@@ -8,6 +8,9 @@ use Zaxbux\B2\Http\Client as HttpClient;
 
 class Client
 {
+    const METADATA_DIRECTIVE_COPY    = "COPY";
+    const METADATA_DIRECTIVE_REPLACE = "REPLACE";
+
     protected $accountId;
     protected $applicationKeyId;
     protected $applicationKey;
@@ -313,7 +316,12 @@ class Client
             $requestUrl = sprintf('%s/file/%s/%s', $this->downloadUrl, $options['BucketName'], $options['FileName']);
         }
 
-        $response = $this->client->request('GET', $requestUrl, $requestOptions, false);
+        if (isset($options['Stream'])) {
+            $requestOptions['stream'] = $options['Stream'];
+            $response = $this->client->request('GET', $requestUrl, $requestOptions, false, false);
+        } else {
+            $response = $this->client->request('GET', $requestUrl, $requestOptions, false);
+        }
 
         return isset($options['SaveAs']) ? true : $response;
     }
@@ -345,13 +353,13 @@ class Client
         }
 
         if (isset($options['MetadataDirective'])) {
-            if ($options['MetadataDirective'] == 'REPLACE' && !isset($options['FileContentType'])) {
+            if ($options['MetadataDirective'] == self::METADATA_DIRECTIVE_REPLACE && !isset($options['FileContentType'])) {
                 $options['FileContentType'] = 'b2/x-auto';
             }
-            if ($options['MetadataDirective'] == 'COPY' && isset($options['FileContentType'])) {
+            if ($options['MetadataDirective'] == self::METADATA_DIRECTIVE_COPY && isset($options['FileContentType'])) {
                 throw new ValidationException('FileContentType must not be provided when MetadataDirective is COPY');
             }
-            if ($options['MetadataDirective'] == 'COPY' && isset($options['FileInfo'])) {
+            if ($options['MetadataDirective'] == self::METADATA_DIRECTIVE_COPY && isset($options['FileInfo'])) {
                 throw new ValidationException('FileInfo must not be provided when MetadataDirective is COPY');
             }
             $json['metadataDirective'] = $options['MetadataDirective'];
