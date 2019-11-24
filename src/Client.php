@@ -9,6 +9,7 @@ use Zaxbux\B2\Http\Client as HttpClient;
 class Client
 {
     protected $accountId;
+    protected $applicationKeyId;
     protected $applicationKey;
 
     protected $authToken;
@@ -24,9 +25,9 @@ class Client
      * @param $applicationKey
      * @param array $options
      */
-    public function __construct($accountId, $applicationKey, array $options = [])
+    public function __construct($applicationKeyId, $applicationKey, array $options = [])
     {
-        $this->accountId = $accountId;
+        $this->applicationKeyId = $applicationKeyId;
         $this->applicationKey = $applicationKey;
 
         if (isset($options['client'])) {
@@ -248,7 +249,7 @@ class Client
 
         if (isset($options['FileId'])) {
             $requestOptions['query'] = ['fileId' => $options['FileId']];
-            $requestUrl = $this->downloadUrl.'/b2api/v1/b2_download_file_by_id';
+            $requestUrl = $this->downloadUrl.'/b2api/v2/b2_download_file_by_id';
         } else {
             if (!isset($options['BucketName']) && isset($options['BucketId'])) {
                 $options['BucketName'] = $this->getBucketNameFromId($options['BucketId']);
@@ -328,7 +329,7 @@ class Client
             $response['uploadTimestamp']
         );
     }
-    
+
     /**
      * Create a new large file part by copying from an existing file
      * 
@@ -413,7 +414,7 @@ class Client
             foreach ($response['files'] as $file) {
                 // if we have a file name set, only retrieve information if the file name matches
                 if (!$fileName || ($fileName === $file['fileName'])) {
-                    $files[] = new File($file['fileId'], $file['fileName'], null, $file['size']);
+                    $files[] = new File($file['fileId'], $file['fileName'], null, $file['contentLength']);
                 }
             }
 
@@ -521,12 +522,15 @@ class Client
      */
     protected function authorizeAccount()
     {
-        $response = $this->client->request('GET', 'https://api.backblazeb2.com/b2api/v1/b2_authorize_account', [
-            'auth' => [$this->accountId, $this->applicationKey]
+        $response = $this->client->request('GET', 'https://api.backblazeb2.com/b2api/v2/b2_authorize_account', [
+            'headers' => [
+                'Authorization' => 'Basic ' . base64_encode($this->applicationKeyId . ":" . $this->applicationKey)
+            ]
         ]);
 
+        $this->accountId = $response['accountId'];
         $this->authToken = $response['authorizationToken'];
-        $this->apiUrl = $response['apiUrl'].'/b2api/v1';
+        $this->apiUrl = $response['apiUrl'].'/b2api/v2';
         $this->downloadUrl = $response['downloadUrl'];
     }
 
