@@ -11,10 +11,13 @@ class Client
     protected $accountId;
     protected $applicationKeyId;
     protected $applicationKey;
+    protected $allowed;
 
     protected $authToken;
     protected $apiUrl;
     protected $downloadUrl;
+    protected $recommendedPartSize;
+    protected $absoluteMinimumPartSize;
 
     protected $client;
 
@@ -37,6 +40,58 @@ class Client
         }
 
         $this->authorizeAccount();
+    }
+
+    /**
+     * Authorize the B2 account in order to get an auth token and API/download URLs.
+     *
+     * @throws \Exception
+     */
+    protected function authorizeAccount()
+    {
+        $response = $this->client->request('GET', 'https://api.backblazeb2.com/b2api/v2/b2_authorize_account', [
+            'headers' => [
+                'Authorization' => 'Basic ' . base64_encode($this->applicationKeyId . ":" . $this->applicationKey)
+            ]
+        ]);
+
+        $this->accountId               = $response['accountId'];
+        $this->authToken               = $response['authorizationToken'];
+        $this->apiUrl                  = $response['apiUrl'].'/b2api/v2';
+        $this->downloadUrl             = $response['downloadUrl'];
+        $this->allowed                 = $response['allowed'];
+        $this->recommendedPartSize     = $response['recommendedPartSize'];
+        $this->absoluteMinimumPartSize = $response['absoluteMinimumPartSize'];
+    }
+
+    /**
+     * Get the capabilities, bucket restrictions, and prefix restrictions.
+     * 
+     * @return array
+     */
+    public function getPermissions()
+    {
+        return $this->allowed;
+    }
+
+    /**
+     * The recomended part size for each part of a large file. It is recomended to use this part size for optimal performance.
+     * 
+     * @return int
+     */
+    public function getRecommendedPartSize()
+    {
+        return $this->recommendedPartSize;
+    }
+
+    /**
+     * The smallest possible size of a part of a large file (except the last one). Upload performance may be impacted if you use this value.
+     * 
+     * @return int
+     */
+    public function getAbsoluteMinimumPartSize()
+    {
+        return $this->absoluteMinimumPartSize;
     }
 
     /**
@@ -513,25 +568,6 @@ class Client
         ]);
 
         return true;
-    }
-
-    /**
-     * Authorize the B2 account in order to get an auth token and API/download URLs.
-     *
-     * @throws \Exception
-     */
-    protected function authorizeAccount()
-    {
-        $response = $this->client->request('GET', 'https://api.backblazeb2.com/b2api/v2/b2_authorize_account', [
-            'headers' => [
-                'Authorization' => 'Basic ' . base64_encode($this->applicationKeyId . ":" . $this->applicationKey)
-            ]
-        ]);
-
-        $this->accountId = $response['accountId'];
-        $this->authToken = $response['authorizationToken'];
-        $this->apiUrl = $response['apiUrl'].'/b2api/v2';
-        $this->downloadUrl = $response['downloadUrl'];
     }
 
     /**
