@@ -1,16 +1,16 @@
 <?php
 
-namespace ChrisWhite\B2\Tests;
+namespace Zaxbux\B2\Tests;
 
-use ChrisWhite\B2\Client;
-use ChrisWhite\B2\Bucket;
-use ChrisWhite\B2\Exceptions\BadValueException;
-use ChrisWhite\B2\Exceptions\BucketNotEmptyException;
-use ChrisWhite\B2\Exceptions\NotFoundException;
-use ChrisWhite\B2\File;
-use ChrisWhite\B2\Exceptions\BucketAlreadyExistsException;
-use ChrisWhite\B2\Exceptions\BadJsonException;
-use ChrisWhite\B2\Exceptions\ValidationException;
+use Zaxbux\B2\Client;
+use Zaxbux\B2\Bucket;
+use Zaxbux\B2\Exceptions\BadValueException;
+use Zaxbux\B2\Exceptions\BucketNotEmptyException;
+use Zaxbux\B2\Exceptions\NotFoundException;
+use Zaxbux\B2\File;
+use Zaxbux\B2\Exceptions\BucketAlreadyExistsException;
+use Zaxbux\B2\Exceptions\BadJsonException;
+use Zaxbux\B2\Exceptions\ValidationException;
 use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Stream;
 

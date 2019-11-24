@@ -1,6 +1,6 @@
 <?php
 
-namespace ChrisWhite\B2\Exceptions;
+namespace Zaxbux\B2\Exceptions;
 
 class BucketAlreadyExistsException extends \Exception
 {

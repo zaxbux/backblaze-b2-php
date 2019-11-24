@@ -1,8 +1,8 @@
 {
-    "name": "cwhite92/b2-sdk-php",
+    "name": "zaxbux/b2-sdk-php",
     "description": "A SDK for working with B2 cloud storage.",
     "keywords": ["b2", "storage", "backblaze", "cloud", "filesystem", "backup"],
-    "homepage": "https://github.com/cwhite92/b2-sdk-php",
+    "homepage": "https://github.com/zaxbux/b2-sdk-php",
     "license": "MIT",
     "type": "library",
     "authors": [
@@ -10,10 +10,15 @@
             "name": "Chris White",
             "email": "chris@cwhite.me",
             "homepage": "https://cwhite.me"
+        },
+        {
+            "name": "Zachary Schneider",
+            "email": "hello@zacharyschneider.ca",
+            "homepage": "https://www.zacharyschneider.ca"
         }
     ],
     "require": {
-        "php": ">=5.5.0",
+        "php": ">=7.2",
         "guzzlehttp/guzzle": "^6.1"
     },
     "require-dev": {
@@ -21,12 +26,12 @@
     },
     "autoload": {
         "psr-4": {
-            "ChrisWhite\\B2\\": "src/"
+            "Zaxbux\\B2\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "ChrisWhite\\B2\\Tests\\": "tests/"
+            "Zaxbux\\B2\\Tests\\": "tests/"
         }
     }
 }
