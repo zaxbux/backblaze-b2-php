@@ -328,6 +328,7 @@ class Client
             $response['uploadTimestamp']
         );
     }
+    
     /**
      * Create a new large file part by copying from an existing file
      * 

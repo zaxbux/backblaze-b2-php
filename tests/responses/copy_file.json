@@ -1,0 +1,14 @@
+{
+    "accountId": "accountId",
+    "action": "copy",
+    "bucketId": "bucketId",
+    "contentLength": 1001,
+    "contentSha1": "300efddb6be85bfe74f76a89ad4ef94fcf9a0b7b",
+    "contentType": "application/octet-stream",
+    "fileId": "newFileId",
+    "fileInfo": {
+      "src_last_modified_millis": "1554914807970"
+    },
+    "fileName": "newFileName",
+    "uploadTimestamp": 1559580871000
+  }

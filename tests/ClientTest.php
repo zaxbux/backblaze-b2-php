@@ -524,4 +524,44 @@ class ClientTest extends \PHPUnit_Framework_TestCase
             'FileName' => 'fileName'
         ]));
     }
+
+    public function testCopyFile()
+    {
+        $guzzle = $this->buildGuzzleFromResponses([
+            $this->buildResponseFromStub(200, [], 'authorize_account.json'),
+            $this->buildResponseFromStub(200, [], 'copy_file.json')
+        ]);
+
+        $client = new Client('testId', 'testKey', ['client' => $guzzle]);
+
+        $newFile = $client->copyFile([
+            'SourceFileId' => 'fileId',
+            'FileName' => 'newFileName'
+        ]);
+
+        $this->assertInstanceOf(File::class, $newFile);
+        $this->assertEquals('newFileName', $newFile->getName());
+        $this->assertEquals('newFileId', $newFile->getId());
+    }
+
+    public function testCopyPart()
+    {
+        $guzzle = $this->buildGuzzleFromResponses([
+            $this->buildResponseFromStub(200, [], 'authorize_account.json'),
+            $this->buildResponseFromStub(200, [], 'copy_part.json')
+        ]);
+
+        $client = new Client('testId', 'testKey', ['client' => $guzzle]);
+
+        $newFilePart = $client->copyPart([
+            'SourceFileId' => 'fileId',
+            'LargeFileId' => 'largeFileId',
+            'PartNumber' => 1
+        ]);
+
+        $this->assertInternalType('array', $newFilePart);
+        $this->assertEquals(1, $newFilePart['partNumber']);
+        $this->assertInstanceOf(File::class, $newFilePart['file']);
+        $this->assertEquals('largeFileId', $newFilePart['file']->getId());
+    }
 }
