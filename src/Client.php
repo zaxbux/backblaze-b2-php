@@ -103,20 +103,23 @@ class Client
     /**
      * Returns a list of bucket objects representing the buckets on the account.
      *
+     * @param array $options Additional options to pass to the API
      * @return array
      */
-    public function listBuckets()
+    public function listBuckets(array $options = [])
     {
         $buckets = [];
 
-        $response = $this->client->request('POST', $this->apiUrl.'/b2_list_buckets', [
+        $options = array_replace_recursive($options, [
             'headers' => [
-                'Authorization' => $this->authToken,
+                'Authorization' => $this->authToken
             ],
             'json' => [
                 'accountId' => $this->accountId
             ]
         ]);
+
+        $response = $this->client->request('POST', $this->apiUrl.'/b2_list_buckets', $options);
 
         foreach ($response['buckets'] as $bucket) {
             $buckets[] = new Bucket($bucket['bucketId'], $bucket['bucketName'], $bucket['bucketType']);
@@ -534,7 +537,7 @@ class Client
      */
     protected function getBucketIdFromName($name)
     {
-        $buckets = $this->listBuckets();
+        $buckets = $this->listBuckets(['json' => ['bucketName' => $name]]);
 
         foreach ($buckets as $bucket) {
             if ($bucket->getName() === $name) {
@@ -553,7 +556,7 @@ class Client
      */
     protected function getBucketNameFromId($id)
     {
-        $buckets = $this->listBuckets();
+        $buckets = $this->listBuckets(['json' => ['bucketId' => $id]]);
 
         foreach ($buckets as $bucket) {
             if ($bucket->getId() === $id) {
