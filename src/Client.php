@@ -260,6 +260,116 @@ class Client
     }
 
     /**
+     * Copy a file in a B2 bucket
+     * 
+     * @param array $options
+     * @return File
+     * @throws ValidationException
+     */
+    public function copyFile(array $options)
+    {
+        if (!isset($options['SourceFileId']) && isset($options['BucketName']) && isset($options['SourceFileName'])) {
+            $file = $this->getFile([
+                'BucketName' => $options['BucketName'],
+                'FileName' => $options['SourceFileName']
+            ]);
+            $options['SourceFileId'] = $file->getId();
+        }
+
+        $json = [
+            'sourceFileId' => $options['SourceFileId'],
+            'fileName' => $options['FileName']
+        ];
+
+        if (isset($options['Range'])) {
+            $json['range'] = $options['Range'];
+        }
+
+        if (isset($options['MetadataDirective'])) {
+            if ($options['MetadataDirective'] == 'REPLACE' && !isset($options['FileContentType'])) {
+                $options['FileContentType'] = 'b2/x-auto';
+            }
+            if ($options['MetadataDirective'] == 'COPY' && isset($options['FileContentType'])) {
+                throw new ValidationException('FileContentType must not be provided when MetadataDirective is COPY');
+            }
+            if ($options['MetadataDirective'] == 'COPY' && isset($options['FileInfo'])) {
+                throw new ValidationException('FileInfo must not be provided when MetadataDirective is COPY');
+            }
+            $json['metadataDirective'] = $options['MetadataDirective'];
+        }
+
+        if (isset($options['FileContentType'])) {
+            $json['contentType'] = $options['FileContentType'];
+        }
+
+        if (isset($options['FileInfo'])) {
+            $json['fileInfo'] = $options['FileInfo'];
+        }
+
+        $response = $this->client->request('POST', $this->apiUrl.'/b2_copy_file', [
+            'headers' => [
+                'Authorization' => $this->authToken
+            ],
+            'json' => $json
+        ]);
+        
+        return new File(
+            $response['fileId'],
+            $response['fileName'],
+            $response['contentSha1'],
+            $response['contentLength'],
+            $response['contentType'],
+            $response['fileInfo'],
+            $response['bucketId'],
+            $response['action'],
+            $response['uploadTimestamp']
+        );
+    }
+    /**
+     * Create a new large file part by copying from an existing file
+     * 
+     * @param array $options
+     * @return array
+     */
+    public function copyPart(array $options)
+    {
+        if (!isset($options['SourceFileId']) && isset($options['BucketName']) && isset($options['SourceFileName'])) {
+            $file = $this->getFile([
+                'BucketName' => $options['BucketName'],
+                'FileName' => $options['SourceFileName']
+            ]);
+            $options['SourceFileId'] = $file->getId();
+        }
+
+        $json = [
+            'sourceFileId' => $options['SourceFileId'],
+            'largeFileId' => $options['LargeFileId'],
+            'partNumber' => $options['PartNumber']
+        ];
+
+        if (isset($options['Range'])) {
+            $json['range'] = $options['Range'];
+        }
+
+        $response = $this->client->request('POST', $this->apiUrl.'/b2_copy_part', [
+            'headers' => [
+                'Authorization' => $this->authToken
+            ],
+            'json' => $json
+        ]);
+        
+        return [
+            'partNumber' => $response['partNumber'],
+            'file' => new File(
+                $response['fileId'],
+                $response['contentSha1'],
+                $response['contentLength'],
+                $response['uploadTimestamp']
+            )
+        ];
+    }
+
+    /**
      * Retrieve a collection of File objects representing the files stored inside a bucket.
      *
      * @param array $options
