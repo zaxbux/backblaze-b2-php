@@ -68,6 +68,31 @@ class Client
     }
 
     /**
+     * Cancel the upload of a large file, and deletes all of the parts that have been uploaded.
+     * 
+     * @param array $options
+     * @return array
+     * @throws ValidationException
+     */
+    public function cancelLargeFile(array $options)
+    {
+        if (!isset($options['FileId'])) {
+            throw new ValidationException('FileId is required');
+        }
+
+        $response = $this->client->request('POST', $this->apiUrl.'/b2_cancel_large_file', [
+            'headers' => [
+                'Authorization' => $this->authToken,
+            ],
+            'json' => [
+                'fileId' => $options['FileId'],
+            ],
+        ]);
+
+        return $response;
+    }
+
+    /**
      * Get the capabilities, bucket restrictions, and prefix restrictions.
      * 
      * @return array

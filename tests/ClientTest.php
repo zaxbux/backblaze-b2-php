@@ -564,4 +564,21 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf(File::class, $newFilePart['file']);
         $this->assertEquals('largeFileId', $newFilePart['file']->getId());
     }
+
+    public function testCancelLargeFile()
+    {
+        $guzzle = $this->buildGuzzleFromResponses([
+            $this->buildResponseFromStub(200, [], 'authorize_account.json'),
+            $this->buildResponseFromStub(200, [], 'cancel_large_file.json')
+        ]);
+
+        $client = new Client('testId', 'testKey', ['client' => $guzzle]);
+
+        $response = $client->cancelLargeFile([
+            'FileId' => 'largeFileId'
+        ]);
+
+        $this->assertInternalType('array', $response);
+        $this->assertEquals('largeFileId', $response['fileId']);
+    }
 }
