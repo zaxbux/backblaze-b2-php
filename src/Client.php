@@ -185,6 +185,47 @@ class Client
     }
 
     /**
+     * Hides a file so that downloading by name will not find the file,
+     * but previous versions of the file are still stored.
+     * 
+     * @param array $options
+     * @return bool
+     */
+    public function hideFile(array $options) {
+
+        if (!isset($options['FileId']) && isset($options['BucketName']) && isset($options['FileName'])) {
+            $file = $this->getFileIdFromBucketAndFileName($options['BucketName'], $options['FileName']);
+
+            if (!$file) {
+                throw new NotFoundException();
+            }
+
+            $options['FileId'] = $file->getId();
+            $options['BucketId'] = $file->getBucketId();
+        }
+
+        if (!isset($options['BucketId']) && isset($options['BucketName'])) {
+            $options['BucketId'] = $this->getBucketIdFromName($options['BucketName']);
+        }
+
+        if (!isset($options['BucketId'])) {
+            throw new ValidationException('BucketId or BucketName is required.');
+        }
+
+        $response = $this->client->request('POST', $this->apiUrl.'/b2_hide_file', [
+            'headers' => [
+                'Authorization' => $this->authToken,
+            ],
+            'json' => [
+                'bucketId' => $options['BucketId'],
+                'fileId'   => $options['FileId']
+            ]
+        ]);
+
+        return $response['action'] == 'hide';
+    }
+
+    /**
      * Returns a list of bucket objects representing the buckets on the account.
      *
      * @param array $options Additional options to pass to the API

@@ -596,4 +596,17 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $this->assertInternalType('array', $response);
         $this->assertInstanceOf(File::class, $response['files'][0]);
     }
+
+    public function testHideFile() {
+        $guzzle = $this->buildGuzzleFromResponses([
+            $this->buildResponseFromStub(200, [], 'authorize_account.json'),
+            $this->buildResponseFromStub(200, [], 'hide_file.json')
+        ]);
+
+        $client = new Client('testId', 'testKey', ['client' => $guzzle]);
+
+        $this->assertTrue($client->hideFile([
+            'FileId' => 'testFile'
+        ]));
+    }
 }
