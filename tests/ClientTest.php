@@ -597,7 +597,8 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf(File::class, $response['files'][0]);
     }
 
-    public function testHideFile() {
+    public function testHideFile()
+    {
         $guzzle = $this->buildGuzzleFromResponses([
             $this->buildResponseFromStub(200, [], 'authorize_account.json'),
             $this->buildResponseFromStub(200, [], 'hide_file.json')
@@ -608,5 +609,22 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($client->hideFile([
             'FileId' => 'testFile'
         ]));
+    }
+
+    public function testGetDownloadAuthorization() {
+        $guzzle = $this->buildGuzzleFromResponses([
+            $this->buildResponseFromStub(200, [], 'authorize_account.json'),
+            $this->buildResponseFromStub(200, [], 'get_download_authorization.json')
+        ]);
+
+        $client = new Client('testId', 'testKey', ['client' => $guzzle]);
+
+        $response = $client->hideFile([
+            'BucketId'               => 'bucketId',
+            'FileNamePrefix'         => 'public',
+            'ValidDurationInSeconds' => 60
+        ]);
+
+        $this->assertEquals('downloadAuthToken', $response);
     }
 }

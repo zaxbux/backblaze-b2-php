@@ -185,11 +185,70 @@ class Client
     }
 
     /**
+     * Generates an authorization token that can be used to download files
+     * with the specified prefix from a private B2 bucket.
+     * 
+     * @param array $options
+     * @return array
+     * @throws ValidationException
+     */
+    public function getDownloadAuthorization(array $options) {
+        if (!isset($options['BucketId'])) {
+            throw new ValidationException('BucketId is required');
+        }
+
+        if (!isset($options['FileNamePrefix'])) {
+            throw new ValidationException('FileNamePrefix is required');
+        }
+
+        if (!isset($options['ValidDurationInSeconds'])) {
+            throw new ValidationException('ValidDurationInSeconds is required');
+        }
+
+        if (isset($options['ContentLanguage'])) {
+            $json['b2ContentLanguage'] = $options['ContentLanguage'];
+        }
+
+        if (isset($options['Expires'])) {
+            $json['b2Expires'] = $options['Expires'];
+        }
+
+        if (isset($options['CacheControl'])) {
+            $json['b2CacheControl'] = $options['CacheControl'];
+        }
+
+        if (isset($options['ContentEncoding'])) {
+            $json['b2ContentEncoding'] = $options['ContentEncoding'];
+        }
+
+        if (isset($options['ContentType'])) {
+            $json['b2ContentType'] = $options['ContentType'];
+        }
+
+        $json = [
+            'bucketId'               => $options['BucketId'],
+            'fileNamePrefix'         => $options['FileNamePrefix'],
+            'validDurationInSeconds' => $options['ValidDurationInSeconds'],
+        ];
+
+        $response = $this->client->request('POST', $this->apiUrl.'/b2_get_download_authorization', [
+            'headers' => [
+                'Authorization' => $this->authToken,
+            ],
+            'json' => $json
+        ]);
+
+        return $response['authorizationToken'];
+    }
+
+    /**
      * Hides a file so that downloading by name will not find the file,
      * but previous versions of the file are still stored.
      * 
      * @param array $options
      * @return bool
+     * @throws ValidationException
+     * @throws NotFoundException
      */
     public function hideFile(array $options) {
 

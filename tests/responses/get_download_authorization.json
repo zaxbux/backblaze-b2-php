@@ -1,0 +1,5 @@
+{
+	"authorizationToken": "downloadAuthToken",
+	"bucketId": "bucketId",
+	"fileNamePrefix": "public"
+}
