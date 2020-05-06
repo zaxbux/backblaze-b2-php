@@ -4,9 +4,11 @@
 `b2-sdk-php` is a client library for working with Backblaze's B2 storage service. It aims to make using the service as
 easy as possible by exposing a clear API and taking influence from other SDKs that you may be familiar with.
 
-## Example
+## Documentation
 
-This is just a short example, full examples to come on the wiki.
+[Full documentation of the Backblaze B2 API can be found here.](https://www.backblaze.com/b2/docs/index.html)
+
+## Examples
 
 ```php
 use Zaxbux\B2\Client;
@@ -89,7 +91,7 @@ $ vendor/bin/phpunit
 
 ## Contributors
 
-Feel free to contribute in any way you can whether that be reporting issues, making suggestions or sending PRs. :)
+Feel free to contribute in any way you can whether that be reporting issues, making suggestions or sending PRs.
 
 ## License
 
