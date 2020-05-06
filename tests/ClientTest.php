@@ -581,4 +581,19 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $this->assertInternalType('array', $response);
         $this->assertEquals('largeFileId', $response['fileId']);
     }
+
+    public function testListUnfinishedLargeFiles()
+    {
+        $guzzle = $this->buildGuzzleFromResponses([
+            $this->buildResponseFromStub(200, [], 'authorize_account.json'),
+            $this->buildResponseFromStub(200, [], 'list_unfinished_large_files.json')
+        ]);
+
+        $client = new Client('testId', 'testKey', ['client' => $guzzle]);
+
+        $response = $client->listUnfinishedLargeFiles();
+
+        $this->assertInternalType('array', $response);
+        $this->assertInstanceOf(File::class, $response['files'][0]);
+    }
 }

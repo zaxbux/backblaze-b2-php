@@ -1,0 +1,16 @@
+{
+	"files": [
+		{
+			"action": "start",
+			"bucketId": "b2f6f21365e1d29f6c580f18",
+			"contentLength": 0,
+			"contentSha1": "none",
+			"contentType": "application/zip",
+			"fileId": "largeFileId",
+			"fileInfo": {},
+			"fileName": "testfile.bin",
+			"uploadTimestamp": 1454256286000
+		}
+	],
+	"nextFileId": null
+}

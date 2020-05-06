@@ -211,6 +211,63 @@ class Client
 
         return $buckets;
     }
+    
+    /**
+     * Lists information about large file uploads that have been started, but have not been finished or canceled.
+     * 
+     * @param array $options
+     * @return array
+     * @throws ValidationException
+     */
+    public function listUnfinishedLargeFiles(array $options)
+    {
+        if (!isset($options['BucketId'])) {
+            throw new ValidationException('BucketId is required');
+        }
+
+        $json = [
+            'bucketId' => $options['bucketId']
+        ];
+
+        if (isset($options['NamePrefix'])) {
+            $json['namePrefix'] = $options['NamePrefix'];
+        }
+
+        if (isset($options['StartFileId'])) {
+            $json['startFileId'] = $options['StartFileId'];
+        }
+
+        if (isset($options['MaxFileCount'])) {
+            $json['maxFileCount'] = $options['MaxFileCount'];
+        }
+
+        $response = $this->client->request('POST', $this->apiUrl.'/b2_list_unfinished_large_files', [
+            'headers' => [
+                'Authorization' => $this->authToken,
+            ],
+            'json' => $json,
+        ]);
+
+        $files = [];
+
+        foreach ($response['files'] as $file) {
+            $files[] = new File(
+                $response['fileId'],
+                $response['fileName'],
+                $response['contentSha1'],
+                $response['contentLength'],
+                $response['contentType'],
+                $response['fileInfo'],
+                $response['bucketId'],
+                $response['action'],
+                $response['uploadTimestamp']
+            );
+        }
+
+        $response['files'] = $files;
+
+        return $response;
+    }
 
     /**
      * Deletes the bucket identified by its ID.
