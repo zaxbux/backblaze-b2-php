@@ -1,0 +1,46 @@
+{
+	"files": [
+	  {
+		"accountId": "ACCOUNT_ID",
+		"action": "hide",
+		"bucketId": "b2f6f21365e1d29f6c580f18",
+		"contentLength": 0,
+		"contentSha1": null,
+		"contentType": null,
+		"fileId": "fileId1",
+		"fileInfo": {},
+		"fileName": "testfile1.bin",
+		"uploadTimestamp": 1536963127000
+	  },
+	  {
+		"accountId": "ACCOUNT_ID",
+		"action": "upload",
+		"bucketId": "b2f6f21365e1d29f6c580f18",
+		"contentLength": 5060,
+		"contentSha1": "bc77b0349d325be71ed2ca26d5e68173210e9e18",
+		"contentType": "text/plain",
+		"fileId": "fileId2",
+		"fileInfo": {
+		  "src_last_modified_millis": "1532626031627"
+		},
+		"fileName": "testfile1.bin",
+		"uploadTimestamp": 1536959293000
+	  },
+	  {
+		"accountId": "ACCOUNT_ID",
+		"action": "upload",
+		"bucketId": "b2f6f21365e1d29f6c580f18",
+		"contentLength": 7,
+		"contentSha1": "bc77b0349d325be71ed2ca26d5e68173210e9e18",
+		"contentType": "text/plain",
+		"fileId": "fileId",
+		"fileInfo": {
+		  "src_last_modified_millis": "1536964184056"
+		},
+		"fileName": "testfile2.bin",
+		"uploadTimestamp": 1536964279000
+	  }
+	],
+	"nextFileId": null,
+	"nextFileName": null
+}

@@ -675,6 +675,77 @@ class Client
     }
 
     /**
+     * Lists all of the versions of all of the files contained in one bucket,
+     * in alphabetical order by file name,
+     * and by reverse of date/time uploaded for versions of files with the same name.
+     * 
+     * @param array $options
+     * @return array
+     * @throws ValidationException
+     */
+    public function listFileVersions(array $options)
+    {
+        if (!isset($options['BucketId'])) {
+            throw new ValidationException('BucketId is required');
+        }
+
+        if (isset($options['StartFileId']) && !isset($options['StartFileName'])) {
+            throw new ValidationException('StartFileName is required if StartFileId is provided.');
+        }
+
+        $json = [
+            'bucketId' => $options['BucketId']
+        ];
+
+        if (isset($options['StartFileName'])) {
+            $json['startFileName'] = $options['StartFileName'];
+        }
+
+        if (isset($options['StartFileId'])) {
+            $json['startFileId'] = $options['StartFileId'];
+        }
+
+        if (isset($options['MaxFileCount'])) {
+            $json['maxFileCount'] = $options['MaxFileCount'];
+        }
+
+        if (isset($options['Prefix'])) {
+            $json['prefix'] = $options['Prefix'];
+        }
+
+        if (isset($options['Delimiter'])) {
+            $json['delimiter'] = $options['Delimiter'];
+        }
+
+        $response = $this->client->request('POST', $this->apiUrl, [
+            'headers' => [
+                'Authorization' => $this->authToken
+            ],
+            'json' => $json
+        ]);
+
+        $files = [];
+
+        foreach ($response['files'] as $file) {
+            $files[] = new File(
+                $file['fileId'],
+                $file['fileName'],
+                $file['contentSha1'],
+                $file['contentLength'],
+                $file['contentType'],
+                $file['fileInfo'],
+                $file['bucketId'],
+                $file['action'],
+                $file['uploadTimestamp']
+            );
+        }
+
+        $response['files'] = $files;
+
+        return $response;
+    }
+
+    /**
      * Test whether a file exists in B2 for the given bucket.
      *
      * @param array $options
