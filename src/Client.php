@@ -152,6 +152,47 @@ class Client
     }
 
     /**
+     * 
+     */
+    public function createKey(array $options)
+    {
+        if (!isset($options['Capabilities']) || gettype($options['Capabilities']) != 'array' || count($options['Capabilities']) == 0) {
+            throw new ValidationException('Capabilities is required and must be an array with at least one valid item.');
+        }
+
+        if (!isset($options['KeyName'])) {
+            throw new ValidationException('KeyName is required');
+        }
+
+        $json = [
+            'accountId' => $this->accountId,
+            'capabilities' => $options['Capabilities'],
+            'keyName' => $options['KeyName'],
+        ];
+
+        if (isset($options['ValidDurationInSeconds'])) {
+            $json['validDurationInSeconds'] = $options['ValidDurationInSeconds'];
+        }
+
+        if (isset($options['BucketId'])) {
+            $json['bucketId'] = $options['BucketId'];
+        }
+
+        if (isset($options['FileNamePrefix'])) {
+            $json['namePrefix'] = $options['FileNamePrefix'];
+        }
+
+        $response = $this->client->request('POST', $this->apiUrl.'/b2_create_key', [
+            'headers' => [
+                'Authorization' => $this->authToken()
+            ],
+            'json' => $json,
+        ]);
+
+        return $response;
+    }
+
+    /**
      * Updates the type attribute of a bucket by the given ID.
      *
      * @param array $options
