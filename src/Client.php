@@ -690,7 +690,7 @@ class Client
                 'headers' => [
                     'Authorization' => $this->authToken
                 ],
-                'json' => [
+                'json' => $options + [
                     'bucketId' => $options['BucketId'],
                     'startFileName' => $nextFileName,
                     'maxFileCount' => $maxFileCount,
