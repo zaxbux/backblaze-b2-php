@@ -683,6 +683,13 @@ class Client
             $nextFileName = $fileName;
             $maxFileCount = 1;
         }
+        
+        $allowedKeys = [
+            'prefix',
+            'delimiter'
+        ];
+        
+        $optionsAllowed = array_intersect_key(array_flip($allowedKeys), $options);
 
         // B2 returns, at most, 1000 files per "page". Loop through the pages and compile an array of File objects.
         while (true) {
@@ -690,7 +697,7 @@ class Client
                 'headers' => [
                     'Authorization' => $this->authToken
                 ],
-                'json' => $options + [
+                'json' => $optionsAllowed + [
                     'bucketId' => $options['BucketId'],
                     'startFileName' => $nextFileName,
                     'maxFileCount' => $maxFileCount,
