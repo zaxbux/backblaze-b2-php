@@ -712,15 +712,25 @@ class Client
 
         // B2 returns, at most, 1000 files per "page". Loop through the pages and compile an array of File objects.
         while (true) {
+            $json = [
+                'bucketId' => $options['BucketId'],
+                'startFileName' => $nextFileName,
+                'maxFileCount' => $maxFileCount,
+            ];
+
+            if (isset($options['Prefix'])) {
+                $json['prefix'] = $options['Prefix'];
+            }
+
+            if (isset($options['Delimiter'])) {
+                $json['Delimiter'] = $options['Delimiter'];
+            }
+
             $response = $this->client->request('POST', $this->apiUrl.'/b2_list_file_names', [
                 'headers' => [
                     'Authorization' => $this->authToken
                 ],
-                'json' => $options + [
-                    'bucketId' => $options['BucketId'],
-                    'startFileName' => $nextFileName,
-                    'maxFileCount' => $maxFileCount,
-                ]
+                'json' => $json
             ]);
 
             foreach ($response['files'] as $file) {
