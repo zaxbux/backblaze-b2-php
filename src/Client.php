@@ -30,8 +30,9 @@ class Client
      * @param $accountId
      * @param $applicationKey
      * @param array $options
+     * @param AuthCacheInterface $authCache
      */
-    public function __construct($applicationKeyId, $applicationKey, array $options = [])
+    public function __construct($applicationKeyId, $applicationKey, array $options = [], $authCache = null)
     {
         $this->applicationKeyId = $applicationKeyId;
         $this->applicationKey = $applicationKey;
@@ -42,29 +43,46 @@ class Client
             $this->client = new HttpClient(['exceptions' => false]);
         }
 
-        $this->authorizeAccount();
+        $this->authorizeAccount($authCache);
     }
 
     /**
      * Authorize the B2 account in order to get an auth token and API/download URLs.
      *
+     * @param AuthCacheINterface $authCache
      * @throws \Exception
      */
-    protected function authorizeAccount()
+    protected function authorizeAccount($authCache = null)
     {
-        $response = $this->client->request('GET', 'https://api.backblazeb2.com/b2api/v2/b2_authorize_account', [
-            'headers' => [
-                'Authorization' => 'Basic ' . base64_encode($this->applicationKeyId . ":" . $this->applicationKey)
-            ]
-        ]);
+        $basic = base64_encode($this->applicationKeyId . ":" . $this->applicationKey);
 
-        $this->accountId               = $response['accountId'];
-        $this->authToken               = $response['authorizationToken'];
-        $this->apiUrl                  = $response['apiUrl'].'/b2api/v2';
-        $this->downloadUrl             = $response['downloadUrl'];
-        $this->allowed                 = $response['allowed'];
-        $this->recommendedPartSize     = $response['recommendedPartSize'];
-        $this->absoluteMinimumPartSize = $response['absoluteMinimumPartSize'];
+        $authData = [];
+
+        if ($authCache instanceof AuthCacheInterface) {
+            $authData = $authCache->cachedB2Auth($basic);
+        }
+
+        if (empty($authData)) {
+            $authData = $this->client->request('GET', 'https://api.backblazeb2.com/b2api/v2/b2_authorize_account', [
+                'headers' => [
+                    'Authorization' => 'Basic ' . $basic
+                ]
+            ]);
+
+            if (!empty($authData) && !empty($authCache)) {
+                $authCache->cacheB2Auth($basic, $authData);
+            }
+        }
+
+        if (!empty($authData)) {
+            $this->accountId               = $authData['accountId'];
+            $this->authToken               = $authData['authorizationToken'];
+            $this->apiUrl                  = $authData['apiUrl'].'/b2api/v2';
+            $this->downloadUrl             = $authData['downloadUrl'];
+            $this->allowed                 = $authData['allowed'];
+            $this->recommendedPartSize     = $authData['recommendedPartSize'];
+            $this->absoluteMinimumPartSize = $authData['absoluteMinimumPartSize'];
+        }
     }
 
     /**
@@ -152,10 +170,18 @@ class Client
     }
 
     /**
+     * Creates a new application key.
      * 
+     * @param array $options
+     * @return array
+     * @throws ValidationException
      */
     public function createKey(array $options)
     {
+        if (!\in_array('writeKeys', $this->allowed)) {
+            throw new ValidationException('writeKeys capability required.');
+        }
+
         if (!isset($options['Capabilities']) || gettype($options['Capabilities']) != 'array' || count($options['Capabilities']) == 0) {
             throw new ValidationException('Capabilities is required and must be an array with at least one valid item.');
         }
@@ -690,7 +716,7 @@ class Client
                 'headers' => [
                     'Authorization' => $this->authToken
                 ],
-                'json' => [
+                'json' => $options + [
                     'bucketId' => $options['BucketId'],
                     'startFileName' => $nextFileName,
                     'maxFileCount' => $maxFileCount,
