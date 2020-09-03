@@ -1,10 +1,10 @@
 <?php
 
-namespace Zaxbux\B2;
+namespace Zaxbux\BackBlazeB2;
 
-use Zaxbux\B2\Exceptions\NotFoundException;
-use Zaxbux\B2\Exceptions\ValidationException;
-use Zaxbux\B2\Http\Client as HttpClient;
+use Zaxbux\BackblazeB2\Exceptions\NotFoundException;
+use Zaxbux\BackblazeB2\Exceptions\ValidationException;
+use Zaxbux\BackblazeB2\Http\Client as HttpClient;
 
 class Client
 {

@@ -26,12 +26,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Zaxbux\\B2\\": "src/"
+            "Zaxbux\\BackblazeB2\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Zaxbux\\B2\\Tests\\": "tests/"
+            "Zaxbux\\BackblazeB2\\Tests\\": "tests/"
         }
     }
 }

@@ -1,8 +1,8 @@
 <?php
 
-namespace Zaxbux\B2\Tests;
+namespace Zaxbux\BackblazeB2\Tests;
 
-use Zaxbux\B2\Http\Client as HttpClient;
+use Zaxbux\BackblazeB2\Http\Client as HttpClient;
 
 trait TestHelper
 {

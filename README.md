@@ -11,8 +11,8 @@ easy as possible by exposing a clear API and taking influence from other SDKs th
 ## Examples
 
 ```php
-use Zaxbux\B2\Client;
-use Zaxbux\B2\Bucket;
+use Zaxbux\BackblazeB2\Client;
+use Zaxbux\BackblazeB2\Bucket;
 
 $client = new Client('accountId', 'applicationKey');
 

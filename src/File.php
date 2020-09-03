@@ -1,6 +1,6 @@
 <?php
 
-namespace Zaxbux\B2;
+namespace Zaxbux\BackblazeB2;
 
 class File
 {

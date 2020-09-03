@@ -1,14 +1,14 @@
 <?php
 
-namespace Zaxbux\B2\Http;
+namespace Zaxbux\BackblazeB2\Http;
 
-use Zaxbux\B2\ErrorHandler;
+use Zaxbux\BackblazeB2\ErrorHandler;
 use GuzzleHttp\Client as GuzzleClient;
 
 /**
  * Client wrapper around Guzzle.
  *
- * @package Zaxbux\B2\Http
+ * @package Zaxbux\BackblazeB2\Http
  */
 class Client extends GuzzleClient
 {
