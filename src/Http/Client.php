@@ -10,34 +10,33 @@ use GuzzleHttp\Client as GuzzleClient;
  *
  * @package Zaxbux\BackblazeB2\Http
  */
-class Client extends GuzzleClient
-{
-    /**
-     * Sends a response to the B2 API, automatically handling decoding JSON and errors.
-     *
-     * @param string $method
-     * @param null $uri
-     * @param array $options
-     * @param bool $asJson
-     * @param bool $getContents
-     * @return mixed|string
-     */
-    public function request($method, $uri = null, array $options = [], $asJson = true, $getContents = true)
-    {
-        $response = parent::request($method, $uri, $options);
+class Client extends GuzzleClient {
+	
+	/**
+	 * Sends a response to the B2 API, automatically handling decoding JSON and errors.
+	 *
+	 * @param string $method
+	 * @param null $uri
+	 * @param array $options
+	 * @param bool $asJson
+	 * @param bool $getContents
+	 * @return mixed|string
+	 */
+	public function request($method, $uri = null, array $options = [], $asJson = true, $getContents = true) {
+		$response = parent::request($method, $uri, $options);
 
-        if ($response->getStatusCode() !== 200) {
-            ErrorHandler::handleErrorResponse($response);
-        }
+		if ($response->getStatusCode() !== 200) {
+			ErrorHandler::handleErrorResponse($response);
+		}
 
-        if ($asJson) {
-            return json_decode($response->getBody(), true);
-        }
+		if ($asJson) {
+			return json_decode($response->getBody(), true);
+		}
 
-        if(!$getContents) {
-            return $response->getBody();
-        }
+		if (!$getContents) {
+			return $response->getBody();
+		}
 
-        return $response->getBody()->getContents();
-    }
+		return $response->getBody()->getContents();
+	}
 }

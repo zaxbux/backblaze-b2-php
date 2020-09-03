@@ -2,6 +2,4 @@
 
 namespace Zaxbux\BackblazeB2\Exception;
 
-class BadValueException extends \Exception
-{
-}
+class BadValueException extends \Exception {}
