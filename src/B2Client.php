@@ -6,7 +6,7 @@ use Zaxbux\BackblazeB2\Exception\NotFoundException;
 use Zaxbux\BackblazeB2\Exception\ValidationException;
 use Zaxbux\BackblazeB2\Http\Client as HttpClient;
 
-class Client
+class B2Client
 {
     const METADATA_DIRECTIVE_COPY    = "COPY";
     const METADATA_DIRECTIVE_REPLACE = "REPLACE";
