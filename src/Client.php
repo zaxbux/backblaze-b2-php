@@ -2,8 +2,8 @@
 
 namespace Zaxbux\BackBlazeB2;
 
-use Zaxbux\BackblazeB2\Exceptions\NotFoundException;
-use Zaxbux\BackblazeB2\Exceptions\ValidationException;
+use Zaxbux\BackblazeB2\Exception\NotFoundException;
+use Zaxbux\BackblazeB2\Exception\ValidationException;
 use Zaxbux\BackblazeB2\Http\Client as HttpClient;
 
 class Client

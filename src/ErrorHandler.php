@@ -2,13 +2,13 @@
 
 namespace Zaxbux\BackblazeB2;
 
-use Zaxbux\BackblazeB2\Exceptions\B2Exception;
-use Zaxbux\BackblazeB2\Exceptions\BadJsonException;
-use Zaxbux\BackblazeB2\Exceptions\BadValueException;
-use Zaxbux\BackblazeB2\Exceptions\BucketAlreadyExistsException;
-use Zaxbux\BackblazeB2\Exceptions\NotFoundException;
-use Zaxbux\BackblazeB2\Exceptions\FileNotPresentException;
-use Zaxbux\BackblazeB2\Exceptions\BucketNotEmptyException;
+use Zaxbux\BackblazeB2\Exception\B2Exception;
+use Zaxbux\BackblazeB2\Exception\BadJsonException;
+use Zaxbux\BackblazeB2\Exception\BadValueException;
+use Zaxbux\BackblazeB2\Exception\BucketAlreadyExistsException;
+use Zaxbux\BackblazeB2\Exception\NotFoundException;
+use Zaxbux\BackblazeB2\Exception\FileNotPresentException;
+use Zaxbux\BackblazeB2\Exception\BucketNotEmptyException;
 use GuzzleHttp\Psr7\Response;
 
 class ErrorHandler

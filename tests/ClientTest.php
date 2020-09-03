@@ -4,13 +4,13 @@ namespace Zaxbux\BackblazeB2\Tests;
 
 use Zaxbux\BackblazeB2\Client;
 use Zaxbux\BackblazeB2\Bucket;
-use Zaxbux\BackblazeB2\Exceptions\BadValueException;
-use Zaxbux\BackblazeB2\Exceptions\BucketNotEmptyException;
-use Zaxbux\BackblazeB2\Exceptions\NotFoundException;
+use Zaxbux\BackblazeB2\Exception\BadValueException;
+use Zaxbux\BackblazeB2\Exception\BucketNotEmptyException;
+use Zaxbux\BackblazeB2\Exception\NotFoundException;
 use Zaxbux\BackblazeB2\File;
-use Zaxbux\BackblazeB2\Exceptions\BucketAlreadyExistsException;
-use Zaxbux\BackblazeB2\Exceptions\BadJsonException;
-use Zaxbux\BackblazeB2\Exceptions\ValidationException;
+use Zaxbux\BackblazeB2\Exception\BucketAlreadyExistsException;
+use Zaxbux\BackblazeB2\Exception\BadJsonException;
+use Zaxbux\BackblazeB2\Exception\ValidationException;
 use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Stream;
 

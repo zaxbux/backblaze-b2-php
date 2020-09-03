@@ -1,6 +1,6 @@
 <?php
 
-namespace Zaxbux\BackblazeB2\Exceptions;
+namespace Zaxbux\BackblazeB2\Exception;
 
 class ValidationException extends \Exception
 {
