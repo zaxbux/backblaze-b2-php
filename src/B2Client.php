@@ -1,6 +1,6 @@
 <?php
 
-namespace Zaxbux\BackBlazeB2;
+namespace Zaxbux\BackblazeB2;
 
 use Zaxbux\BackblazeB2\Exception\NotFoundException;
 use Zaxbux\BackblazeB2\Exception\ValidationException;
