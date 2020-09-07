@@ -18,14 +18,14 @@ $client = new Client('accountId', 'applicationKey');
 
 // Returns a Bucket object.
 $bucket = $client->createBucket([
-    'BucketName' => 'my-special-bucket',
-    'BucketType' => Bucket::TYPE_PRIVATE // or TYPE_PUBLIC
+	'BucketName' => 'my-special-bucket',
+	'BucketType' => Bucket::TYPE_PRIVATE // or TYPE_PUBLIC
 ]);
 
 // Change the bucket to private. Also returns a Bucket object.
 $updatedBucket = $client->updateBucket([
-    'BucketId' => $bucket->getId(),
-    'BucketType' => Bucket::TYPE_PUBLIC
+	'BucketId' => $bucket->getId(),
+	'BucketType' => Bucket::TYPE_PUBLIC
 ]);
 
 // Retrieve an array of Bucket objects on your account.
@@ -33,43 +33,43 @@ $buckets = $client->listBuckets();
 
 // Delete a bucket.
 $client->deleteBucket([
-    'BucketId' => 'xxxxxxxxxxxxxxxxxxxxxxxx'
+	'BucketId' => 'xxxxxxxxxxxxxxxxxxxxxxxx'
 ]);
 
 // Upload a file to a bucket. Returns a File object.
 $file = $client->upload([
-    'BucketName' => 'my-special-bucket',
-    'FileName' => 'path/to/upload/to',
-    'Body' => 'I am the file content'
+	'BucketName' => 'my-special-bucket',
+	'FileName' => 'path/to/upload/to',
+	'Body' => 'I am the file content'
 
-    // The file content can also be provided via a resource.
-    // 'Body' => fopen('/path/to/input', 'r')
+	// The file content can also be provided via a resource.
+	// 'Body' => fopen('/path/to/input', 'r')
 ]);
 
 // Download a file from a bucket. Returns the file content.
 $fileContent = $client->download([
-    'FileId' => $file->getId()
+	'FileId' => $file->getId()
 
-    // Can also identify the file via bucket and path:
-    // 'BucketName' => 'my-special-bucket',
-    // 'FileName' => 'path/to/file'
+	// Can also identify the file via bucket and path:
+	// 'BucketName' => 'my-special-bucket',
+	// 'FileName' => 'path/to/file'
 
-    // Can also save directly to a location on disk. This will cause download() to not return file content.
-    // 'SaveAs' => '/path/to/save/location'
+	// Can also save directly to a location on disk. This will cause download() to not return file content.
+	// 'SaveAs' => '/path/to/save/location'
 ]);
 
 // Delete a file from a bucket. Returns true or false.
 $fileDelete = $client->deleteFile([
-    'FileId' => $file->getId()
-    
-    // Can also identify the file via bucket and path:
-    // 'BucketName' => 'my-special-bucket',
-    // 'FileName' => 'path/to/file'
+	'FileId' => $file->getId()
+	
+	// Can also identify the file via bucket and path:
+	// 'BucketName' => 'my-special-bucket',
+	// 'FileName' => 'path/to/file'
 ]);
 
 // Retrieve an array of file objects from a bucket.
 $fileList = $client->listFiles([
-    'BucketId' => 'xxxxxxxxxxxxxxxxxxxxxxxx'
+	'BucketId' => 'xxxxxxxxxxxxxxxxxxxxxxxx'
 ]);
 ```
 
@@ -88,6 +88,28 @@ Tests are run with PHPUnit. After installing PHPUnit via Composer:
 ```bash
 $ vendor/bin/phpunit
 ```
+
+## Authorization Cache
+
+If you want to cache the authorization token to reduce the number of API calls, create a class that implements `Zaxbux\BackblazeB2\AuthCacheInterface`.
+
+```php
+<?php
+
+use Zaxbux\BackblazeB2\AuthCacheInterface;
+
+class AuthorizationCacheExample implements AuthCacheInterface {
+	public function cache($key, $value) {
+		$myCache->remember($key, $value, AuthCacheInterface::EXPIRES)
+	}
+
+	public function get($key) {
+		$myCache->get($key);
+	}
+}
+```
+
+The `AuthCacheInterface::EXPIRES` constant is how long the authorization token is valid for, in seconds. Currently, this is equivalent to 24 hours. Requests made after the token expires will result in an `ExpiredAuthTokenException` exception being thrown. You will need to get a new authorization token with `authorizeAccount()`.
 
 ## Contributors
 
