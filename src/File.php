@@ -3,6 +3,11 @@
 namespace Zaxbux\BackblazeB2;
 
 class File {
+	const ACTION_START  = 'start';
+	const ACTION_UPLOAD = 'upload';
+	const ACTION_HIDE   = 'hide';
+	const ACTION_FOLDER = 'folder';
+
 	protected $id;
 	protected $name;
 	protected $sha1;
@@ -29,38 +34,6 @@ class File {
 			$this->hydrateFromAPI($value);
 		} else {
 			$this->hydrate($value);
-		}
-	}
-
-	protected function hydrate($value) {
-		foreach ($data as $attribute => $value) {
-			$method = 'set'.str_replace('_', '', ucwords($attribute, '_'));
-			if (is_callable([$this, $method])) {
-				$this->$method($value);
-			}
-		}
-	}
-
-	protected function hydrateFromAPI($value) {
-		$apiResponseFields = [
-			'contentLength' => 'size',
-			'contentSha1'   => 'sha1',
-			'contentType'   => 'type',
-			'fileId'        => 'id',
-			'fileInfo'      => 'info',
-			'fileName'      => 'name',
-		];
-
-		foreach ($data as $attribute => $value) {
-			// Convert API response fields to class attribute names
-			if (array_key_exists($attribute, $apiResponseFields)) {
-				$attribute = $apiResponseFields[$attribute];
-			}
-
-			$method = 'set'.ucwords($attribute);
-			if (is_callable([$this, $method])) {
-				$this->$method($value);
-			}
 		}
 	}
 
@@ -209,7 +182,11 @@ class File {
 	}
 
 	/**
-	 * Get the file action
+	 * Get the file action.
+	 * "upload" means this file is uploaded to B2.
+	 * "start" means this is an unfinished large file upload.
+	 * "hide" means this file is a previous version, thus hidden.
+	 * "folder" means this is a virtual folder.
 	 */ 
 	public function getAction() {
 		return $this->action;
@@ -242,5 +219,73 @@ class File {
 		$this->uploadTimestamp = $uploadTimestamp;
 
 		return $this;
+	}
+
+	/**
+	 * Check if this file object is a finished upload.
+	 * 
+	 * @return bool
+	 */
+	public function isUpload() {
+		return $this->action === self::ACTION_UPLOAD;
+	}
+
+	/**
+	 * Check if this file object is an unfinished large file.
+	 * 
+	 * @return bool
+	 */
+	public function isUnfinishedLargeFile() {
+		return $this->action === self::ACTION_START;
+	}
+
+	/**
+	 * Check if this file object is a previous file version, thus hidden.
+	 * 
+	 * @return bool
+	 */
+	public function isHidden() {
+		return $this->action === self::ACTION_HIDE;
+	}
+
+	/**
+	 * Check if this file object is a virtual folder.
+	 * 
+	 * @return bool
+	 */
+	public function isFolder() {
+		return $this->action === self::ACTION_FOLDER;
+	}
+
+	protected function hydrate($value) {
+		foreach ($data as $attribute => $value) {
+			$method = 'set'.str_replace('_', '', ucwords($attribute, '_'));
+			if (is_callable([$this, $method])) {
+				$this->$method($value);
+			}
+		}
+	}
+
+	protected function hydrateFromAPI($value) {
+		$apiResponseFields = [
+			'contentLength' => 'size',
+			'contentSha1'   => 'sha1',
+			'contentType'   => 'type',
+			'fileId'        => 'id',
+			'fileInfo'      => 'info',
+			'fileName'      => 'name',
+		];
+
+		foreach ($data as $attribute => $value) {
+			// Convert API response fields to class attribute names
+			if (array_key_exists($attribute, $apiResponseFields)) {
+				$attribute = $apiResponseFields[$attribute];
+			}
+
+			$method = 'set'.ucwords($attribute);
+			if (is_callable([$this, $method])) {
+				$this->$method($value);
+			}
+		}
 	}
 }

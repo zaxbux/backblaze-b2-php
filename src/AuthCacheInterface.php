@@ -3,19 +3,24 @@
 namespace Zaxbux\BackblazeB2;
 
 interface AuthCacheInterface {
-	
+
 	/**
-	 * Returns the auth data for the given key
-	 *
-	 * @param $key
-	 * @return array|null
+	 * The maximum number of seconds to cache the authorization token
 	 */
-	public function cachedB2Auth($key);
+	const EXPIRES = 86400;
 
 	/**
 	 * Caches authentication data
 	 * @param $key
 	 * @param $authData
 	 */
-	public function cacheB2Auth($key, $authData);
+	public function cache($key, $token);
+
+	/**
+	 * Returns the authorization token for the given key
+	 *
+	 * @param $key
+	 * @return array|null
+	 */
+	public function get($key);
 }
