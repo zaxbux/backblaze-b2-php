@@ -78,8 +78,6 @@ class Client {
 	 * Authorize the B2 account in order to get an auth token and API/download URLs.
 	 * 
 	 * @link https://www.backblaze.com/b2/docs/b2_authorize_account.html
-	 *
-	 * @param AuthCacheInterface $authCache
 	 * 
 	 * @throws \Exception
 	 */
@@ -310,7 +308,7 @@ class Client {
 			'json' => $json
 		]);
 
-		return new Bucket($response['bucketId'], $response['bucketName'], $response['bucketType']);
+		return new Bucket($response, true);
 	}
 
 	/**
@@ -506,7 +504,7 @@ class Client {
 		$sink = null,
 		bool $headersOnly = false
 	) {
-		$downloadUrl = sprintf('%s/file/%s/%s', $this->downloadUrl, $bucketname, $fileName);
+		$downloadUrl = sprintf('%s/file/%s/%s', $this->downloadUrl, $bucketName, $fileName);
 
 		return $this->download($downloadUrl, [], $options, $range, $sink, $headersOnly);
 	}
@@ -564,7 +562,7 @@ class Client {
 
 		return [
 			'headers' => $response->getHeaders(),
-			'stream'  => $headersOnly ? null : $response->getBody(),
+			'stream'  => $headersOnly || \is_string($sink) ? null : $response->getBody(),
 		];
 	}
 
@@ -610,7 +608,7 @@ class Client {
 		string $bucketId,
 		string $fileNamePrefix,
 		int $validDuration,
-		array $options
+		array $options = null
 	) {
 		$json = [
 			'bucketId'               => $bucketId,

@@ -7,70 +7,17 @@
 
 [Full documentation of the Backblaze B2 API can be found here.](https://www.backblaze.com/b2/docs/index.html)
 
-## Examples
+Each method is well documented in [`src/client.php`](src/Client.php).
 
-```php
-use Zaxbux\BackblazeB2\Client;
-use Zaxbux\BackblazeB2\Bucket;
+For examples and options that are specific to this library, please see [`docs/`](docs/):
 
-$client = new Client('accountId', 'applicationKey');
-
-// Returns a Bucket object.
-$bucket = $client->createBucket([
-	'BucketName' => 'my-special-bucket',
-	'BucketType' => Bucket::TYPE_PRIVATE // or TYPE_PUBLIC
-]);
-
-// Change the bucket to private. Also returns a Bucket object.
-$updatedBucket = $client->updateBucket([
-	'BucketId'   => $bucket->getId(),
-	'BucketType' => Bucket::TYPE_PUBLIC
-]);
-
-// Retrieve an array of Bucket objects on your account.
-$buckets = $client->listBuckets();
-
-// Delete a bucket.
-$client->deleteBucket([
-	'bucketId' => 'xxxxxxxxxxxxxxxxxxxxxxxx'
-]);
-
-// Upload a file to a bucket. Returns a File object.
-$file = $client->upload([
-	'bucketName' => 'my-special-bucket',
-	'fileName' => 'path/to/upload/to',
-	'body' => 'I am the file content'
-
-	// The file content can also be provided via a resource.
-	// 'body' => fopen('/path/to/input', 'r')
-]);
-
-// Download a file from a bucket. Returns the file content.
-$fileContent = $client->download([
-	'fileId' => $file->getId()
-
-	// Can also identify the file via bucket and path:
-	// 'BucketName' => 'my-special-bucket',
-	// 'FileName' => 'path/to/file'
-
-	// Can also save directly to a location on disk. This will cause download() to not return file content.
-	// 'SaveAs' => '/path/to/save/location'
-]);
-
-// Delete a file from a bucket. Returns true or false.
-$fileDelete = $client->deleteFile([
-	'fileId' => $file->getId()
-	
-	// Can also identify the file via bucket and path:
-	// 'BucketName' => 'my-special-bucket',
-	// 'FileName' => 'path/to/file'
-]);
-
-// Retrieve an array of file objects from a bucket.
-$fileList = $client->listFiles([
-	'bucketId' => 'xxxxxxxxxxxxxxxxxxxxxxxx'
-]);
-```
+  * [Authorization](docs/authorization.md)
+  * [Downloading](docs/downloading.md)
+  * [Uploading](docs/uploading.md)
+  * [Large Files](docs/large_files.md)
+  * [Buckets](docs/buckets.md)
+  * [Files](docs/files.md)
+  * [Keys](docs/keys.md)
 
 ## Installation
 
@@ -80,18 +27,38 @@ Installation is via Composer:
 $ composer require zaxbux/b2-sdk-php
 ```
 
-## Tests
+## Getting Started
 
-Tests are run with PHPUnit. After installing PHPUnit via Composer:
+```php
+<?php
 
-```bash
-$ vendor/bin/phpunit
+use Zaxbux\BackblazeB2\Client;
+
+$accountId      = '...';
+$applicationKey = '...';
+
+$client = new Client($accountId, $applicationKey);
+
+// Retrieve an array of Bucket objects on your account.
+$buckets = $client->listBuckets();
 ```
 
 ## Authorization Cache
 
 If you want to cache the authorization token to reduce the number of API calls, create a class that implements `Zaxbux\BackblazeB2\AuthCacheInterface`.
 
+```php
+<?php
+
+use Zaxbux\BackblazeB2\Client;
+
+$authCache = new AuthorizationCacheExample;
+
+$client = new Client($accountId, $applicationKey, $authCache);
+
+```
+
+### Sample Authorization Cache
 ```php
 <?php
 
@@ -110,9 +77,17 @@ class AuthorizationCacheExample implements AuthCacheInterface {
 
 The `AuthCacheInterface::EXPIRES` constant is how long the authorization token is valid for, in seconds. Currently, this is equivalent to 24 hours. Requests made after the token expires will result in an `ExpiredAuthTokenException` exception being thrown. You will need to get a new authorization token with `authorizeAccount()`.
 
-## Contributors
+## Tests
 
-Feel free to contribute in any way you can whether that be reporting issues, making suggestions or sending PRs.
+Tests are run with PHPUnit. After installing PHPUnit via Composer:
+
+```bash
+$ vendor/bin/phpunit
+```
+
+## Contributing
+
+Feel free to contribute in any way by reporting an issue, making a suggestion, or submitting a pull request.
 
 ## License
 
