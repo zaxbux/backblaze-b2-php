@@ -1058,7 +1058,7 @@ class Client {
 	 *                                listed.
 	 * @param int    $startPartNumber The first part to return. Used when a query hits the maxKeyCount, and you want to
 	 *                                get more.
-	 * @param int    $maxKeyCount     The maximum number of parts to return in the response. The default value is 1000,
+	 * @param int    $maxPartCount    The maximum number of parts to return in the response. The default value is 1000,
 	 *                                and the maximum is 10000. The maximum number of parts returned per transaction
 	 *                                is 1000.
 	 *                                If more than 1000 are returned, the call will be billed as multiple transactions.
@@ -1066,8 +1066,28 @@ class Client {
 	 * 
 	 * @return array
 	 */
-	public function listParts(string $fileId, int $startPartNumber = null, int $maxPartCount = 100, $loop = true) {
+	public function listParts(string $fileId, int $startPartNumber = null, int $maxPartCount = 1000, $loop = true) {
+		$parts = [];
 
+		while (true) {
+			$response = $this->_listParts($fileId, $startPartNumber, $maxPartCount);
+
+			if (!$loop) {
+				return $response;
+			}
+
+			array_merge($parts, $response['parts']);
+			$startPartNumber = $response['nextPartNumber'];
+
+			if ($startPartNumber == null) {
+				break;
+			}
+		}
+
+		return [
+			'parts'          => $parts,
+			'nextPartNumber' => null,
+		];
 	}
 
 	/**
@@ -1077,7 +1097,19 @@ class Client {
 	 * 
 	 * @return array
 	 */
-	private function _listParts() {
+	private function _listParts($fileId, $startPartNumber, $maxPartCount) {
+		$json = [
+			'fileId' => $fileId
+		];
+
+		if ($startPartNumber) {
+			$json['startpartNumber'] = $startPartNumber;
+		}
+
+		if ($maxPartCount) {
+			$json['maxPartCount'] = $maxPartCount;
+		}
+
 		$response = $this->client->request('POST', $this->apiUrl.'/b2_list_parts', [
 			'headers' => [
 				'Authorization' => $this->authToken,
