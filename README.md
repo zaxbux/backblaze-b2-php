@@ -1,8 +1,7 @@
 ## Backblaze B2 SDK for PHP
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
 
-`b2-sdk-php` is a client library for working with Backblaze's B2 storage service. It aims to make using the service as
-easy as possible by exposing a clear API and taking influence from other SDKs that you may be familiar with.
+`b2-sdk-php` is a client library for working with Backblaze's B2 storage service.
 
 ## Documentation
 
@@ -24,7 +23,7 @@ $bucket = $client->createBucket([
 
 // Change the bucket to private. Also returns a Bucket object.
 $updatedBucket = $client->updateBucket([
-	'BucketId' => $bucket->getId(),
+	'BucketId'   => $bucket->getId(),
 	'BucketType' => Bucket::TYPE_PUBLIC
 ]);
 
@@ -33,22 +32,22 @@ $buckets = $client->listBuckets();
 
 // Delete a bucket.
 $client->deleteBucket([
-	'BucketId' => 'xxxxxxxxxxxxxxxxxxxxxxxx'
+	'bucketId' => 'xxxxxxxxxxxxxxxxxxxxxxxx'
 ]);
 
 // Upload a file to a bucket. Returns a File object.
 $file = $client->upload([
-	'BucketName' => 'my-special-bucket',
-	'FileName' => 'path/to/upload/to',
-	'Body' => 'I am the file content'
+	'bucketName' => 'my-special-bucket',
+	'fileName' => 'path/to/upload/to',
+	'body' => 'I am the file content'
 
 	// The file content can also be provided via a resource.
-	// 'Body' => fopen('/path/to/input', 'r')
+	// 'body' => fopen('/path/to/input', 'r')
 ]);
 
 // Download a file from a bucket. Returns the file content.
 $fileContent = $client->download([
-	'FileId' => $file->getId()
+	'fileId' => $file->getId()
 
 	// Can also identify the file via bucket and path:
 	// 'BucketName' => 'my-special-bucket',
@@ -60,7 +59,7 @@ $fileContent = $client->download([
 
 // Delete a file from a bucket. Returns true or false.
 $fileDelete = $client->deleteFile([
-	'FileId' => $file->getId()
+	'fileId' => $file->getId()
 	
 	// Can also identify the file via bucket and path:
 	// 'BucketName' => 'my-special-bucket',
@@ -69,7 +68,7 @@ $fileDelete = $client->deleteFile([
 
 // Retrieve an array of file objects from a bucket.
 $fileList = $client->listFiles([
-	'BucketId' => 'xxxxxxxxxxxxxxxxxxxxxxxx'
+	'bucketId' => 'xxxxxxxxxxxxxxxxxxxxxxxx'
 ]);
 ```
 
@@ -117,4 +116,4 @@ Feel free to contribute in any way you can whether that be reporting issues, mak
 
 ## License
 
-MIT.
+MIT

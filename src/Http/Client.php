@@ -15,28 +15,20 @@ class Client extends GuzzleClient {
 	/**
 	 * Sends a response to the B2 API, automatically handling decoding JSON and errors.
 	 *
-	 * @param string $method
-	 * @param null $uri
-	 * @param array $options
-	 * @param bool $asJson
-	 * @param bool $getContents
-	 * @return mixed|string
+	 * @param string $method  The HTTP requeest method.
+	 * @param string $uri     The request URI.
+	 * @param array  $options Guzzle options.
+	 * @param bool   $asJson  Return JSON, default is true.
+	 * 
+	 * @return mixed
 	 */
-	public function request($method, $uri = null, array $options = [], $asJson = true, $getContents = true) {
+	public function request($method, $uri = null, array $options = [], bool $asJson = true) {
 		$response = parent::request($method, $uri, $options);
 
 		if ($response->getStatusCode() !== 200) {
 			ErrorHandler::handleErrorResponse($response);
 		}
 
-		if ($asJson) {
-			return json_decode($response->getBody(), true);
-		}
-
-		if (!$getContents) {
-			return $response->getBody();
-		}
-
-		return $response->getBody()->getContents();
+		return $asJson ? json_decode($response->getBody(), true) : $response;
 	}
 }
