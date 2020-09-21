@@ -9,6 +9,7 @@ use Zaxbux\BackblazeB2\Exception\UnauthorizedException;
 use Zaxbux\BackblazeB2\Http\Client as HttpClient;
 
 class Client {
+	const CLIENT_VERSION             = '2.0.0';
 	const B2_API_BASE_URL            = 'https://api.backblazeb2.com';
 	const B2_API_V2                  = '/b2api/v2';
 	const METADATA_DIRECTIVE_COPY    = 'COPY';
@@ -68,7 +69,12 @@ class Client {
 		if ($client) {
 			$this->client = $client;
 		} else {
-			$this->client = new HttpClient(['exceptions' => false]);
+			$this->client = new HttpClient([
+				'headers' => [
+					'User-Agent' => sprintf('b2-sdk-php/%s+php/zaxbux', self::CLIENT_VERSION),
+				],
+				'exceptions' => false,
+			]);
 		}
 
 		$this->authorizeAccount();
@@ -270,7 +276,7 @@ class Client {
 	 */
 	public function createBucket(
 		string $bucketName,
-		string $bucketType,
+		string $bucketType = Bucket::TYPE_PRIVATE,
 		array $bucketInfo = null,
 		array $corsRules = null,
 		array $lifecycleRules = null
