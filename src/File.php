@@ -10,7 +10,7 @@ class File {
 
 	protected $id;
 	protected $name;
-	protected $sha1;
+	protected $checksum;
 	protected $size;
 	protected $type;
 	protected $info;
@@ -74,19 +74,19 @@ class File {
 	}
 
 	/**
-	 * Get the file sha1
+	 * Get the file checksum
 	 */ 
-	public function getSha1() {
-		return $this->sha1;
+	public function getChecksum() {
+		return $this->checksum;
 	}
 
 	/**
-	 * Set the file sha1
+	 * Set the file checksum
 	 *
 	 * @return  self
 	 */ 
-	public function setSha1($sha1) {
-		$this->sha1 = $sha1;
+	public function setChecksum($checksum) {
+		$this->checksum = $checksum;
 
 		return $this;
 	}
@@ -207,7 +207,7 @@ class File {
 	 * Get the file upload timestamp
 	 */ 
 	public function getUploadTimestamp() {
-		return $this->uploadTimestamp;
+		return $this->isFolder() ? 0 : $this->uploadTimestamp;
 	}
 
 	/**
@@ -257,7 +257,7 @@ class File {
 		return $this->action === self::ACTION_FOLDER;
 	}
 
-	protected function hydrate($value) {
+	protected function hydrate($data) {
 		foreach ($data as $attribute => $value) {
 			$method = 'set'.str_replace('_', '', ucwords($attribute, '_'));
 			if (is_callable([$this, $method])) {
@@ -266,10 +266,10 @@ class File {
 		}
 	}
 
-	protected function hydrateFromAPI($value) {
+	protected function hydrateFromAPI($data) {
 		$apiResponseFields = [
 			'contentLength' => 'size',
-			'contentSha1'   => 'sha1',
+			'contentSha1'   => 'checksum',
 			'contentType'   => 'type',
 			'fileId'        => 'id',
 			'fileInfo'      => 'info',

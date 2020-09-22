@@ -727,7 +727,7 @@ class Client {
 	 * @param string $bucketId
 	 * @param string $fileName
 	 * 
-	 * @return array
+	 * @return File
 	 */
 	public function hideFile(string $bucketId, string $fileName) {
 
@@ -741,7 +741,7 @@ class Client {
 			]
 		]);
 
-		return $response;
+		return new File($response, true);
 	}
 
 	/**

@@ -179,7 +179,7 @@ class Bucket {
 		return $this;
 	}
 
-	protected function hydrate($value) {
+	protected function hydrate($data) {
 		foreach ($data as $attribute => $value) {
 			$method = 'set'.str_replace('_', '', ucwords($attribute, '_'));
 			if (is_callable([$this, $method])) {
@@ -188,7 +188,7 @@ class Bucket {
 		}
 	}
 
-	protected function hydrateFromAPI($value) {
+	protected function hydrateFromAPI($data) {
 		$apiResponseFields = [
 			'bucketId'   => 'id',
 			'bucketname' => 'name',
