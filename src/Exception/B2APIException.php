@@ -2,7 +2,7 @@
 
 namespace Zaxbux\BackblazeB2\Exception;
 
-class B2Exception extends \Exception {
+class B2APIException extends \Exception {
 
 	protected $code;
 

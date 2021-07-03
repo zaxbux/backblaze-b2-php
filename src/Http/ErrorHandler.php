@@ -1,6 +1,6 @@
 <?php
 
-namespace Zaxbux\BackblazeB2;
+namespace Zaxbux\BackblazeB2\Http;
 
 use Zaxbux\BackblazeB2\Exception\B2Exception;
 use Zaxbux\BackblazeB2\Exception\BadJsonException;

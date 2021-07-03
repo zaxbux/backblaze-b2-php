@@ -1,6 +1,6 @@
 <?php
 
-namespace Zaxbux\BackblazeB2;
+namespace Zaxbux\BackblazeB2\B2Object;
 
 /**
  * A CORS rule object for the Backblaze B2 API

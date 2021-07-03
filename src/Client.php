@@ -1,84 +1,106 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Zaxbux\BackblazeB2;
 
-use GuzzleHttp\Client as GuzzleClient;
+use Exception;
+use InvalidArgumentException;
+
+use GuzzleHttp\ClientInterface;
+
+use Zaxbux\BackblazeB2\B2Object\Bucket;
+use Zaxbux\BackblazeB2\B2Object\BucketType;
+use Zaxbux\BackblazeB2\B2Object\DownloadAuthorization;
+use Zaxbux\BackblazeB2\B2Object\File;
+use Zaxbux\BackblazeB2\B2Object\Key;
+
+use Zaxbux\BackblazeB2\Client\AccountAuthorization;
+use Zaxbux\BackblazeB2\Client\IAuthorizationCache;
+
+use Zaxbux\BackblazeB2\Http\ClientFactory;
+
 use Zaxbux\BackblazeB2\Exception\NotFoundException;
 use Zaxbux\BackblazeB2\Exception\ValidationException;
 use Zaxbux\BackblazeB2\Exception\UnauthorizedException;
-use Zaxbux\BackblazeB2\Http\Client as HttpClient;
+
 
 class Client {
-	const CLIENT_VERSION             = '2.0.0';
-	const B2_API_BASE_URL            = 'https://api.backblazeb2.com';
-	const B2_API_V2                  = '/b2api/v2';
-	const METADATA_DIRECTIVE_COPY    = 'COPY';
-	const METADATA_DIRECTIVE_REPLACE = 'REPLACE';
-
-	/** @var string */
-	protected $accountId;
-
+	public const CLIENT_VERSION  = '2.0.0';
+	public const B2_API_BASE_URL = 'https://api.backblazeb2.com';
+	public const B2_API_V2       = '/b2api/v2';
+	
 	/** @var string */
 	protected $applicationKeyId;
 
 	/** @var string */
 	protected $applicationKey;
 
-	/** @var AuthCacheInterface */
-	protected $authCache;
+	/** @var AccountAuthorization */
+	protected $accountAuthorization;
 
-	/** @var string */
-	protected $authToken;
+	/** @var IAuthorizationCache */
+	protected $authorizationCache;
 
-	/** @var string */
-	protected $apiUrl;
-
-	/** @var array */
-	protected $allowed;
-
-	/** @var string */
-	protected $downloadUrl;
-
-	/** @var int */
-	protected $recommendedPartSize;
-
-	/** @var int */
-	protected $absoluteMinimumPartSize;
-
+	/** @var GuzzleClient */
 	protected $client;
 
 	/**
 	 * Client constructor.
 	 *
-	 * @param string             $applicationKeyId The identifier for the key. The account ID can also be used.
-	 * @param string             $applicationKey   The secret part of the key. The master application key can also be
-	 *                                             used.
-	 * @param AuthCacheInterface $authCache        An optional authorization cache instance.
-	 * @param GuzzleClient       $client           An optional client compatible with GuzzleHttp
+	 * @param string $applicationKeyId The identifier for the key. The account ID can also be used.
+	 * @param string $applicationKey   The secret part of the key. The master application key can also be used.
+	 * 
+	 * @param IAuthorizationCache|null $authorizationCache [optional] An object implementing an authorization cache.
+	 * @param ClientInterface|null     $client             [optional] A client compatible with GuzzleHttp.
 	 */
 	public function __construct(
 		string $applicationKeyId,
 		string $applicationKey,
-		AuthCacheInterface $authCache = null,
-		GuzzleClient $client = null
+		?IAuthorizationCache $authorizationCache = null,
+		?ClientInterface $client = null
 	) {
-		$this->applicationKeyId = $applicationKeyId;
-		$this->applicationKey   = $applicationKey;
-		$this->authCache        = $authCache;
-
-		if ($client) {
-			$this->client = $client;
-		} else {
-			$this->client = new HttpClient([
-				'headers' => [
-					'User-Agent' => sprintf('b2-sdk-php/%s+php/zaxbux', self::CLIENT_VERSION),
-				],
-				'exceptions' => false,
-			]);
-		}
-
-		$this->authorizeAccount();
+		$this->applicationKeyId   = $applicationKeyId;
+		$this->applicationKey     = $applicationKey;
+		$this->authorizationCache = $authorizationCache;
+		
+		$this->client = $client ?: ClientFactory::create();
 	}
+
+	public function getApplicationKeyId(): string {
+		return $this->getApplicationKeyId;
+	}
+
+	public function getApplicationKey(): string {
+		return $this->getApplicationKey;
+	}
+
+	public function getAccountAuthorization(): ?AccountAuthorization {
+		return $this->accountAuthorization;
+	}
+
+	public function setAccountAuthorization(AccountAuthorization $accountAuthorization): void {
+		$this->accountAuthorization = $accountAuthorization;
+	}
+
+	/**
+	 * Create an instance of the Client and authorize it.
+	 * 
+	 * @see Client::__construct()
+	 * 
+	 * @return Client An authorized instance of the B2 API PHP Client.
+	 */
+	/*public static function create(
+		string $applicationKeyId,
+		string $applicationKey,
+		?IAuthorizationCache $authorizationCache = null,
+		?ClientInterface $client = null
+	): Client {
+		$client = new Client($applicationKeyId, $applicationKey, $authorizationCache, $client);
+		$client->authorizeAccount();
+
+		return $client;
+	}*/
 
 	/**
 	 * Authorize the B2 account in order to get an auth token and API/download URLs.
@@ -87,38 +109,25 @@ class Client {
 	 * 
 	 * @throws \Exception
 	 */
-	protected function authorizeAccount() {
-		$basic = base64_encode($this->applicationKeyId . ':' . $this->applicationKey);
-
-		$authorization = [];
-
-		if ($this->authCache instanceof AuthCacheInterface) {
-			$authorization = $this->authCache->get($this->applicationKeyId);
+	protected function authorize() {
+		// Try to fetch existing authorization token from cache.
+		if ($this->authorizationCache instanceof IAuthorizationCache) {
+			$this->accountAuthorization = $this->authorizationCache->get($this->applicationKeyId);
 		}
 
-		if (empty($authorization)) {
-			$authorization = $this->client->request(
-				'GET',
-				self::B2_API_BASE_URL.self::B2_API_V2.'/b2_authorize_account',
-				['headers' => ['Authorization' => 'Basic ' . $basic]]
-			);
+		// Fetch a new authorization token from the API.
+		if (!$this->accountAuthorization) {
+			$this->accountAuthorization = AccountAuthorization::refresh($this->applicationKeyId, $this->applicationKey);
 
-			if (!empty($authorization) && $this->authCache instanceof AuthCacheInterface) {
-				$this->authCache->cache($this->applicationKeyId, $authorization);
+			// Cache the new authorization token.
+			if ($this->authorizationCache instanceof IAuthorizationCache && !$this->accountAuthorization) {
+				$this->authorizationCache->put($this->applicationKeyId, $this->accountAuthorization);
 			}
 		}
 
-		if (empty($authorization)) {
-			throw new \Exception('Failed to get authorization.');
+		if (empty($this->accountAuthorization)) {
+			throw new \Exception('Failed to authorize account.');
 		}
-
-		$this->accountId               = $authorization['accountId'];
-		$this->authToken               = $authorization['authorizationToken'];
-		$this->apiUrl                  = $authorization['apiUrl'].self::B2_API_V2;
-		$this->downloadUrl             = $authorization['downloadUrl'];
-		$this->allowed                 = $authorization['allowed'];
-		$this->recommendedPartSize     = $authorization['recommendedPartSize'];
-		$this->absoluteMinimumPartSize = $authorization['absoluteMinimumPartSize'];
 	}
 
 	/**
@@ -186,16 +195,16 @@ class Client {
 		}
 
 		if ($metadataDirective) {
-			if ($metadataDirective == self::METADATA_DIRECTIVE_REPLACE && $contentType == null) {
-				$contentType = 'b2/x-auto';
+			if ($metadataDirective == File::METADATA_DIRECTIVE_REPLACE && $contentType == null) {
+				$contentType = File::CONTENT_TYPE_AUTO;
 			}
 
-			if ($metadataDirective == self::METADATA_DIRECTIVE_COPY && $contentType) {
-				throw new \InvalidArgumentException('contentType must not be set when metadataDirective is '.self::METADATA_DIRECTIVE_COPY);
+			if ($metadataDirective == File::METADATA_DIRECTIVE_COPY && $contentType) {
+				throw new InvalidArgumentException(File::ATTRIBUTE_CONTENT_TYPE . ' must not be set when metadataDirective is ' . File::METADATA_DIRECTIVE_COPY);
 			}
 
-			if ($metadataDirective == self::METADATA_DIRECTIVE_COPY && $fileInfo) {
-				throw new \InvalidArgumentException('fileInfo must not be set when metadataDirective is '.self::METADATA_DIRECTIVE_COPY);
+			if ($metadataDirective == File::METADATA_DIRECTIVE_COPY && $fileInfo) {
+				throw new InvalidArgumentException(File::ATTRIBUTE_FILE_INFO . ' must not be set when metadataDirective is ' . File::METADATA_DIRECTIVE_COPY);
 			}
 
 			$json['metadataDirective'] = $metadataDirective;
@@ -216,7 +225,7 @@ class Client {
 			'json' => $json
 		]);
 		
-		return new File($response, true);
+		return File::fromArray(json_decode((string) $response->getBody(), true));
 	}
 
 	/**
@@ -231,9 +240,10 @@ class Client {
 	 *                             numbers, starting with 1.
 	 * @param string $range        The range of bytes to copy. If not provided, the whole source file will be copied.
 	 * 
-	 * @return array
+	 * @return File
 	 */
-	public function copyPart(string $sourceFileId, string $largeFileId, int $partNumber, string $range = null) {
+	public function copyPart(string $sourceFileId, string $largeFileId, int $partNumber, string $range = null): File
+	{
 		$json = [
 			'sourceFileId' => $sourceFileId,
 			'largeFileId'  => $largeFileId,
@@ -251,10 +261,7 @@ class Client {
 			'json' => $json
 		]);
 		
-		return [
-			'partNumber' => $response['partNumber'],
-			'file'       => new File($response, true),
-		];
+		return File::fromArray(json_decode((string) $response->getBody(), true));
 	}
 
 	/**
@@ -276,16 +283,16 @@ class Client {
 	 */
 	public function createBucket(
 		string $bucketName,
-		string $bucketType = Bucket::TYPE_PRIVATE,
+		string $bucketType = BucketType::PRIVATE,
 		array $bucketInfo = null,
 		array $corsRules = null,
 		array $lifecycleRules = null
 	) {
-		if (!in_array($bucketType, [Bucket::TYPE_PUBLIC, Bucket::TYPE_PRIVATE])) {
-			throw new \InvalidArgumentException(sprintf(
+		if (!in_array($bucketType, [BucketType::PUBLIC, BucketType::PRIVATE])) {
+			throw new InvalidArgumentException(sprintf(
 				'$bucketType must be %s or %s',
-				Bucket::TYPE_PRIVATE,
-				Bucket::TYPE_PUBLIC
+				BucketType::PRIVATE,
+				BucketType::PUBLIC
 			));
 		}
 
@@ -314,7 +321,7 @@ class Client {
 			'json' => $json
 		]);
 
-		return new Bucket($response, true);
+		return Bucket::fromArray(json_decode((string) $response->getBody(), true));
 	}
 
 	/**
@@ -344,7 +351,7 @@ class Client {
 	) {
 
 		if (empty($capabilities)) {
-			throw new \InvalidArgumentException('capabilities must contain least one valid item');
+			throw new InvalidArgumentException('capabilities must contain least one valid item');
 		}
 
 		$json = [
@@ -380,12 +387,12 @@ class Client {
 
 		$response = $this->client->request('POST', $this->apiUrl.'/b2_create_key', [
 			'headers' => [
-				'Authorization' => $this->authToken()
+				'Authorization' => $this->authToken
 			],
 			'json' => $json,
 		]);
 
-		return $response;
+		return Key::fromArray(json_decode((string) $response->getBody(), true));
 	}
 
 	/**
@@ -408,7 +415,7 @@ class Client {
 			]
 		]);
 
-		return new Bucket($response, true);
+		return Bucket::fromArray(json_decode((string) $response->getBody(), true));
 	}
 
 	/**
@@ -416,12 +423,15 @@ class Client {
 	 * 
 	 * @link https://www.backblaze.com/b2/docs/b2_delete_file_version.html
 	 *
-	 * @param string $fileName The name of the file.
-	 * @param string $fileId   The ID of the file.
+	 * @param string $fileName         The name of the file.
+	 * @param string $fileId           The ID of the file.
+	 * @param bool   $bypassGovernance Must be specified and set to true if deleting a file version protected by
+	 *                                 File Lock governance mode retention settings.
 	 * 
 	 * @return array
 	 */
-	public function deleteFile(string $fileName, string $fileId) {
+	public function deleteFileVersion(string $fileName, string $fileId, ?bool $bypassGovernance = false): File
+	{
 		$response = $this->client->request('POST', $this->apiUrl.'/b2_delete_file_version', [
 			'headers' => [
 				'Authorization' => $this->authToken
@@ -432,7 +442,7 @@ class Client {
 			]
 		]);
 
-		return $response;
+		return File::fromArray(json_decode((string) $response->getBody(), true));
 	}
 
 	/**
@@ -454,7 +464,7 @@ class Client {
 			]
 		]);
 
-		return $response;
+		return Key::fromArray(json_decode((string) $response->getBody(), true));
 	}
 
 	/**
@@ -479,7 +489,7 @@ class Client {
 		$sink = null,
 		bool $headersOnly = false
 	) {
-		$downloadUrl = sprintf('%s/b2_download_file_by_id', $this->downloadUrl.self::B2_API_V2);
+		$downloadUrl = sprintf('%s/b2_download_file_by_id', $this->downloadUrl.static::B2_API_V2);
 
 		$query = ['fileId' => $fileId];
 
@@ -557,7 +567,7 @@ class Client {
 			$query['b2ContentType'] = $options['b2ContentType'];
 		}
 
-		$stream = isset($options['stream']) && $stream == true;
+		$stream = isset($options['stream']) && $options['stream'] == true;
 
 		$response = $this->client->request('GET', $downloadUrl, [
 			'query'   => $query,
@@ -593,7 +603,7 @@ class Client {
 			]
 		]);
 
-		return new File($response, true);
+		return File::fromArray(json_decode((string) $response->getBody(), true));
 	}
 
 	/**
@@ -607,15 +617,13 @@ class Client {
 	 * @param int    $validDuration  The number of seconds before the authorization token will expire. The minimum
 	 *                               value is 1 second. The maximum value is 604800.
 	 * @param array  $options        Additional options to pass to the API.
-	 * 
-	 * @return array
 	 */
 	public function getDownloadAuthorization(
 		string $bucketId,
 		string $fileNamePrefix,
 		int $validDuration,
-		array $options = null
-	) {
+		?array $options = null
+	): DownloadAuthorization {
 		$json = [
 			'bucketId'               => $bucketId,
 			'fileNamePrefix'         => $fileNamePrefix,
@@ -653,7 +661,7 @@ class Client {
 			'json' => $json
 		]);
 
-		return $response;
+		return DownloadAuthorization::fromArray(json_decode((string) $response->getBody(), true));
 	}
 
 	/**
@@ -662,10 +670,9 @@ class Client {
 	 * @link https://www.backblaze.com/b2/docs/b2_get_file_info.html
 	 *
 	 * @param string $fileId The ID of the file.
-	 * 
-	 * @return File
 	 */
-	public function getFileInfo(string $fileId) {
+	public function getFileInfo(string $fileId): File
+	{
 		$response = $this->client->request('POST', $this->apiUrl.'/b2_get_file_info', [
 			'headers' => [
 				'Authorization' => $this->authToken
@@ -675,7 +682,7 @@ class Client {
 			]
 		]);
 
-		return new File($response, true);
+		return File::fromArray(json_decode((string) $response->getBody(), true));
 	}
 
 	/**
@@ -685,9 +692,10 @@ class Client {
 	 * 
 	 * @param string $fileId The ID of the large file whose parts you want to upload.
 	 * 
-	 * @return array
+	 * @return array [ $fileId => string, $uploadUrl => string, $authorizationToken => string ]
 	 */
-	public function getUploadPartUrl(string $fileId) {
+	public function getUploadPartUrl(string $fileId): array
+	{
 		$response = $this->client->request('POST', $this->apiUrl.'/b2_get_upload_part_url', [
 			'headers' => [
 				'Authorization' => $this->authToken
@@ -696,6 +704,8 @@ class Client {
 				'fileId' => $fileId
 			]
 		]);
+
+		return json_decode((string) $response->getBody(), true);
 	}
 
 	/**
@@ -705,7 +715,7 @@ class Client {
 	 * 
 	 * @param string $bucketId The ID of the bucket that you want to upload to.
 	 * 
-	 * @return array
+	 * @return array [ $bucketId => string, $uploadUrl => string, $authorizationToken => string ]
 	 */
 	public function getUploadUrl(string $bucketId) {
 		$response = $this->client->request('POST', $this->apiUrl.'/b2_get_upload_url', [
@@ -716,6 +726,8 @@ class Client {
 				'bucketId' => $bucketId
 			]
 		]);
+
+		return json_decode((string) $response->getBody(), true);
 	}
 
 	/**
@@ -741,7 +753,41 @@ class Client {
 			]
 		]);
 
-		return new File($response, true);
+		return File::fromArray(json_decode((string) $response->getBody(), true));
+	}
+
+	/**
+	 * Returns a list of bucket objects representing the buckets on the account.
+	 * 
+	 * @link https://www.backblaze.com/b2/docs/b2_list_buckets.html
+	 * 
+	 * @param string[] $bucketTypes Filter buckets by type. Either "allPublic" or "allPrivate" or "snapshot" or "all".
+	 *                              If "all" is specified, it must be the only type.
+	 * 
+	 * @return iterable<Bucket>
+	 */
+	public function listBuckets(array $bucketTypes = null): iterable {
+		return $this->_listBuckets(null, false, $bucketTypes);
+	}
+
+	public function getBucketById(string $bucketId, array $bucketTypes = null) {
+		$buckets = $this->_listBuckets($bucketId, false, $bucketTypes);
+
+		if (iterator_count($buckets) !== 1) {
+			throw new NotFoundException('Bucket not found.');
+		}
+
+		return $buckets[0];
+	}
+
+	public function getBucketByName(string $bucketName, array $bucketTypes = null) {
+		$buckets = $this->_listBuckets($bucketName, true, $bucketTypes);
+
+		if (iterator_count($buckets) !== 1) {
+			throw new NotFoundException('Bucket not found.');
+		}
+
+		return $buckets[0];
 	}
 
 	/**
@@ -751,19 +797,19 @@ class Client {
 	 *
 	 * @param string   $bucketId    When bucketId is specified, the result will be a list containing just this bucket,
 	 *                              if it's present in the account, or no buckets if the account does not have a
-	 *                              bucket with this ID. 
+	 *                              bucket with this ID.
 	 * @param bool     $listByName  If true, use the value of $bucketId as bucketName
 	 * @param string[] $bucketTypes Filter buckets by type. Either "allPublic" or "allPrivate" or "snapshot" or "all".
 	 *                              If "all" is specified, it must be the only type.
 	 * 
-	 * @return array
+	 * @return iterable<Bucket>
 	 */
-	public function listBuckets(string $bucketId, bool $listByName = false, array $bucketTypes = null) {
+	private function _listBuckets(string $bucketId = null, bool $listByName = false, array $bucketTypes = null): iterable {
 		$json = [
 			'accountId' => $this->accountId,
 		];
 
-		$json[$listByName ? 'bucketName' : 'bucketId'] = $bucketid;
+		$json[$listByName ? 'bucketName' : 'bucketId'] = $bucketId;
 
 		if ($bucketTypes) {
 			$json['bucketTypes'] = implode(',', $bucketTypes);
@@ -776,11 +822,11 @@ class Client {
 			'json' => $json
 		]);
 
-		foreach ($response['buckets'] as $bucket) {
-			$buckets[] = new Bucket($bucket, true);
-		}
+		/*foreach ($response['buckets'] as $bucket) {
+			$buckets[] = Bucket::fromArray($bucket);
+		}*/
 
-		return $buckets;
+		return Bucket::iterableFromArray(json_decode((string) $response->getBody(), true)->buckets);
 	}
 
 	/**
@@ -868,6 +914,7 @@ class Client {
 			'json' => $json
 		]);
 
+		/*
 		foreach ($response['files'] as $file) {
 			$files[] = new File($file, true);
 		}
@@ -875,6 +922,9 @@ class Client {
 		$response['files'] = $files;
 
 		return $response;
+		*/
+
+		return File::iterableFromArray(json_decode((string) $response->getBody())->files);
 	}
 
 	/**
@@ -945,9 +995,10 @@ class Client {
 	 * 
 	 * @see Client::listFileVersions()
 	 * 
-	 * @return array
+	 * @return iterable<File>
 	 */
-	private function _listFileVersions($bucketId, $prefix, $delimiter, $startFileName, $startFileId, $maxFileCount) {
+	private function _listFileVersions($bucketId, $prefix, $delimiter, $startFileName, $startFileId, $maxFileCount): iterable
+	{
 		$json = [
 			'bucketId'     => $bucketId,
 			'maxFileCount' => $maxFileCount,
@@ -976,6 +1027,7 @@ class Client {
 			'json' => $json
 		]);
 
+		/*
 		$files = [];
 
 		foreach ($response['files'] as $file) {
@@ -985,6 +1037,17 @@ class Client {
 		$response['files'] = $files;
 
 		return $response;
+		*/
+
+		return File::iterableFromArray(json_decode((string) $response->getBody())->files);
+	}
+
+	public function getFileById($fileId) {
+		
+	}
+
+	public function getFileByName($fileName) {
+
 	}
 
 	/**
@@ -992,7 +1055,7 @@ class Client {
 	 * 
 	 * @link https://www.backblaze.com/b2/docs/b2_list_keys.html
 	 * 
-	 * @param string $startApplicationKeyId The first key to return. Used when a query hits the maxKeyCount, and you
+	 * @param string $startApplicationKeyId The first key to return. Used when a query hits the `maxKeyCount`, and you
 	 *                                      want to get more.
 	 * @param int    $maxKeyCount           The maximum number of keys to return in the response. The default value is
 	 *                                      1000, and the maximum is 10000. The maximum number of keys returned per
@@ -1004,7 +1067,7 @@ class Client {
 	 * @return array
 	 */
 	public function listKeys(string $startApplicationKeyId = null, int $maxKeyCount = 1000, bool $loop = true) {
-		$keys = [];
+		//$keys = [];
 
 		while (true) {
 			$response = $this->_listKeys($startApplicationKeyId, $maxKeyCount);
@@ -1013,7 +1076,7 @@ class Client {
 				return $response;
 			}
 
-			array_merge($keys, $response['keys']);
+			//array_merge($keys, $response['keys']);
 			$startApplicationKeyId = $response['nextApplicationKeyId'];
 
 			if ($startApplicationKeyId == null) {
@@ -1022,7 +1085,7 @@ class Client {
 		}
 
 		return [
-			'keys'                 => $keys,
+			'keys'                 => Key::iterableFromArray($response['keys']),
 			'nextApplicationKeyId' => null,
 		];
 	}
@@ -1031,10 +1094,9 @@ class Client {
 	 * Internal method to call the b2_list_keys API
 	 * 
 	 * @see Client::listKeys()
-	 * 
-	 * @return array
 	 */
-	private function _listKeys($startApplicationKeyId, $maxKeyCount) {
+	private function _listKeys($startApplicationKeyId, $maxKeyCount)
+	{
 		$json = [
 			'maxKeyCount' => $maxKeyCount,
 		];
@@ -1201,7 +1263,7 @@ class Client {
 		$files = [];
 
 		foreach ($response['files'] as $file) {
-			$files[] = new File($file, true);
+			$files[] = File::fromArray(json_decode((string) $response->getBody(), true));
 		}
 
 		$response['files'] = $files;
@@ -1240,7 +1302,7 @@ class Client {
 		]);
 
 
-		return new File($response, true);
+		return File::fromArray(json_decode((string) $response->getBody(), true));
 	}
 
 	/**
@@ -1276,11 +1338,11 @@ class Client {
 		];
 
 		if ($bucketType) {
-			if (!in_array($bucketType, [Bucket::TYPE_PUBLIC, Bucket::TYPE_PRIVATE])) {
+			if (!in_array($bucketType, [BucketType::PUBLIC, BucketType::PRIVATE])) {
 				throw new ValidationException(sprintf(
 					'Bucket type must be "%s" or "%s"',
-					Bucket::TYPE_PRIVATE,
-					Bucket::TYPE_PUBLIC
+					BucketType::PRIVATE,
+					BucketType::PUBLIC
 				));
 			}
 
@@ -1310,7 +1372,7 @@ class Client {
 			'json' => $json
 		]);
 
-		return new Bucket($response['bucketId'], $response['bucketName'], $response['bucketType']);
+		return Bucket::fromArray(json_decode((string) $response->getBody(), true));
 	}
 
 	/**
@@ -1329,9 +1391,9 @@ class Client {
 		$body,
 		string $bucketId,
 		string $fileName,
-		string $contentType = 'b2/x-auto',
+		string $contentType = File::CONTENT_TYPE_AUTO,
 		array $fileInfo = null
-	) {
+	): File {
 		$uploadMetadata = $this->getUploadMetadata($body);
 		$uploadEndpoint = $this->getUploadUrl($bucketId);
 
@@ -1352,7 +1414,7 @@ class Client {
 			'body'    => $body
 		]);
 
-		return new File($response, true);
+		return File::fromArray(json_decode((string) $response->getBody(), true));
 	}
 
 	/**
@@ -1363,10 +1425,8 @@ class Client {
 	 * @param string|resource $body       The file part to be uploaded. String or stream resource.
 	 * @param string          $fileId     The ID of the large file whose parts you want to upload.
 	 * @param int             $partNumber The parts uploaded for one file must have contiguous numbers, starting with 1.
-	 * 
-	 * @return array
 	 */
-	public function uploadPart($body, string $fileId, int $partNumber) {
+	public function uploadPart($body, string $fileId, int $partNumber): File {
 		$uploadMetadata = $this->getUploadMetadata($body);
 		$uploadEndpoint = $this->getUploadPartUrl($fileId);
 
@@ -1380,46 +1440,38 @@ class Client {
 			'body' => $body
 		]);
 
-		return $response;
+		return File::fromArray(json_decode((string) $response->getBody(), true));
 	}
 
 	/**
 	 * Get the capabilities, bucket restrictions, and prefix restrictions.
-	 * 
-	 * @return array
 	 */
-	public function getAllowed() {
+	public function getAllowed(): array {
 		return $this->allowed;
 	}
 
 	/**
-	 * The recomended part size for each part of a large file. It is recomended to use this part size for optimal
+	 * The recommended part size for each part of a large file. It is recommended to use this part size for optimal
 	 * performance.
-	 * 
-	 * @return int
 	 */
-	public function getRecommendedPartSize() {
+	public function getRecommendedPartSize(): int {
 		return $this->recommendedPartSize;
 	}
 
 	/**
 	 * The smallest possible size of a part of a large file (except the last one). Upload performance may be impacted
 	 * if you use this value.
-	 * 
-	 * @return int
 	 */
-	public function getAbsoluteMinimumPartSize() {
+	public function getAbsoluteMinimumPartSize(): int {
 		return $this->absoluteMinimumPartSize;
 	}
 
 	/**
 	 * Calculate the hash and content length of a string or stream
 	 * 
-	 * @param string|resource $content
-	 * 
-	 * @return array
+	 * @param string|resource $content The resource used to calculate a size in bytes and SHA1 hash.
 	 */
-	protected function getUploadMetadata($content) {
+	protected function getUploadMetadata($content): array {
 		$size = null;
 		$hash = null;
 

@@ -2,20 +2,19 @@
 
 namespace Zaxbux\BackblazeB2\Http;
 
-use Zaxbux\BackblazeB2\ErrorHandler;
-use GuzzleHttp\Client as GuzzleClient;
+use Zaxbux\BackblazeB2\Http\ErrorHandler;
 
 /**
  * Client wrapper around Guzzle.
  *
  * @package Zaxbux\BackblazeB2\Http
  */
-class Client extends GuzzleClient {
+class GuzzleClient extends \GuzzleHttp\Client {
 	
 	/**
 	 * Sends a response to the B2 API, automatically handling decoding JSON and errors.
 	 *
-	 * @param string $method  The HTTP requeest method.
+	 * @param string $method  The HTTP request method.
 	 * @param string $uri     The request URI.
 	 * @param array  $options Guzzle options.
 	 * @param bool   $asJson  Return JSON, default is true.
