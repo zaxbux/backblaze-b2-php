@@ -2,7 +2,8 @@
 
 namespace Zaxbux\BackblazeB2\Tests;
 
-use Zaxbux\BackblazeB2\Http\Client as HttpClient;
+use Zaxbux\BackblazeB2\Http\ClientFactory;
+use Zaxbux\BackblazeB2\Http\Config;
 
 trait TestHelper {
 	protected function buildGuzzleFromResponses(array $responses, $history = null) {
@@ -13,7 +14,7 @@ trait TestHelper {
 			$handler->push($history);
 		}
 
-		return new HttpClient(['handler' => $handler]);
+		return ClientFactory::create(null, $handler);
 	}
 
 	protected function buildResponseFromStub($statusCode, array $headers = [], $responseFile) {

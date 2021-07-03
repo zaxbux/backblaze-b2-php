@@ -3,18 +3,21 @@
 namespace Zaxbux\BackblazeB2\Tests;
 
 use Zaxbux\BackblazeB2\Client;
-use Zaxbux\BackblazeB2\Bucket;
-use Zaxbux\BackblazeB2\Exception\BadValueException;
-use Zaxbux\BackblazeB2\Exception\BucketNotEmptyException;
-use Zaxbux\BackblazeB2\Exception\NotFoundException;
-use Zaxbux\BackblazeB2\File;
-use Zaxbux\BackblazeB2\Exception\BucketAlreadyExistsException;
-use Zaxbux\BackblazeB2\Exception\BadJsonException;
-use Zaxbux\BackblazeB2\Exception\ValidationException;
+use Zaxbux\BackblazeB2\B2ObjectBase\Bucket;
+use Zaxbux\BackblazeB2\Client\Exception\BadValueException;
+use Zaxbux\BackblazeB2\Client\Exception\BucketNotEmptyException;
+use Zaxbux\BackblazeB2\Client\Exception\NotFoundException;
+use Zaxbux\BackblazeB2\B2ObjectBase\File;
+use Zaxbux\BackblazeB2\Client\Exception\BucketAlreadyExistsException;
+use Zaxbux\BackblazeB2\Client\Exception\BadJsonException;
+use Zaxbux\BackblazeB2\Client\Exception\ValidationException;
 use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Stream;
+use InvalidArgumentException;
+use PHPUnit\Framework\TestCase;
+use Zaxbux\BackblazeB2\B2ObjectBase\BucketType;
 
-class ClientTest extends \PHPUnit_Framework_TestCase
+class ClientTest extends TestCase
 {
 	use TestHelper;
 
@@ -24,16 +27,16 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 			$this->buildResponseFromStub(200, [], 'create_bucket_public.json')
 		]);
 
-		$client = new Client('testId', 'testKey', ['client' => $guzzle]);
+		$client = new Client('testId', 'testKey', null, $guzzle);
 
 		// Test that we get a public bucket back after creation
-		$bucket = $client->createBucket([
-			'BucketName' => 'Test bucket',
-			'BucketType' => Bucket::TYPE_PUBLIC
-		]);
+		$bucket = $client->createBucket(
+			'Test bucket',
+			BucketType::PUBLIC
+		);
 		$this->assertInstanceOf(Bucket::class, $bucket);
 		$this->assertEquals('Test bucket', $bucket->getName());
-		$this->assertEquals(Bucket::TYPE_PUBLIC, $bucket->getType());
+		$this->assertEquals(BucketType::PUBLIC, $bucket->getType());
 	}
 
 	public function testCreatePrivateBucket() {
@@ -42,45 +45,45 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 			$this->buildResponseFromStub(200, [], 'create_bucket_private.json')
 		]);
 
-		$client = new Client('testId', 'testKey', ['client' => $guzzle]);
+		$client = new Client('testId', 'testKey', null, $guzzle);
 
 		// Test that we get a private bucket back after creation
-		$bucket = $client->createBucket([
-			'BucketName' => 'Test bucket',
-			'BucketType' => Bucket::TYPE_PRIVATE
-		]);
+		$bucket = $client->createBucket(
+			'Test bucket',
+			BucketType::PRIVATE
+		);
 		$this->assertInstanceOf(Bucket::class, $bucket);
 		$this->assertEquals('Test bucket', $bucket->getName());
-		$this->assertEquals(Bucket::TYPE_PRIVATE, $bucket->getType());
+		$this->assertEquals(BucketType::PRIVATE, $bucket->getType());
 	}
 
 	public function testBucketAlreadyExistsExceptionThrown() {
-		$this->setExpectedException(BucketAlreadyExistsException::class);
+		$this->expectException(BucketAlreadyExistsException::class);
 
 		$guzzle = $this->buildGuzzleFromResponses([
 			$this->buildResponseFromStub(200, [], 'authorize_account.json'),
 			$this->buildResponseFromStub(400, [], 'create_bucket_exists.json')
 		]);
 
-		$client = new Client('testId', 'testKey', ['client' => $guzzle]);
-		$client->createBucket([
-			'BucketName' => 'I already exist',
-			'BucketType' => Bucket::TYPE_PRIVATE
-		]);
+		$client = new Client('testId', 'testKey', null, $guzzle);
+		$client->createBucket(
+			'I already exist',
+			BucketType::PRIVATE
+		);
 	}
 
 	public function testInvalidBucketTypeThrowsException() {
-		$this->setExpectedException(ValidationException::class);
+		$this->expectException(InvalidArgumentException::class);
 
 		$guzzle = $this->buildGuzzleFromResponses([
 			$this->buildResponseFromStub(200, [], 'authorize_account.json')
 		]);
 
-		$client = new Client('testId', 'testKey', ['client' => $guzzle]);
-		$client->createBucket([
-			'BucketName' => 'Test bucket',
-			'BucketType' => 'i am not valid'
-		]);
+		$client = new Client('testId', 'testKey', null, $guzzle);
+		$client->createBucket(
+			'Test bucket',
+			'i am not valid'
+		);
 	}
 
 	public function testUpdateBucketToPrivate() {
@@ -89,16 +92,16 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 			$this->buildResponseFromStub(200, [], 'update_bucket_to_private.json')
 		]);
 
-		$client = new Client('testId', 'testKey', ['client' => $guzzle]);
+		$client = new Client('testId', 'testKey', null, $guzzle);
 
-		$bucket = $client->updateBucket([
-			'BucketId' => 'bucketId',
-			'BucketType' => Bucket::TYPE_PRIVATE
-		]);
+		$bucket = $client->updateBucket(
+			'bucketId',
+			BucketType::PRIVATE
+		);
 
 		$this->assertInstanceOf(Bucket::class, $bucket);
 		$this->assertEquals('bucketId', $bucket->getId());
-		$this->assertEquals(Bucket::TYPE_PRIVATE, $bucket->getType());
+		$this->assertEquals(BucketType::PRIVATE, $bucket->getType());
 	}
 
 	public function testUpdateBucketToPublic() {
@@ -107,16 +110,16 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 			$this->buildResponseFromStub(200, [], 'update_bucket_to_public.json')
 		]);
 
-		$client = new Client('testId', 'testKey', ['client' => $guzzle]);
+		$client = new Client('testId', 'testKey', null, $guzzle);
 
-		$bucket = $client->updateBucket([
-			'BucketId' => 'bucketId',
-			'BucketType' => Bucket::TYPE_PUBLIC
-		]);
+		$bucket = $client->updateBucket(
+			'bucketId',
+			BucketType::PUBLIC
+		);
 
 		$this->assertInstanceOf(Bucket::class, $bucket);
 		$this->assertEquals('bucketId', $bucket->getId());
-		$this->assertEquals(Bucket::TYPE_PUBLIC, $bucket->getType());
+		$this->assertEquals(BucketType::PUBLIC, $bucket->getType());
 	}
 
 	public function testList3Buckets() {
@@ -125,10 +128,10 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 			$this->buildResponseFromStub(200, [], 'list_buckets_3.json')
 		]);
 
-		$client = new Client('testId', 'testKey', ['client' => $guzzle]);
+		$client = new Client('testId', 'testKey', null, $guzzle);
 
 		$buckets = $client->listBuckets();
-		$this->assertInternalType('array', $buckets);
+		//$this->assertInternalType('array', $buckets);
 		$this->assertCount(3, $buckets);
 		$this->assertInstanceOf(Bucket::class, $buckets[0]);
 	}
@@ -139,10 +142,10 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 			$this->buildResponseFromStub(200, [], 'list_buckets_0.json')
 		]);
 
-		$client = new Client('testId', 'testKey', ['client' => $guzzle]);
+		$client = new Client('testId', 'testKey', null, $guzzle);
 
 		$buckets = $client->listBuckets();
-		$this->assertInternalType('array', $buckets);
+		//$this->assertInternalType('array', $buckets);
 		$this->assertCount(0, $buckets);
 	}
 
@@ -152,41 +155,37 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 			$this->buildResponseFromStub(200, [], 'delete_bucket.json')
 		]);
 
-		$client = new Client('testId', 'testKey', ['client' => $guzzle]);
+		$client = new Client('testId', 'testKey', null, $guzzle);
 
-		$this->assertTrue($client->deleteBucket([
-			'BucketId' => 'bucketId'
-		]));
+		$this->assertInstanceOf(Bucket::class, $client->deleteBucket(
+			'bucketId'
+		));
 	}
 
 	public function testBadJsonThrownDeletingNonExistentBucket() {
-		$this->setExpectedException(BadJsonException::class);
+		$this->expectException(BadJsonException::class);
 
 		$guzzle = $this->buildGuzzleFromResponses([
 			$this->buildResponseFromStub(200, [], 'authorize_account.json'),
 			$this->buildResponseFromStub(400, [], 'delete_bucket_non_existent.json')
 		]);
 
-		$client = new Client('testId', 'testKey', ['client' => $guzzle]);
+		$client = new Client('testId', 'testKey', null, $guzzle);
 
-		$client->deleteBucket([
-			'BucketId' => 'bucketId'
-		]);
+		$client->deleteBucket('bucketId');
 	}
 
 	public function testBucketNotEmptyThrownDeletingNonEmptyBucket() {
-		$this->setExpectedException(BucketNotEmptyException::class);
+		$this->expectException(BucketNotEmptyException::class);
 
 		$guzzle = $this->buildGuzzleFromResponses([
 			$this->buildResponseFromStub(200, [], 'authorize_account.json'),
 			$this->buildResponseFromStub(400, [], 'bucket_not_empty.json')
 		]);
 
-		$client = new Client('testId', 'testKey', ['client' => $guzzle]);
+		$client = new Client('testId', 'testKey', null, $guzzle);
 
-		$client->deleteBucket([
-			'BucketId' => 'bucketId'
-		]);
+		$client->deleteBucket('bucketId');
 	}
 
 	public function testUploadingResource() {
@@ -198,7 +197,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 			$this->buildResponseFromStub(200, [], 'upload.json')
 		], $history);
 
-		$client = new Client('testId', 'testKey', ['client' => $guzzle]);
+		$client = new Client('testId', 'testKey', null, $guzzle);
 
 		// Set up the resource being uploaded.
 		$content = 'The quick brown box jumps over the lazy dog';
@@ -206,11 +205,11 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 		fwrite($resource, $content);
 		rewind($resource);
 
-		$file = $client->upload([
-			'BucketId' => 'bucketId',
-			'FileName' => 'test.txt',
-			'Body' => $resource
-		]);
+		$file = $client->uploadFile(
+			$resource,
+			'bucketId',
+			'test.txt',
+		);
 
 		$this->assertInstanceOf(File::class, $file);
 
@@ -234,15 +233,15 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 			$this->buildResponseFromStub(200, [], 'upload.json')
 		], $history);
 
-		$client = new Client('testId', 'testKey', ['client' => $guzzle]);
+		$client = new Client('testId', 'testKey', null, $guzzle);
 
 		$content = 'The quick brown box jumps over the lazy dog';
 
-		$file = $client->upload([
-			'BucketId' => 'bucketId',
-			'FileName' => 'test.txt',
-			'Body' => $content
-		]);
+		$file = $client->uploadFile(
+			$content,
+			'bucketId',
+			'test.txt'
+		);
 
 		$this->assertInstanceOf(File::class, $file);
 
@@ -266,19 +265,21 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 			$this->buildResponseFromStub(200, [], 'upload.json')
 		], $history);
 
-		$client = new Client('testId', 'testKey', ['client' => $guzzle]);
+		$client = new Client('testId', 'testKey', null, $guzzle);
 
 		// My birthday :)
 		$lastModified =  701568000000;
 		$contentType = 'text/plain';
 
-		$file = $client->upload([
-			'BucketId' => 'bucketId',
-			'FileName' => 'test.txt',
-			'Body' => 'Test file content',
-			'FileContentType' => $contentType,
-			'FileLastModified' => $lastModified
-		]);
+		$file = $client->uploadFile(
+			'Test file content',
+			'bucketId',
+			'test.txt',
+			$contentType,
+			[
+				'src_last_modified_millis' => $lastModified
+			]
+		);
 
 		$this->assertInstanceOf(File::class, $file);
 
@@ -295,11 +296,9 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 			$this->buildResponseFromStub(200, [], 'download_content')
 		]);
 
-		$client = new Client('testId', 'testKey', ['client' => $guzzle]);
+		$client = new Client('testId', 'testKey', null, $guzzle);
 
-		$fileContent = $client->download([
-			'FileId' => 'fileId'
-		]);
+		$fileContent = $client->downloadFileById('fileId');
 
 		$this->assertEquals($fileContent, 'The quick brown fox jumps over the lazy dog');
 	}
@@ -310,12 +309,9 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 			$this->buildResponseFromStub(200, [], 'download_content')
 		]);
 
-		$client = new Client('testId', 'testKey', ['client' => $guzzle]);
+		$client = new Client('testId', 'testKey', null, $guzzle);
 
-		$client->download([
-			'FileId' => 'fileId',
-			'SaveAs' => __DIR__.'/test.txt'
-		]);
+		$client->downloadFileById('fileId', null, null, __DIR__ . '/test.txt');
 
 		$this->assertFileExists(__DIR__.'/test.txt');
 		$this->assertEquals('The quick brown fox jumps over the lazy dog', file_get_contents(__DIR__.'/test.txt'));
@@ -324,18 +320,16 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 	}
 
 	public function testDownloadingByIncorrectIdThrowsException() {
-		$this->setExpectedException(BadValueException::class);
+		$this->expectException(BadValueException::class);
 
 		$guzzle = $this->buildGuzzleFromResponses([
 			$this->buildResponseFromStub(200, [], 'authorize_account.json'),
 			$this->buildResponseFromStub(400, [], 'download_by_incorrect_id.json')
 		]);
 
-		$client = new Client('testId', 'testKey', ['client' => $guzzle]);
+		$client = new Client('testId', 'testKey', null, $guzzle);
 
-		$client->download([
-			'FileId' => 'incorrect'
-		]);
+		$client->downloadFileById('incorrect');
 	}
 
 	public function testDownloadByPathWithoutSavePath() {
@@ -344,12 +338,9 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 			$this->buildResponseFromStub(200, [], 'download_content')
 		]);
 
-		$client = new Client('testId', 'testKey', ['client' => $guzzle]);
+		$client = new Client('testId', 'testKey', null, $guzzle);
 
-		$fileContent = $client->download([
-			'BucketName' => 'test-bucket',
-			'FileName' => 'test.txt'
-		]);
+		$fileContent = $client->downloadFileByName('test.txt', 'test-bucket');
 
 		$this->assertEquals($fileContent, 'The quick brown fox jumps over the lazy dog');
 	}
@@ -360,13 +351,9 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 			$this->buildResponseFromStub(200, [], 'download_content')
 		]);
 
-		$client = new Client('testId', 'testKey', ['client' => $guzzle]);
+		$client = new Client('testId', 'testKey', null, $guzzle);
 
-		$client->download([
-			'BucketName' => 'test-bucket',
-			'FileName' => 'test.txt',
-			'SaveAs' => __DIR__.'/test.txt'
-		]);
+		$client->downloadFileByName('test.txt', 'test-bucket', null, null, __DIR__.'/test.txt');
 
 		$this->assertFileExists(__DIR__.'/test.txt');
 		$this->assertEquals('The quick brown fox jumps over the lazy dog', file_get_contents(__DIR__.'/test.txt'));
@@ -375,19 +362,16 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 	}
 
 	public function testDownloadingByIncorrectPathThrowsException() {
-		$this->setExpectedException(NotFoundException::class);
+		$this->expectException(NotFoundException::class);
 
 		$guzzle = $this->buildGuzzleFromResponses([
 			$this->buildResponseFromStub(200, [], 'authorize_account.json'),
 			$this->buildResponseFromStub(400, [], 'download_by_incorrect_path.json')
 		]);
 
-		$client = new Client('testId', 'testKey', ['client' => $guzzle]);
+		$client = new Client('testId', 'testKey', null, $guzzle);
 
-		$client->download([
-			'BucketName' => 'test-bucket',
-			'FileName' => 'path/to/incorrect/file.txt'
-		]);
+		$client->downloadFileByName('path/to/incorrect/file.txt', 'test-bucket');
 	}
 
 	public function testListFilesHandlesMultiplePages() {
@@ -397,13 +381,11 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 			$this->buildResponseFromStub(200, [], 'list_files_page2.json')
 		]);
 
-		$client = new Client('testId', 'testKey', ['client' => $guzzle]);
+		$client = new Client('testId', 'testKey', null, $guzzle);
 
-		$files = $client->listFiles([
-			'BucketId' => 'bucketId'
-		]);
+		$files = $client->listFileNames('bucketId');
 
-		$this->assertInternalType('array', $files);
+		//$this->assertInternalType('array', $files);
 		$this->assertInstanceOf(File::class, $files[0]);
 		$this->assertCount(1500, $files);
 	}
@@ -414,13 +396,11 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 			$this->buildResponseFromStub(200, [], 'list_files_empty.json')
 		]);
 
-		$client = new Client('testId', 'testKey', ['client' => $guzzle]);
+		$client = new Client('testId', 'testKey', null, $guzzle);
 
-		$files = $client->listFiles([
-			'BucketId' => 'bucketId'
-		]);
+		$files = $client->listFileNames('bucketId');
 
-		$this->assertInternalType('array', $files);
+		//$this->assertInternalType('array', $files);
 		$this->assertCount(0, $files);
 	}
 
@@ -430,28 +410,24 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 			$this->buildResponseFromStub(200, [], 'get_file.json')
 		]);
 
-		$client = new Client('testId', 'testKey', ['client' => $guzzle]);
+		$client = new Client('testId', 'testKey', null, $guzzle);
 
-		$file = $client->getFile([
-			'FileId' => 'fileId'
-		]);
+		$file = $client->getFileById('bucketId', 'fileId');
 
 		$this->assertInstanceOf(File::class, $file);
 	}
 
 	public function testGettingNonExistentFileThrowsException() {
-		$this->setExpectedException(BadJsonException::class);
+		$this->expectException(BadJsonException::class);
 
 		$guzzle = $this->buildGuzzleFromResponses([
 			$this->buildResponseFromStub(200, [], 'authorize_account.json'),
 			$this->buildResponseFromStub(400, [], 'get_file_non_existent.json')
 		]);
 
-		$client = new Client('testId', 'testKey', ['client' => $guzzle]);
+		$client = new Client('testId', 'testKey', null, $guzzle);
 
-		$client->getFile([
-			'FileId' => 'fileId'
-		]);
+		$client->getFileById('bucketId', 'fileId');
 	}
 
 	public function testDeleteFile() {
@@ -461,11 +437,11 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 			$this->buildResponseFromStub(200, [], 'delete_file.json')
 		]);
 
-		$client = new Client('testId', 'testKey', ['client' => $guzzle]);
+		$client = new Client('testId', 'testKey', null, $guzzle);
 
-		$this->assertTrue($client->deleteFile([
-			'FileId' => 'fileId'
-		]));
+		$fileId = $client->getFileByName('bucketId', 'Test file.bin')->getId();
+
+		$this->assertTrue($client->deleteFileVersion('Test file.bin', $fileId));
 	}
 
 	public function testDeleteFileRetrievesFileNameWhenNotProvided() {
@@ -475,27 +451,22 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 			$this->buildResponseFromStub(200, [], 'delete_file.json')
 		]);
 
-		$client = new Client('testId', 'testKey', ['client' => $guzzle]);
+		$client = new Client('testId', 'testKey', null, $guzzle);
 
-		$this->assertTrue($client->deleteFile([
-			'FileId' => 'fileId'
-		]));
+		$this->assertTrue($client->deleteAllFileVersions('bucketId', 'fileId'));
 	}
 
 	public function testDeletingNonExistentFileThrowsException() {
-		$this->setExpectedException(BadJsonException::class);
+		$this->expectException(BadJsonException::class);
 
 		$guzzle = $this->buildGuzzleFromResponses([
 			$this->buildResponseFromStub(200, [], 'authorize_account.json'),
 			$this->buildResponseFromStub(400, [], 'delete_file_non_existent.json')
 		]);
 
-		$client = new Client('testId', 'testKey', ['client' => $guzzle]);
+		$client = new Client('testId', 'testKey', null, $guzzle);
 
-		$this->assertTrue($client->deleteFile([
-			'FileId' => 'fileId',
-			'FileName' => 'fileName'
-		]));
+		$this->assertTrue($client->deleteFileVersion('fileId','fileName'));
 	}
 
 	public function testCopyFile() {
@@ -504,12 +475,12 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 			$this->buildResponseFromStub(200, [], 'copy_file.json')
 		]);
 
-		$client = new Client('testId', 'testKey', ['client' => $guzzle]);
+		$client = new Client('testId', 'testKey', null, $guzzle);
 
-		$newFile = $client->copyFile([
-			'SourceFileId' => 'fileId',
-			'FileName' => 'newFileName'
-		]);
+		$newFile = $client->copyFile(
+			'fileId',
+			'newFileName'
+		);
 
 		$this->assertInstanceOf(File::class, $newFile);
 		$this->assertEquals('newFileName', $newFile->getName());
@@ -522,15 +493,15 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 			$this->buildResponseFromStub(200, [], 'copy_part.json')
 		]);
 
-		$client = new Client('testId', 'testKey', ['client' => $guzzle]);
+		$client = new Client('testId', 'testKey', null, $guzzle);
 
-		$newFilePart = $client->copyPart([
-			'SourceFileId' => 'fileId',
-			'LargeFileId' => 'largeFileId',
-			'PartNumber' => 1
-		]);
+		$newFilePart = $client->copyPart(
+			'fileId',
+			'largeFileId',
+			1
+		);
 
-		$this->assertInternalType('array', $newFilePart);
+		//$this->assertInternalType('array', $newFilePart);
 		$this->assertEquals(1, $newFilePart['partNumber']);
 		$this->assertInstanceOf(File::class, $newFilePart['file']);
 		$this->assertEquals('largeFileId', $newFilePart['file']->getId());
@@ -542,13 +513,13 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 			$this->buildResponseFromStub(200, [], 'cancel_large_file.json')
 		]);
 
-		$client = new Client('testId', 'testKey', ['client' => $guzzle]);
+		$client = new Client('testId', 'testKey', null, $guzzle);
 
-		$response = $client->cancelLargeFile([
-			'FileId' => 'largeFileId'
-		]);
+		$response = $client->cancelLargeFile(
+			'largeFileId'
+		);
 
-		$this->assertInternalType('array', $response);
+		//$this->assertInternalType('array', $response);
 		$this->assertEquals('largeFileId', $response['fileId']);
 	}
 
@@ -558,11 +529,11 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 			$this->buildResponseFromStub(200, [], 'list_unfinished_large_files.json')
 		]);
 
-		$client = new Client('testId', 'testKey', ['client' => $guzzle]);
+		$client = new Client('testId', 'testKey', null, $guzzle);
 
-		$response = $client->listUnfinishedLargeFiles();
+		$response = $client->listUnfinishedLargeFiles('bucketId');
 
-		$this->assertInternalType('array', $response);
+		//$this->assertInternalType('array', $response);
 		$this->assertInstanceOf(File::class, $response['files'][0]);
 	}
 
@@ -572,11 +543,9 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 			$this->buildResponseFromStub(200, [], 'hide_file.json')
 		]);
 
-		$client = new Client('testId', 'testKey', ['client' => $guzzle]);
+		$client = new Client('testId', 'testKey', null, $guzzle);
 
-		$this->assertTrue($client->hideFile([
-			'FileId' => 'testFile'
-		]));
+		$this->assertTrue($client->hideFile('bucketId', 'testfile.bin'));
 	}
 
 	public function testGetDownloadAuthorization() {
@@ -585,13 +554,13 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 			$this->buildResponseFromStub(200, [], 'get_download_authorization.json')
 		]);
 
-		$client = new Client('testId', 'testKey', ['client' => $guzzle]);
+		$client = new Client('testId', 'testKey', null, $guzzle);
 
-		$response = $client->hideFile([
-			'BucketId'               => 'bucketId',
-			'FileNamePrefix'         => 'public',
-			'ValidDurationInSeconds' => 60
-		]);
+		$response = $client->getDownloadAuthorization(
+			'bucketId',
+			'public',
+			60
+		);
 
 		$this->assertEquals('downloadAuthToken', $response);
 	}

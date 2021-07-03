@@ -3,28 +3,30 @@
 namespace Zaxbux\BackblazeB2\Http;
 
 use GuzzleHttp\Client;
+use GuzzleHttp\ClientInterface;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
 use Psr\Http\Message\RequestInterface;
 use Zaxbux\BackblazeB2\Client as B2Client;
-use Zaxbux\BackblazeB2\Client\RefreshAuthorizationMiddleware;
+use Zaxbux\BackblazeB2\Http\Middleware\ExceptionMiddleware;
+use Zaxbux\BackblazeB2\Http\Middleware\RefreshAuthorizationMiddleware;
 
 /** @package Zaxbux\BackblazeB2\Http */
 class ClientFactory {
 	/**
 	 * @param Config|null $config 
-	 * @return static 
+	 * @return ClientInterface 
 	 */
-	public static function create(Config $config = null) {
-		$stack = HandlerStack::create();
+	public static function create(?Config $config = null, $handler = null): ClientInterface {
+		$stack = $handler ?: HandlerStack::create();
 
-		foreach ($config->middleware as $name => $middleware) {
+		foreach ($config->middleware ?? [] as $name => $middleware) {
 			$stack->push($middleware, $name ?? '');
 		}
 
 		$client = new Client([
-			'base_uri' => $config->baseUri,
-			'http_errors' => $config->useHttpErrors,
+			//'base_uri' => $config->baseUri,
+			'http_errors' => $config->useHttpErrors ?? false,
 			//'exceptions' => false,
 			'handler' => $stack,
 			'headers' => [
@@ -47,7 +49,9 @@ class ClientFactory {
 			return $retries * 1000;
 		}));
 
-		return new static($client, $config);
+		return $client;
+
+		//return new static($client, $config);
 	}
 
 	public function isRetryable(RequestInterface $request) {

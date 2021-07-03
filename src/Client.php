@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Zaxbux\BackblazeB2;
 
@@ -9,27 +9,28 @@ use InvalidArgumentException;
 
 use GuzzleHttp\ClientInterface;
 
-use Zaxbux\BackblazeB2\B2Object\Bucket;
-use Zaxbux\BackblazeB2\B2Object\BucketType;
-use Zaxbux\BackblazeB2\B2Object\DownloadAuthorization;
-use Zaxbux\BackblazeB2\B2Object\File;
-use Zaxbux\BackblazeB2\B2Object\Key;
+use Zaxbux\BackblazeB2\B2ObjectBase\Bucket;
+use Zaxbux\BackblazeB2\B2ObjectBase\BucketType;
+use Zaxbux\BackblazeB2\B2ObjectBase\DownloadAuthorization;
+use Zaxbux\BackblazeB2\B2ObjectBase\File;
+use Zaxbux\BackblazeB2\B2ObjectBase\Key;
 
 use Zaxbux\BackblazeB2\Client\AccountAuthorization;
 use Zaxbux\BackblazeB2\Client\IAuthorizationCache;
 
 use Zaxbux\BackblazeB2\Http\ClientFactory;
 
-use Zaxbux\BackblazeB2\Exception\NotFoundException;
-use Zaxbux\BackblazeB2\Exception\ValidationException;
-use Zaxbux\BackblazeB2\Exception\UnauthorizedException;
+use Zaxbux\BackblazeB2\Client\Exception\NotFoundException;
+use Zaxbux\BackblazeB2\Client\Exception\ValidationException;
+use Zaxbux\BackblazeB2\Client\Exception\UnauthorizedException;
+use Zaxbux\BackblazeB2\Http\Config;
 
-
-class Client {
+class Client
+{
 	public const CLIENT_VERSION  = '2.0.0';
 	public const B2_API_BASE_URL = 'https://api.backblazeb2.com';
 	public const B2_API_V2       = '/b2api/v2';
-	
+
 	/** @var string */
 	protected $applicationKeyId;
 
@@ -63,44 +64,33 @@ class Client {
 		$this->applicationKeyId   = $applicationKeyId;
 		$this->applicationKey     = $applicationKey;
 		$this->authorizationCache = $authorizationCache;
-		
-		$this->client = $client ?: ClientFactory::create();
+		//$this->accountAuthorization = AccountAuthorization::fromArray([]);
+
+		$config = new Config();
+		$config->client = $this;
+
+		$this->client = $client ?: ClientFactory::create($config);
 	}
 
-	public function getApplicationKeyId(): string {
+	public function getApplicationKeyId(): string
+	{
 		return $this->getApplicationKeyId;
 	}
 
-	public function getApplicationKey(): string {
+	public function getApplicationKey(): string
+	{
 		return $this->getApplicationKey;
 	}
 
-	public function getAccountAuthorization(): ?AccountAuthorization {
+	public function getAccountAuthorization(): ?AccountAuthorization
+	{
 		return $this->accountAuthorization;
 	}
 
-	public function setAccountAuthorization(AccountAuthorization $accountAuthorization): void {
+	public function setAccountAuthorization(AccountAuthorization $accountAuthorization): void
+	{
 		$this->accountAuthorization = $accountAuthorization;
 	}
-
-	/**
-	 * Create an instance of the Client and authorize it.
-	 * 
-	 * @see Client::__construct()
-	 * 
-	 * @return Client An authorized instance of the B2 API PHP Client.
-	 */
-	/*public static function create(
-		string $applicationKeyId,
-		string $applicationKey,
-		?IAuthorizationCache $authorizationCache = null,
-		?ClientInterface $client = null
-	): Client {
-		$client = new Client($applicationKeyId, $applicationKey, $authorizationCache, $client);
-		$client->authorizeAccount();
-
-		return $client;
-	}*/
 
 	/**
 	 * Authorize the B2 account in order to get an auth token and API/download URLs.
@@ -109,7 +99,8 @@ class Client {
 	 * 
 	 * @throws \Exception
 	 */
-	protected function authorize() {
+	protected function authorize()
+	{
 		// Try to fetch existing authorization token from cache.
 		if ($this->authorizationCache instanceof IAuthorizationCache) {
 			$this->accountAuthorization = $this->authorizationCache->get($this->applicationKeyId);
@@ -139,11 +130,9 @@ class Client {
 	 * 
 	 * @return array
 	 */
-	public function cancelLargeFile(string $fileId) {
-		$response = $this->client->request('POST', $this->apiUrl.'/b2_cancel_large_file', [
-			'headers' => [
-				'Authorization' => $this->authToken,
-			],
+	public function cancelLargeFile(string $fileId)
+	{
+		$response = $this->client->request('POST', '/b2_cancel_large_file', [
 			'json' => [
 				'fileId' => $fileId,
 			],
@@ -218,13 +207,10 @@ class Client {
 			$json['fileInfo'] = $fileInfo;
 		}
 
-		$response = $this->client->request('POST', $this->apiUrl.'/b2_copy_file', [
-			'headers' => [
-				'Authorization' => $this->authToken
-			],
+		$response = $this->client->request('POST', '/b2_copy_file', [
 			'json' => $json
 		]);
-		
+
 		return File::fromArray(json_decode((string) $response->getBody(), true));
 	}
 
@@ -254,13 +240,10 @@ class Client {
 			$json['range'] = $range;
 		}
 
-		$response = $this->client->request('POST', $this->apiUrl.'/b2_copy_part', [
-			'headers' => [
-				'Authorization' => $this->authToken
-			],
+		$response = $this->client->request('POST', '/b2_copy_part', [
 			'json' => $json
 		]);
-		
+
 		return File::fromArray(json_decode((string) $response->getBody(), true));
 	}
 
@@ -297,7 +280,7 @@ class Client {
 		}
 
 		$json = [
-			'accountId'  => $this->accountId,
+			'accountId'  => $this->accountAuthorization->getAccountId(),
 			'bucketName' => $bucketName,
 			'bucketType' => $bucketType,
 		];
@@ -314,10 +297,7 @@ class Client {
 			$json['lifecycleRules'] = $lifecycleRules;
 		}
 
-		$response = $this->client->request('POST', $this->apiUrl.'/b2_create_bucket', [
-			'headers' => [
-				'Authorization' => $this->authToken,
-			],
+		$response = $this->client->request('POST', '/b2_create_bucket', [
 			'json' => $json
 		]);
 
@@ -355,7 +335,7 @@ class Client {
 		}
 
 		$json = [
-			'accountId'    => $this->accountId,
+			'accountId'    => $this->accountAuthorization->getAccountId(),
 			'capabilities' => $capabilities,
 			'keyName'      => $keyName,
 		];
@@ -385,10 +365,7 @@ class Client {
 			$json['namePrefix'] = $namePrefix;
 		}
 
-		$response = $this->client->request('POST', $this->apiUrl.'/b2_create_key', [
-			'headers' => [
-				'Authorization' => $this->authToken
-			],
+		$response = $this->client->request('POST', '/b2_create_key', [
 			'json' => $json,
 		]);
 
@@ -404,13 +381,11 @@ class Client {
 	 * 
 	 * @return Bucket
 	 */
-	public function deleteBucket(string $bucketId) {
-		$response = $this->client->request('POST', $this->apiUrl.'/b2_delete_bucket', [
-			'headers' => [
-				'Authorization' => $this->authToken
-			],
+	public function deleteBucket(string $bucketId)
+	{
+		$response = $this->client->request('POST', '/b2_delete_bucket', [
 			'json' => [
-				'accountId' => $this->accountId,
+				'accountId' => $this->accountAuthorization->getAccountId(),
 				'bucketId'  => $bucketId
 			]
 		]);
@@ -432,10 +407,7 @@ class Client {
 	 */
 	public function deleteFileVersion(string $fileName, string $fileId, ?bool $bypassGovernance = false): File
 	{
-		$response = $this->client->request('POST', $this->apiUrl.'/b2_delete_file_version', [
-			'headers' => [
-				'Authorization' => $this->authToken
-			],
+		$response = $this->client->request('POST', '/b2_delete_file_version', [
 			'json' => [
 				'fileName' => $fileName,
 				'fileId'   => $fileId
@@ -443,6 +415,24 @@ class Client {
 		]);
 
 		return File::fromArray(json_decode((string) $response->getBody(), true));
+	}
+
+	/**
+	 * Deletes all versions of a file in a bucket.
+	 * 
+	 * @see Client::deleteFileVersion()
+	 * 
+	 * @param string $bucketId 
+	 * @param string $fileName 
+	 * @param null|bool $bypassGovernance 
+	 */
+	public function deleteAllFileVersions(string $bucketId, string $fileName, ?bool $bypassGovernance = false): void
+	{
+		$fileVersions = $this->listFileVersions($bucketId, $fileName);
+
+		foreach ($fileVersions as $version) {
+			$this->deleteFileVersion($fileName, $version['id']);
+		}
 	}
 
 	/**
@@ -454,11 +444,9 @@ class Client {
 	 * 
 	 * @return array
 	 */
-	public function deleteKey(string $applicationKeyId) {
-		$response = $this->client->request('POST', $this->apiUrl.'/b2_delete_key', [
-			'headers' => [
-				'Authorization' => $this->authToken
-			],
+	public function deleteKey(string $applicationKeyId)
+	{
+		$response = $this->client->request('POST', '/b2_delete_key', [
 			'json' => [
 				'applicationKeyId' => $applicationKeyId,
 			]
@@ -489,7 +477,7 @@ class Client {
 		$sink = null,
 		bool $headersOnly = false
 	) {
-		$downloadUrl = sprintf('%s/b2_download_file_by_id', $this->downloadUrl.static::B2_API_V2);
+		$downloadUrl = sprintf('%s/b2_download_file_by_id', $this->accountAuthorization->getDownloadUrl() . static::B2_API_V2);
 
 		$query = ['fileId' => $fileId];
 
@@ -520,7 +508,7 @@ class Client {
 		$sink = null,
 		bool $headersOnly = false
 	) {
-		$downloadUrl = sprintf('%s/file/%s/%s', $this->downloadUrl, $bucketName, $fileName);
+		$downloadUrl = sprintf('%s/file/%s/%s', $this->accountAuthorization->getApiUrl(), $bucketName, $fileName);
 
 		return $this->download($downloadUrl, [], $options, $range, $sink, $headersOnly);
 	}
@@ -538,10 +526,9 @@ class Client {
 	 * 
 	 * @return array
 	 */
-	protected function download($downloadUrl, $query, $options, $range, $sink, $headersOnly) {
-		$headers = [
-			'Authorization' => $this->authToken,
-		];
+	protected function download($downloadUrl, $query, $options, $range, $sink, $headersOnly)
+	{
+		$headers = [];
 
 		if (isset($options['b2ContentDisposition'])) {
 			$query['b2ContentDisposition'] = $options['b2ContentDisposition'];
@@ -592,11 +579,9 @@ class Client {
 	 * 
 	 * @return File
 	 */
-	public function finishLargeFile(string $fileId, array $hashes) {
-		$response = $this->client->request('POST', $this->apiUrl.'/b2_finish_large_file', [
-			'headers' => [
-				'Authorization' => $this->authToken
-			],
+	public function finishLargeFile(string $fileId, array $hashes)
+	{
+		$response = $this->client->request('POST', '/b2_finish_large_file', [
 			'json' => [
 				'fileId'        => $fileId,
 				'partSha1Array' => $hashes,
@@ -654,10 +639,7 @@ class Client {
 			$json['b2ContentType'] = $options['b2ContentType'];
 		}
 
-		$response = $this->client->request('POST', $this->apiUrl.'/b2_get_download_authorization', [
-			'headers' => [
-				'Authorization' => $this->authToken,
-			],
+		$response = $this->client->request('POST', '/b2_get_download_authorization', [
 			'json' => $json
 		]);
 
@@ -673,10 +655,7 @@ class Client {
 	 */
 	public function getFileInfo(string $fileId): File
 	{
-		$response = $this->client->request('POST', $this->apiUrl.'/b2_get_file_info', [
-			'headers' => [
-				'Authorization' => $this->authToken
-			],
+		$response = $this->client->request('POST', '/b2_get_file_info', [
 			'json' => [
 				'fileId' => $fileId
 			]
@@ -696,10 +675,7 @@ class Client {
 	 */
 	public function getUploadPartUrl(string $fileId): array
 	{
-		$response = $this->client->request('POST', $this->apiUrl.'/b2_get_upload_part_url', [
-			'headers' => [
-				'Authorization' => $this->authToken
-			],
+		$response = $this->client->request('POST', '/b2_get_upload_part_url', [
 			'json' => [
 				'fileId' => $fileId
 			]
@@ -717,11 +693,9 @@ class Client {
 	 * 
 	 * @return array [ $bucketId => string, $uploadUrl => string, $authorizationToken => string ]
 	 */
-	public function getUploadUrl(string $bucketId) {
-		$response = $this->client->request('POST', $this->apiUrl.'/b2_get_upload_url', [
-			'headers' => [
-				'Authorization' => $this->authToken
-			],
+	public function getUploadUrl(string $bucketId)
+	{
+		$response = $this->client->request('POST', '/b2_get_upload_url', [
 			'json' => [
 				'bucketId' => $bucketId
 			]
@@ -741,12 +715,10 @@ class Client {
 	 * 
 	 * @return File
 	 */
-	public function hideFile(string $bucketId, string $fileName) {
+	public function hideFile(string $bucketId, string $fileName)
+	{
 
-		$response = $this->client->request('POST', $this->apiUrl.'/b2_hide_file', [
-			'headers' => [
-				'Authorization' => $this->authToken,
-			],
+		$response = $this->client->request('POST', '/b2_hide_file', [
 			'json' => [
 				'bucketId' => $bucketId,
 				'fileName' => $fileName,
@@ -766,11 +738,13 @@ class Client {
 	 * 
 	 * @return iterable<Bucket>
 	 */
-	public function listBuckets(array $bucketTypes = null): iterable {
+	public function listBuckets(array $bucketTypes = null): iterable
+	{
 		return $this->_listBuckets(null, false, $bucketTypes);
 	}
 
-	public function getBucketById(string $bucketId, array $bucketTypes = null) {
+	public function getBucketById(string $bucketId, array $bucketTypes = null)
+	{
 		$buckets = $this->_listBuckets($bucketId, false, $bucketTypes);
 
 		if (iterator_count($buckets) !== 1) {
@@ -780,7 +754,8 @@ class Client {
 		return $buckets[0];
 	}
 
-	public function getBucketByName(string $bucketName, array $bucketTypes = null) {
+	public function getBucketByName(string $bucketName, array $bucketTypes = null)
+	{
 		$buckets = $this->_listBuckets($bucketName, true, $bucketTypes);
 
 		if (iterator_count($buckets) !== 1) {
@@ -804,9 +779,10 @@ class Client {
 	 * 
 	 * @return iterable<Bucket>
 	 */
-	private function _listBuckets(string $bucketId = null, bool $listByName = false, array $bucketTypes = null): iterable {
+	private function _listBuckets(string $bucketId = null, bool $listByName = false, array $bucketTypes = null): iterable
+	{
 		$json = [
-			'accountId' => $this->accountId,
+			'accountId' => $this->accountAuthorization->getAccountId(),
 		];
 
 		$json[$listByName ? 'bucketName' : 'bucketId'] = $bucketId;
@@ -815,10 +791,7 @@ class Client {
 			$json['bucketTypes'] = implode(',', $bucketTypes);
 		}
 
-		$response = $this->client->request('POST', $this->apiUrl.'/b2_list_buckets', [
-			'headers' => [
-				'Authorization' => $this->authToken
-			],
+		$response = $this->client->request('POST', '/b2_list_buckets', [
 			'json' => $json
 		]);
 
@@ -887,9 +860,10 @@ class Client {
 	 * 
 	 * @see Client::listFileNames()
 	 * 
-	 * @return array
+	 * @return iterable<File>
 	 */
-	private function _listFileNames($bucketId, $prefix, $delimiter, $startFileName, $maxFileCount) {
+	private function _listFileNames($bucketId, $prefix, $delimiter, $startFileName, $maxFileCount): iterable
+	{
 		$json = [
 			'bucketId'      => $bucketId,
 			'maxFileCount'  => $maxFileCount,
@@ -907,10 +881,7 @@ class Client {
 			$json['startFileName'] = $startFileName;
 		}
 
-		$response = $this->client->request('POST', $this->apiUrl.'/b2_list_file_names', [
-			'headers' => [
-				'Authorization' => $this->authToken
-			],
+		$response = $this->client->request('POST', '/b2_list_file_names', [
 			'json' => $json
 		]);
 
@@ -964,7 +935,7 @@ class Client {
 		if ($startFileId && !$startFileName) {
 			throw new ValidationException('$startFileName is required if $startFileId is provided.');
 		}
-	
+
 		$files = [];
 
 		while (true) {
@@ -1020,10 +991,7 @@ class Client {
 			$json['delimiter'] = $delimiter;
 		}
 
-		$response = $this->client->request('POST', $this->apiUrl.'/b2_list_file_versions', [
-			'headers' => [
-				'Authorization' => $this->authToken
-			],
+		$response = $this->client->request('POST', '/b2_list_file_versions', [
 			'json' => $json
 		]);
 
@@ -1042,12 +1010,26 @@ class Client {
 		return File::iterableFromArray(json_decode((string) $response->getBody())->files);
 	}
 
-	public function getFileById($fileId) {
-		
+	public function getFileById(string $bucketId, string $fileId): File
+	{
+		$files = $this->_listFileVersions($bucketId, '', null, null, $fileId, 1);
+
+		if (iterator_count($files) < 1) {
+			throw new Exception();
+		}
+
+		return File::fromArray($files[0]);
 	}
 
-	public function getFileByName($fileName) {
+	public function getFileByName(string $bucketId, string $fileName): File
+	{
+		$files = $this->_listFileNames($bucketId, '', null, $fileName, 1);
 
+		if (iterator_count($files) < 1) {
+			throw new Exception();
+		}
+
+		return File::fromArray($files[0]);
 	}
 
 	/**
@@ -1066,7 +1048,8 @@ class Client {
 	 * 
 	 * @return array
 	 */
-	public function listKeys(string $startApplicationKeyId = null, int $maxKeyCount = 1000, bool $loop = true) {
+	public function listKeys(string $startApplicationKeyId = null, int $maxKeyCount = 1000, bool $loop = true)
+	{
 		//$keys = [];
 
 		while (true) {
@@ -1105,10 +1088,7 @@ class Client {
 			$json['startApplicationKeyId'] = $startApplicationKeyId;
 		}
 
-		$response = $this->client->request('POST', $this->apiUrl.'/b2_list_keys', [
-			'headers' => [
-				'Authorization' => $this->authToken,
-			],
+		$response = $this->client->request('POST', '/b2_list_keys', [
 			'json' => $json,
 		]);
 
@@ -1132,7 +1112,8 @@ class Client {
 	 * 
 	 * @return array
 	 */
-	public function listParts(string $fileId, int $startPartNumber = null, int $maxPartCount = 1000, $loop = true) {
+	public function listParts(string $fileId, int $startPartNumber = null, int $maxPartCount = 1000, $loop = true)
+	{
 		$parts = [];
 
 		while (true) {
@@ -1163,7 +1144,8 @@ class Client {
 	 * 
 	 * @return array
 	 */
-	private function _listParts($fileId, $startPartNumber, $maxPartCount) {
+	private function _listParts($fileId, $startPartNumber, $maxPartCount)
+	{
 		$json = [
 			'fileId' => $fileId
 		];
@@ -1176,16 +1158,13 @@ class Client {
 			$json['maxPartCount'] = $maxPartCount;
 		}
 
-		$response = $this->client->request('POST', $this->apiUrl.'/b2_list_parts', [
-			'headers' => [
-				'Authorization' => $this->authToken,
-			],
+		$response = $this->client->request('POST', '/b2_list_parts', [
 			'json' => $json,
 		]);
 
 		return $response;
 	}
-	
+
 	/**
 	 * Lists information about large file uploads that have been started, but have not been finished or canceled.
 	 * 
@@ -1239,7 +1218,8 @@ class Client {
 	 * 
 	 * @return array
 	 */
-	private function _listUnfinishedLargeFiles($bucketId, $namePrefix, $startFileId, $maxFileCount) {
+	private function _listUnfinishedLargeFiles($bucketId, $namePrefix, $startFileId, $maxFileCount)
+	{
 		$json = [
 			'bucketId'     => $bucketId,
 			'maxFileCount' => $maxFileCount,
@@ -1253,10 +1233,7 @@ class Client {
 			$json['startFileId'] = $startFileId;
 		}
 
-		$response = $this->client->request('POST', $this->apiUrl.'/b2_list_unfinished_large_files', [
-			'headers' => [
-				'Authorization' => $this->authToken,
-			],
+		$response = $this->client->request('POST', '/b2_list_unfinished_large_files', [
 			'json' => $json,
 		]);
 
@@ -1283,7 +1260,8 @@ class Client {
 	 * 
 	 * @return File
 	 */
-	public function startLargeFile(string $bucketId, string $fileName, string $contentType, array $fileInfo = null) {
+	public function startLargeFile(string $bucketId, string $fileName, string $contentType, array $fileInfo = null)
+	{
 		$json = [
 			'bucketId'    => $bucketId,
 			'fileName'    => $fileName,
@@ -1294,10 +1272,7 @@ class Client {
 			$json['fileInfo'] = $fileInfo;
 		}
 
-		$response = $this->client->request('POST', $this->apiUrl.'/b2_start_large_file', [
-			'headers' => [
-				'Authorization' => $this->authToken,
-			],
+		$response = $this->client->request('POST', '/b2_start_large_file', [
 			'json' => $json,
 		]);
 
@@ -1333,7 +1308,7 @@ class Client {
 		$ifRevisionIs = null
 	) {
 		$json = [
-			'accountId'  => $this->accountId,
+			'accountId'  => $this->accountAuthorization->getAccountId(),
 			'bucketId'   => $bucketId,
 		];
 
@@ -1365,10 +1340,7 @@ class Client {
 			$json['ifRevisionIs'] = $ifRevisionIs;
 		}
 
-		$response = $this->client->request('POST', $this->apiUrl.'/b2_update_bucket', [
-			'headers' => [
-				'Authorization' => $this->authToken,
-			],
+		$response = $this->client->request('POST', '/b2_update_bucket', [
 			'json' => $json
 		]);
 
@@ -1406,7 +1378,7 @@ class Client {
 		];
 
 		foreach ($fileInfo as $key => $info) {
-			$headers['X-Bz-Info-'.$key] = rawurlencode($info);
+			$headers['X-Bz-Info-' . $key] = rawurlencode($info);
 		}
 
 		$response = $this->client->request('POST', $uploadEndpoint['uploadUrl'], [
@@ -1426,7 +1398,8 @@ class Client {
 	 * @param string          $fileId     The ID of the large file whose parts you want to upload.
 	 * @param int             $partNumber The parts uploaded for one file must have contiguous numbers, starting with 1.
 	 */
-	public function uploadPart($body, string $fileId, int $partNumber): File {
+	public function uploadPart($body, string $fileId, int $partNumber): File
+	{
 		$uploadMetadata = $this->getUploadMetadata($body);
 		$uploadEndpoint = $this->getUploadPartUrl($fileId);
 
@@ -1446,7 +1419,8 @@ class Client {
 	/**
 	 * Get the capabilities, bucket restrictions, and prefix restrictions.
 	 */
-	public function getAllowed(): array {
+	public function getAllowed(): array
+	{
 		return $this->allowed;
 	}
 
@@ -1454,7 +1428,8 @@ class Client {
 	 * The recommended part size for each part of a large file. It is recommended to use this part size for optimal
 	 * performance.
 	 */
-	public function getRecommendedPartSize(): int {
+	public function getRecommendedPartSize(): int
+	{
 		return $this->recommendedPartSize;
 	}
 
@@ -1462,7 +1437,8 @@ class Client {
 	 * The smallest possible size of a part of a large file (except the last one). Upload performance may be impacted
 	 * if you use this value.
 	 */
-	public function getAbsoluteMinimumPartSize(): int {
+	public function getAbsoluteMinimumPartSize(): int
+	{
 		return $this->absoluteMinimumPartSize;
 	}
 
@@ -1471,7 +1447,8 @@ class Client {
 	 * 
 	 * @param string|resource $content The resource used to calculate a size in bytes and SHA1 hash.
 	 */
-	protected function getUploadMetadata($content): array {
+	protected function getUploadMetadata($content): array
+	{
 		$size = null;
 		$hash = null;
 
@@ -1483,7 +1460,7 @@ class Client {
 
 			// Similarly, we have to use fstat to get the size of the stream.
 			$size = fstat($content)['size'];
-			
+
 			// Rewind the stream before passing it to the HTTP client.
 			rewind($content);
 		} else {

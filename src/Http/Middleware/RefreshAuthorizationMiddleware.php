@@ -1,10 +1,11 @@
 <?php
 
-namespace Zaxbux\BackblazeB2\Client;
+namespace Zaxbux\BackblazeB2\Http\Middleware;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Utils;
 use Psr\Http\Message\RequestInterface;
+use Zaxbux\BackblazeB2\Client\AccountAuthorization;
 use Zaxbux\BackblazeB2\Http\Config;
 
 //use function \GuzzleHttp\json_decode;
@@ -14,7 +15,7 @@ class RefreshAuthorizationMiddleware
 	private $client;
 	private $config;
 
-	public function __construct(Client $client, Config $config)
+	public function __construct(Client $client, Config $config = null)
 	{
 		$this->client = $client;
 		$this->config = $config;
@@ -24,6 +25,7 @@ class RefreshAuthorizationMiddleware
 	{
 		return function (RequestInterface $request, array $options = []) use ($next) {
 			$request = $this->applyToken($request);
+			
 			return $next($request, $options);
 		};
 	}
@@ -36,7 +38,9 @@ class RefreshAuthorizationMiddleware
 		if (!$this->hasValidToken()) {
 			$this->acquireAccessToken();
 		}
+
 		return Utils::modifyRequest($request, [
+			'uri' => $this->config->client->getAccountAuthorization()->getApiUrl(),
 			'set_headers' => [
 				'Authorization' => $this->getToken(),
 			],
@@ -50,7 +54,8 @@ class RefreshAuthorizationMiddleware
 
 	private function hasValidToken(): bool
 	{
-		return !!$this->config->client->getAccountAuthorization() || !$this->config->client->getAccountAuthorization()->isStale();
+		return false;
+		return $this->config->client->getAccountAuthorization() instanceof AccountAuthorization && !$this->config->client->getAccountAuthorization()->isStale();
 	}
 
 	private function acquireAccessToken(): void

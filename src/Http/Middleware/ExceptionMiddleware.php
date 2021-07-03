@@ -1,13 +1,14 @@
 <?php
 
-namespace Zaxbux\BackblazeB2\Http;
+namespace Zaxbux\BackblazeB2\Http\Middleware;
 
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
-use Zaxbux\BackblazeB2\Exception\B2APIException;
-use Zaxbux\BackblazeB2\Exception\NotFoundException;
-use Zaxbux\BackblazeB2\Exception\UnauthorizedException;
-use Zaxbux\BackblazeB2\Exception\ValidationException;
+use Zaxbux\BackblazeB2\Client\Exception\B2APIException;
+use Zaxbux\BackblazeB2\Client\Exception\NotFoundException;
+use Zaxbux\BackblazeB2\Client\Exception\UnauthorizedException;
+use Zaxbux\BackblazeB2\Client\Exception\ValidationException;
+use Zaxbux\BackblazeB2\Http\Response;
 
 class ExceptionMiddleware
 {
@@ -24,7 +25,8 @@ class ExceptionMiddleware
 
 	public function isSuccessful(ResponseInterface $response)
 	{
-		return $response->getStatusCode() == Response::HTTP_OK || Response::HTTP_NO_CONTENT;
+		return $response->getStatusCode() <= 299;
+		//return $response->getStatusCode() == Response::HTTP_OK || Response::HTTP_NO_CONTENT || Response::HTTP_PARTIAL_CONTENT;
 		//return $response->getStatusCode() < Response::HTTP_BAD_REQUEST;
 	}
 

@@ -13,7 +13,7 @@ class Config {
 	public $middleware = [];
 
 	/** @var string */
-	public $baseUri = '';
+	//public $baseUri = '';
 
 	/** @var bool */
 	public $useHttpErrors = false;
