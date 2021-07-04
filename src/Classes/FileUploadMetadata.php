@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Zaxbux\BackblazeB2\Classes;
 
 use function hash_init, hash_update_stream, hash_final;
-use function sha1, fstat, rewind, mb_strlen, is_resource;
+use function sha1, fstat, rewind, strlen, is_resource;
 
 /**
  * Calculate the length and hash of a string or stream.
@@ -56,7 +56,7 @@ final class FileUploadMetadata {
 
 		// Calculate the length and hash of a string.
 		$hash = sha1($body);
-		$length = mb_strlen($body);
+		$length = strlen($body);
 
 		return new FileUploadMetadata($length, $hash);
 	}

@@ -24,7 +24,8 @@ class ClientTest extends TestCase
 	use TestHelper;
 	use UsesGuzzler;
 
-	public function testCreatePublicBucket() {
+	public function testCreatePublicBucket()
+	{
 		/*handler = $this->buildGuzzleHandlerFromResponses([
 			$this->buildResponseFromStub(200, [], 'authorize_account.json'),
 			$this->buildResponseFromStub(200, [], 'create_bucket_public.json')
@@ -49,8 +50,9 @@ class ClientTest extends TestCase
 		$this->assertEquals(BucketType::PUBLIC, $bucket->getType());
 	}
 
-	
-	public function testCreatePrivateBucket() {
+
+	public function testCreatePrivateBucket()
+	{
 		$this->guzzler->queueResponse(
 			$this->buildResponseFromStub(200, [], 'authorize_account.json'),
 			$this->buildResponseFromStub(200, [], 'create_bucket_private.json')
@@ -70,7 +72,8 @@ class ClientTest extends TestCase
 		$this->assertEquals(BucketType::PRIVATE, $bucket->getType());
 	}
 
-	public function testBucketAlreadyExistsExceptionThrown() {
+	public function testBucketAlreadyExistsExceptionThrown()
+	{
 		$this->expectException(DuplicateBucketNameException::class);
 
 		$this->guzzler->queueResponse(
@@ -87,7 +90,8 @@ class ClientTest extends TestCase
 		);
 	}
 
-	public function testInvalidBucketTypeThrowsException() {
+	public function testInvalidBucketTypeThrowsException()
+	{
 		$this->expectException(BadRequestException::class);
 
 		$this->guzzler->queueResponse(
@@ -104,7 +108,8 @@ class ClientTest extends TestCase
 		);
 	}
 
-	public function testUpdateBucketToPrivate() {
+	public function testUpdateBucketToPrivate()
+	{
 		$this->guzzler->queueResponse(
 			$this->buildResponseFromStub(200, [], 'authorize_account.json'),
 			$this->buildResponseFromStub(200, [], 'update_bucket_to_private.json')
@@ -124,7 +129,8 @@ class ClientTest extends TestCase
 		$this->assertEquals(BucketType::PRIVATE, $bucket->getType());
 	}
 
-	public function testUpdateBucketToPublic() {
+	public function testUpdateBucketToPublic()
+	{
 		$this->guzzler->queueResponse(
 			$this->buildResponseFromStub(200, [], 'authorize_account.json'),
 			$this->buildResponseFromStub(200, [], 'update_bucket_to_public.json')
@@ -144,7 +150,8 @@ class ClientTest extends TestCase
 		$this->assertEquals(BucketType::PUBLIC, $bucket->getType());
 	}
 
-	public function testList3Buckets() {
+	public function testList3Buckets()
+	{
 		$this->guzzler->queueResponse(
 			$this->buildResponseFromStub(200, [], 'authorize_account.json'),
 			$this->buildResponseFromStub(200, [], 'list_buckets_3.json')
@@ -160,7 +167,8 @@ class ClientTest extends TestCase
 		$this->assertInstanceOf(Bucket::class, $buckets[0]);
 	}
 
-	public function testEmptyArrayWithNoBuckets() {
+	public function testEmptyArrayWithNoBuckets()
+	{
 		$this->guzzler->queueResponse(
 			$this->buildResponseFromStub(200, [], 'authorize_account.json'),
 			$this->buildResponseFromStub(200, [], 'list_buckets_0.json')
@@ -175,7 +183,8 @@ class ClientTest extends TestCase
 		$this->assertCount(0, $buckets);
 	}
 
-	public function testDeleteBucket() {
+	public function testDeleteBucket()
+	{
 		$this->guzzler->queueResponse(
 			$this->buildResponseFromStub(200, [], 'authorize_account.json'),
 			$this->buildResponseFromStub(200, [], 'delete_bucket.json')
@@ -190,7 +199,8 @@ class ClientTest extends TestCase
 		));
 	}
 
-	public function testBadJsonThrownDeletingNonExistentBucket() {
+	public function testBadJsonThrownDeletingNonExistentBucket()
+	{
 		$this->expectException(BadRequestException::class);
 
 		$this->guzzler->queueResponse(
@@ -205,7 +215,8 @@ class ClientTest extends TestCase
 		$client->deleteBucket('bucketId');
 	}
 
-	public function testBucketNotEmptyThrownDeletingNonEmptyBucket() {
+	public function testBucketNotEmptyThrownDeletingNonEmptyBucket()
+	{
 		$this->expectException(B2APIException::class);
 
 		$this->guzzler->queueResponse(
@@ -220,7 +231,8 @@ class ClientTest extends TestCase
 		$client->deleteBucket('bucketId');
 	}
 
-	public function testUploadingResource() {
+	public function testUploadingResource()
+	{
 		$this->guzzler->queueResponse(
 			$this->buildResponseFromStub(200, [], 'authorize_account.json'),
 			$this->buildResponseFromStub(200, [], 'get_upload_url.json'),
@@ -234,6 +246,7 @@ class ClientTest extends TestCase
 		// Set up the resource being uploaded.
 		$content = 'The quick brown box jumps over the lazy dog';
 		$resource = fopen('php://memory', 'r+');
+		fwrite($resource, $content);
 		rewind($resource);
 
 		$file = $client->uploadFile(
@@ -242,7 +255,7 @@ class ClientTest extends TestCase
 			'test.txt',
 			null,
 			[
-				FileInfo::B2_FILE_INFO_MTIME => time(),
+				FileInfo::B2_FILE_INFO_MTIME => time() * 1000,
 			]
 		);
 
@@ -255,11 +268,12 @@ class ClientTest extends TestCase
 		$this->assertEquals(strlen($content), $uploadRequest->getHeader('Content-Length')[0]);
 		$this->assertEquals('test.txt', $uploadRequest->getHeader('X-Bz-File-Name')[0]);
 		$this->assertEquals(sha1($content), $uploadRequest->getHeader('X-Bz-Content-Sha1')[0]);
-		$this->assertEquals(round(microtime(true) * 1000), $uploadRequest->getHeader('X-Bz-Info-src_last_modified_millis')[0], '', 100);
+		$this->assertEqualsWithDelta((int) round(microtime(true) * 1000), (int) $uploadRequest->getHeader('X-Bz-Info-src_last_modified_millis')[0], 1000);
 		$this->assertInstanceOf(Stream::class, $uploadRequest->getBody());
 	}
 
-	public function testUploadingString() {
+	public function testUploadingString()
+	{
 		$this->guzzler->queueResponse(
 			$this->buildResponseFromStub(200, [], 'authorize_account.json'),
 			$this->buildResponseFromStub(200, [], 'get_upload_url.json'),
@@ -278,7 +292,7 @@ class ClientTest extends TestCase
 			'test.txt',
 			null,
 			[
-				FileInfo::B2_FILE_INFO_MTIME => round(microtime(true) * 1000),
+				FileInfo::B2_FILE_INFO_MTIME => time() * 1000,
 			]
 		);
 
@@ -291,11 +305,12 @@ class ClientTest extends TestCase
 		$this->assertEquals(strlen($content), $uploadRequest->getHeader('Content-Length')[0]);
 		$this->assertEquals('test.txt', $uploadRequest->getHeader('X-Bz-File-Name')[0]);
 		$this->assertEquals(sha1($content), $uploadRequest->getHeader('X-Bz-Content-Sha1')[0]);
-		$this->assertEquals((int)round(microtime(true) * 1000), $uploadRequest->getHeader('X-Bz-Info-src_last_modified_millis')[0], '', 100);
+		$this->assertEqualsWithDelta((int) round(microtime(true) * 1000), (int) $uploadRequest->getHeader('X-Bz-Info-src_last_modified_millis')[0], 1000);
 		$this->assertInstanceOf(Stream::class, $uploadRequest->getBody());
 	}
 
-	public function testUploadingWithCustomContentTypeAndLastModified() {
+	public function testUploadingWithCustomContentTypeAndLastModified()
+	{
 		$this->guzzler->queueResponse(
 			$this->buildResponseFromStub(200, [], 'authorize_account.json'),
 			$this->buildResponseFromStub(200, [], 'get_upload_url.json'),
@@ -328,7 +343,8 @@ class ClientTest extends TestCase
 		$this->assertInstanceOf(Stream::class, $uploadRequest->getBody());
 	}
 
-	public function testDownloadByIdWithoutSavePath() {
+	public function testDownloadByIdWithoutSavePath()
+	{
 		$this->guzzler->queueResponse(
 			$this->buildResponseFromStub(200, [], 'authorize_account.json'),
 			$this->buildResponseFromStub(200, [], 'download_content')
@@ -343,7 +359,8 @@ class ClientTest extends TestCase
 		$this->assertEquals($fileContent, 'The quick brown fox jumps over the lazy dog');
 	}
 
-	public function testDownloadByIdWithSavePath() {
+	public function testDownloadByIdWithSavePath()
+	{
 		$this->guzzler->queueResponse(
 			$this->buildResponseFromStub(200, [], 'authorize_account.json'),
 			$this->buildResponseFromStub(200, [], 'download_content')
@@ -355,13 +372,14 @@ class ClientTest extends TestCase
 
 		$client->downloadFileById('fileId', null, __DIR__ . '/test.txt');
 
-		$this->assertFileExists(__DIR__.'/test.txt');
-		$this->assertEquals('The quick brown fox jumps over the lazy dog', file_get_contents(__DIR__.'/test.txt'));
+		$this->assertFileExists(__DIR__ . '/test.txt');
+		$this->assertEquals('The quick brown fox jumps over the lazy dog', file_get_contents(__DIR__ . '/test.txt'));
 
-		unlink(__DIR__.'/test.txt');
+		unlink(__DIR__ . '/test.txt');
 	}
 
-	public function testDownloadingByIncorrectIdThrowsException() {
+	public function testDownloadingByIncorrectIdThrowsException()
+	{
 		$this->expectException(B2APIException::class);
 
 		$this->guzzler->queueResponse(
@@ -376,7 +394,8 @@ class ClientTest extends TestCase
 		$client->downloadFileById('incorrect');
 	}
 
-	public function testDownloadByPathWithoutSavePath() {
+	public function testDownloadByPathWithoutSavePath()
+	{
 		$this->guzzler->queueResponse(
 			$this->buildResponseFromStub(200, [], 'authorize_account.json'),
 			$this->buildResponseFromStub(200, [], 'download_content')
@@ -391,7 +410,8 @@ class ClientTest extends TestCase
 		$this->assertEquals($fileContent, 'The quick brown fox jumps over the lazy dog');
 	}
 
-	public function testDownloadByPathWithSavePath() {
+	public function testDownloadByPathWithSavePath()
+	{
 		$this->guzzler->queueResponse(
 			$this->buildResponseFromStub(200, [], 'authorize_account.json'),
 			$this->buildResponseFromStub(200, [], 'download_content')
@@ -401,15 +421,16 @@ class ClientTest extends TestCase
 			'handler' => $this->guzzler->getHandlerStack(),
 		]);
 
-		$client->downloadFileByName('test.txt', 'test-bucket', null, __DIR__.'/test.txt');
+		$client->downloadFileByName('test.txt', 'test-bucket', null, __DIR__ . '/test.txt');
 
-		$this->assertFileExists(__DIR__.'/test.txt');
-		$this->assertEquals('The quick brown fox jumps over the lazy dog', file_get_contents(__DIR__.'/test.txt'));
+		$this->assertFileExists(__DIR__ . '/test.txt');
+		$this->assertEquals('The quick brown fox jumps over the lazy dog', file_get_contents(__DIR__ . '/test.txt'));
 
-		unlink(__DIR__.'/test.txt');
+		unlink(__DIR__ . '/test.txt');
 	}
 
-	public function testDownloadingByIncorrectPathThrowsException() {
+	public function testDownloadingByIncorrectPathThrowsException()
+	{
 		$this->expectException(NotFoundException::class);
 
 		$this->guzzler->queueResponse(
@@ -424,7 +445,8 @@ class ClientTest extends TestCase
 		$client->downloadFileByName('path/to/incorrect/file.txt', 'test-bucket');
 	}
 
-	public function testListFilesHandlesMultiplePages() {
+	public function testListFilesHandlesMultiplePages()
+	{
 		$this->guzzler->queueResponse(
 			$this->buildResponseFromStub(200, [], 'authorize_account.json'),
 			$this->buildResponseFromStub(200, [], 'list_files_page1.json'),
@@ -442,7 +464,8 @@ class ClientTest extends TestCase
 		$this->assertCount(1500, $files);
 	}
 
-	public function testListFilesReturnsEmptyArrayWithNoFiles() {
+	public function testListFilesReturnsEmptyArrayWithNoFiles()
+	{
 		$this->guzzler->queueResponse(
 			$this->buildResponseFromStub(200, [], 'authorize_account.json'),
 			$this->buildResponseFromStub(200, [], 'list_files_empty.json')
@@ -458,7 +481,8 @@ class ClientTest extends TestCase
 		$this->assertCount(0, $files);
 	}
 
-	public function testGetFile() {
+	public function testGetFile()
+	{
 		$this->guzzler->queueResponse(
 			$this->buildResponseFromStub(200, [], 'authorize_account.json'),
 			$this->buildResponseFromStub(200, [], 'get_file.json')
@@ -473,7 +497,8 @@ class ClientTest extends TestCase
 		$this->assertInstanceOf(File::class, $file);
 	}
 
-	public function testGettingNonExistentFileThrowsException() {
+	public function testGettingNonExistentFileThrowsException()
+	{
 		$this->expectException(BadRequestException::class);
 
 		$this->guzzler->queueResponse(
@@ -488,7 +513,8 @@ class ClientTest extends TestCase
 		$client->getFileById('bucketId', 'fileId');
 	}
 
-	public function testDeleteFile() {
+	public function testDeleteFile()
+	{
 		$this->guzzler->queueResponse(
 			$this->buildResponseFromStub(200, [], 'authorize_account.json'),
 			$this->buildResponseFromStub(200, [], 'get_file.json'),
@@ -504,7 +530,8 @@ class ClientTest extends TestCase
 		$this->assertInstanceOf(File::class, $client->deleteFileVersion('Test file.bin', $fileId));
 	}
 
-	public function testDeleteFileRetrievesFileNameWhenNotProvided() {
+	public function testDeleteFileRetrievesFileNameWhenNotProvided()
+	{
 		$this->guzzler->queueResponse(
 			$this->buildResponseFromStub(200, [], 'authorize_account.json'),
 			$this->buildResponseFromStub(200, [], 'get_file.json'),
@@ -518,7 +545,8 @@ class ClientTest extends TestCase
 		$this->assertNull($client->deleteAllFileVersions('bucketId', 'fileId'));
 	}
 
-	public function testDeletingNonExistentFileThrowsException() {
+	public function testDeletingNonExistentFileThrowsException()
+	{
 		$this->expectException(BadRequestException::class);
 
 		$this->guzzler->queueResponse(
@@ -530,10 +558,11 @@ class ClientTest extends TestCase
 			'handler' => $this->guzzler->getHandlerStack(),
 		]);
 
-		$this->assertNull($client->deleteFileVersion('fileId','fileName'));
+		$this->assertNull($client->deleteFileVersion('fileId', 'fileName'));
 	}
 
-	public function testCopyFile() {
+	public function testCopyFile()
+	{
 		$this->guzzler->queueResponse(
 			$this->buildResponseFromStub(200, [], 'authorize_account.json'),
 			$this->buildResponseFromStub(200, [], 'copy_file.json')
@@ -553,7 +582,8 @@ class ClientTest extends TestCase
 		$this->assertEquals('newFileId', $newFile->getId());
 	}
 
-	public function testCopyPart() {
+	public function testCopyPart()
+	{
 		$this->guzzler->queueResponse(
 			$this->buildResponseFromStub(200, [], 'authorize_account.json'),
 			$this->buildResponseFromStub(200, [], 'copy_part.json')
@@ -574,7 +604,8 @@ class ClientTest extends TestCase
 		$this->assertEquals('largeFileId', $newFilePart->getId());
 	}
 
-	public function testCancelLargeFile() {
+	public function testCancelLargeFile()
+	{
 		$this->guzzler->queueResponse(
 			$this->buildResponseFromStub(200, [], 'authorize_account.json'),
 			$this->buildResponseFromStub(200, [], 'cancel_large_file.json')
@@ -592,7 +623,8 @@ class ClientTest extends TestCase
 		$this->assertEquals('largeFileId', $file->getId());
 	}
 
-	public function testListUnfinishedLargeFiles() {
+	public function testListUnfinishedLargeFiles()
+	{
 		$this->guzzler->queueResponse(
 			$this->buildResponseFromStub(200, [], 'authorize_account.json'),
 			$this->buildResponseFromStub(200, [], 'list_unfinished_large_files.json')
@@ -609,7 +641,8 @@ class ClientTest extends TestCase
 		$this->assertInstanceOf(File::class, $files[0]);
 	}
 
-	public function testHideFile() {
+	public function testHideFile()
+	{
 		$this->guzzler->queueResponse(
 			$this->buildResponseFromStub(200, [], 'authorize_account.json'),
 			$this->buildResponseFromStub(200, [], 'hide_file.json')
@@ -622,7 +655,8 @@ class ClientTest extends TestCase
 		$this->assertInstanceOf(File::class, $client->hideFile('bucketId', 'testfile.bin'));
 	}
 
-	public function testGetDownloadAuthorization() {
+	public function testGetDownloadAuthorization()
+	{
 		$this->guzzler->queueResponse(
 			$this->buildResponseFromStub(200, [], 'authorize_account.json'),
 			$this->buildResponseFromStub(200, [], 'get_download_authorization.json')

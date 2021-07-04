@@ -614,8 +614,8 @@ trait FileService
 		string $bucketId,
 		string $fileName,
 		?string $contentType = null,
-		 $fileInfo = null,
-		 $serverSideEncryption = null,
+		$fileInfo = null,
+		$serverSideEncryption = null,
 		?UploadUrl $uploadUrl = null
 	): File {
 		if (!$fileInfo instanceof FileInfo) {
@@ -680,8 +680,8 @@ trait FileService
 		$response = $this->guzzle->request('POST', $uploadPartUrl->getUploadUrl(), [
 			'body' => $body,
 			'headers' => self::filterRequestOptions([
-				'Authorization'                  => $uploadPartUrl->getAuthorizationToken(),
-				'Content-Length'                 => $uploadMetadata->getLength(),
+				'Authorization'                => $uploadPartUrl->getAuthorizationToken(),
+				'Content-Length'               => $uploadMetadata->getLength(),
 				File::HEADER_X_BZ_CONTENT_SHA1 => $uploadMetadata->getSha1(),
 				File::HEADER_X_BZ_PART_NUMBER  => $partNumber,
 			], [
