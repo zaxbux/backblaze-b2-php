@@ -11,4 +11,8 @@ use Zaxbux\BackblazeB2\Classes\ObjectInfoBase;
  * 
  * @package Zaxbux\BackblazeB2\B2\Object
  */
-final class FileInfo extends ObjectInfoBase {}
+final class FileInfo extends ObjectInfoBase {
+	public static function fromArray(array $data): FileInfo {
+		return new FileInfo($data);
+	}
+}

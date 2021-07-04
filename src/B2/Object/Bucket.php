@@ -72,7 +72,7 @@ class Bucket implements B2ObjectBase
 		?array $fileLockConfiguration = null,
 		?array $lifecycleRules = null,
 		?int $revision = null,
-		?string $options = null,
+		?string $options = null
 	) {
 		$this->id                          = $id;
 		$this->name                        = $name;

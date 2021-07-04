@@ -34,7 +34,7 @@ trait FileService
 	 */
 	public function cancelLargeFile(string $fileId)
 	{
-		$response = $this->client->guzzle->request('POST', '/b2_cancel_large_file', [
+		$response = $this->guzzle->request('POST', '/b2_cancel_large_file', [
 			'json' => [
 				File::ATTRIBUTE_FILE_ID => $fileId,
 			],
@@ -103,7 +103,7 @@ trait FileService
 		}
 		*/
 
-		$response = $this->client->guzzle->request('POST', '/b2_copy_file', [
+		$response = $this->guzzle->request('POST', '/b2_copy_file', [
 			'json' => ServiceBase::filterRequestOptions([
 				File::ATTRIBUTE_SOURCE_FILE_ID => $sourceFileId,
 				File::ATTRIBUTE_FILE_NAME      => $fileName,
@@ -150,7 +150,7 @@ trait FileService
 		?ServerSideEncryption $sourceSSE = null,
 		?ServerSideEncryption $destinationSSE = null
 	): File {
-		$response = $this->client->guzzle->request('POST', '/b2_copy_part', [
+		$response = $this->guzzle->request('POST', '/b2_copy_part', [
 			'json' => ServiceBase::filterRequestOptions([
 				File::ATTRIBUTE_SOURCE_FILE_ID => $sourceFileId,
 				File::ATTRIBUTE_LARGE_FILE_ID  => $largeFileId,
@@ -179,7 +179,7 @@ trait FileService
 	 */
 	public function deleteFileVersion(string $fileName, string $fileId, ?bool $bypassGovernance = false): File
 	{
-		$response = $this->client->guzzle->request('POST', '/b2_delete_file_version', [
+		$response = $this->guzzle->request('POST', '/b2_delete_file_version', [
 			'json' => ServiceBase::filterRequestOptions([
 				File::ATTRIBUTE_FILE_NAME => $fileName,
 				File::ATTRIBUTE_FILE_ID   => $fileId,
@@ -199,7 +199,7 @@ trait FileService
 	 * @param string                $fileId      The file ID to download.
 	 * @param DownloadOptions|array $options     An optional array of additional B2 API options.
 	 * @param string                $range       A standard RFC 7233 byte-range request, that will only return part of the stored file.
-	 * @param mixed                 $sink        A string, stream, or `StreamInterface` that specifies where to save the file.
+	 * @param string|resource       $sink        A string, stream, or `StreamInterface` that specifies where to save the file.
 	 *                                           {@link https://docs.guzzlephp.org/en/stable/request-options.html#sink}
 	 * @param bool                  $headersOnly Only get the file headers, without downloading the whole file.
 	 * 
@@ -207,8 +207,8 @@ trait FileService
 	 */
 	public function downloadFileById(
 		string $fileId,
-		mixed $options = null,
-		?mixed $sink = null,
+		$options = null,
+		$sink = null,
 		?bool $headersOnly = false
 	): DownloadResponse {
 		$downloadUrl = sprintf('%s/b2_download_file_by_id', $this->accountAuthorization->getDownloadUrl() . Client::B2_API_V2);
@@ -225,7 +225,7 @@ trait FileService
 	 * @param string                 $bucketName  The bucket the file is contained in.
 	 * @param DownloadOptions|array  $options     An optional array of additional B2 API options.
 	 * @param string                 $range       A standard RFC 7233 byte-range request, that will only return part of the stored file.
-	 * @param mixed                  $sink        A string, stream, or `StreamInterface` that specifies where to save the file.
+	 * @param string|resource        $sink        A string, stream, or `StreamInterface` that specifies where to save the file.
 	 *                                            {@link https://docs.guzzlephp.org/en/stable/request-options.html#sink}
 	 * @param bool                   $headersOnly Only get the file headers, without downloading the whole file.
 	 * 
@@ -234,8 +234,8 @@ trait FileService
 	public function downloadFileByName(
 		string $fileName,
 		string $bucketName,
-		mixed $options = null,
-		?mixed $sink = null,
+		$options = null,
+		$sink = null,
 		?bool $headersOnly = false
 	): DownloadResponse {
 		$downloadUrl = sprintf('%s/file/%s/%s', $this->accountAuthorization->getApiUrl(), $bucketName, $fileName);
@@ -255,7 +255,7 @@ trait FileService
 	 */
 	public function finishLargeFile(string $fileId, array $hashes)
 	{
-		$response = $this->client->guzzle->request('POST', '/b2_finish_large_file', [
+		$response = $this->guzzle->request('POST', '/b2_finish_large_file', [
 			'json' => [
 				File::ATTRIBUTE_FILE_ID         => $fileId,
 				File::ATTRIBUTE_PART_SHA1_ARRAY => $hashes,
@@ -281,13 +281,13 @@ trait FileService
 		string $bucketId,
 		string $fileNamePrefix,
 		?int $validDuration = DownloadAuthorization::VALID_DURATION_MAX,
-		?mixed $options = null
+		$options = null
 	): DownloadAuthorization {
 		if (!$options instanceof DownloadOptions) {
-			$options = DownloadOptions::fromArray($options);
+			$options = DownloadOptions::fromArray($options ?? []);
 		}
 
-		$response = $this->client->guzzle->request('POST', '/b2_get_download_authorization', [
+		$response = $this->guzzle->request('POST', '/b2_get_download_authorization', [
 			'json' => ServiceBase::filterRequestOptions([
 				File::ATTRIBUTE_BUCKET_ID        => $bucketId,
 				File::ATTRIBUTE_FILE_NAME_PREFIX => $fileNamePrefix,
@@ -307,7 +307,7 @@ trait FileService
 	 */
 	public function getFileInfo(string $fileId): File
 	{
-		$response = $this->client->guzzle->request('POST', '/b2_get_file_info', [
+		$response = $this->guzzle->request('POST', '/b2_get_file_info', [
 			'json' => [
 				File::ATTRIBUTE_FILE_ID => $fileId
 			]
@@ -327,7 +327,7 @@ trait FileService
 	 */
 	public function getUploadPartUrl(string $fileId): UploadPartUrl
 	{
-		$response = $this->client->guzzle->request('POST', '/b2_get_upload_part_url', [
+		$response = $this->guzzle->request('POST', '/b2_get_upload_part_url', [
 			'json' => [
 				File::ATTRIBUTE_FILE_ID => $fileId
 			]
@@ -347,7 +347,7 @@ trait FileService
 	 */
 	public function getUploadUrl(string $bucketId): UploadUrl
 	{
-		$response = $this->client->guzzle->request('POST', '/b2_get_upload_url', [
+		$response = $this->guzzle->request('POST', '/b2_get_upload_url', [
 			'json' => [
 				File::ATTRIBUTE_BUCKET_ID => $bucketId
 			]
@@ -370,7 +370,7 @@ trait FileService
 	public function hideFile(string $bucketId, string $fileName)
 	{
 
-		$response = $this->client->guzzle->request('POST', '/b2_hide_file', [
+		$response = $this->guzzle->request('POST', '/b2_hide_file', [
 			'json' => [
 				File::ATTRIBUTE_BUCKET_ID => $bucketId,
 				File::ATTRIBUTE_FILE_NAME => $fileName,
@@ -406,7 +406,7 @@ trait FileService
 		?string $startFileName = null,
 		?int $maxFileCount = 1000
 	): FileListResponse {
-		$response = $this->client->guzzle->request('POST', '/b2_list_file_names', [
+		$response = $this->guzzle->request('POST', '/b2_list_file_names', [
 			'json' => ServiceBase::filterRequestOptions([
 				File::ATTRIBUTE_BUCKET_ID      => $bucketId,
 				File::ATTRIBUTE_MAX_FILE_COUNT => $maxFileCount,
@@ -450,7 +450,7 @@ trait FileService
 		?string $startFileId = null,
 		?int $maxFileCount = 1000
 	): FileListResponse {
-		$response = $this->client->guzzle->request('POST', '/b2_list_file_versions', [
+		$response = $this->guzzle->request('POST', '/b2_list_file_versions', [
 			'json' => ServiceBase::filterRequestOptions([
 				File::ATTRIBUTE_BUCKET_ID      => $bucketId,
 				File::ATTRIBUTE_MAX_FILE_COUNT => $maxFileCount,
@@ -487,7 +487,7 @@ trait FileService
 		?int $startPartNumber = null,
 		?int $maxPartCount = 1000
 	): FilePartListResponse {
-		$response = $this->client->guzzle->request('POST', '/b2_list_parts', [
+		$response = $this->guzzle->request('POST', '/b2_list_parts', [
 			'json' => ServiceBase::filterRequestOptions([
 				File::ATTRIBUTE_FILE_ID => $fileId
 			], [
@@ -517,7 +517,7 @@ trait FileService
 		?string $startFileId = null,
 		?int $maxFileCount = 100
 	): FileListResponse {
-		$response = $this->client->guzzle->request('POST', '/b2_list_unfinished_large_files', [
+		$response = $this->guzzle->request('POST', '/b2_list_unfinished_large_files', [
 			'json' => ServiceBase::filterRequestOptions([
 				File::ATTRIBUTE_BUCKET_ID      => $bucketId,
 				File::ATTRIBUTE_MAX_FILE_COUNT => $maxFileCount,
@@ -546,13 +546,13 @@ trait FileService
 		string $bucketId,
 		string $fileName,
 		?string $contentType = null,
-		?mixed $fileInfo = null
+		 $fileInfo = null
 	): File {
 		if (!$fileInfo instanceof FileInfo) {
 			$fileInfo = FileInfo::fromArray($fileInfo);
 		}
 
-		$response = $this->client->guzzle->request('POST', '/b2_start_large_file', [
+		$response = $this->guzzle->request('POST', '/b2_start_large_file', [
 			'json' => ServiceBase::filterRequestOptions([
 				File::ATTRIBUTE_BUCKET_ID    => $bucketId,
 				File::ATTRIBUTE_FILE_NAME    => $fileName,
@@ -580,7 +580,7 @@ trait FileService
 		string $fileId,
 		string $legalHold
 	): File {
-		$response = $this->client->guzzle->request('POST', '/b2_update_file_legal_hold', [
+		$response = $this->guzzle->request('POST', '/b2_update_file_legal_hold', [
 			'json' => ServiceBase::filterRequestOptions([
 				File::ATTRIBUTE_FILE_NAME  => $fileName,
 				File::ATTRIBUTE_FILE_ID    => $fileId,
@@ -610,7 +610,7 @@ trait FileService
 		string $fileRetention,
 		?bool $bypassGovernance = false
 	): File {
-		$response = $this->client->guzzle->request('POST', '/b2_update_file_retention', [
+		$response = $this->guzzle->request('POST', '/b2_update_file_retention', [
 			'json' => ServiceBase::filterRequestOptions([
 				File::ATTRIBUTE_FILE_NAME         => $fileName,
 				File::ATTRIBUTE_FILE_ID           => $fileId,
@@ -641,16 +641,16 @@ trait FileService
 		string $bucketId,
 		string $fileName,
 		?string $contentType = null,
-		?mixed $fileInfo = null,
-		?mixed $serverSideEncryption = null,
+		 $fileInfo = null,
+		 $serverSideEncryption = null,
 		?UploadUrl $uploadUrl = null
 	): File {
 		if (!$fileInfo instanceof FileInfo) {
-			$fileInfo = FileInfo::fromArray($fileInfo);
+			$fileInfo = FileInfo::fromArray($fileInfo ?? []);
 		}
 
 		if (!$serverSideEncryption instanceof ServerSideEncryption) {
-			$serverSideEncryption = ServerSideEncryption::fromArray($serverSideEncryption);
+			$serverSideEncryption = ServerSideEncryption::fromArray($serverSideEncryption ?? []);
 		}
 
 		if (!$uploadUrl instanceof UploadUrl) {
@@ -659,7 +659,7 @@ trait FileService
 
 		$uploadMetadata = FileUploadMetadata::fromResource($body);
 
-		$response = $this->client->guzzle->request('POST', $uploadUrl->getUploadUrl(), [
+		$response = $this->guzzle->request('POST', $uploadUrl->getUploadUrl(), [
 			'body'    => $body,
 			'headers' => ServiceBase::filterRequestOptions([
 				'Authorization'                  => $uploadUrl->getAuthorizationToken(),
@@ -688,10 +688,10 @@ trait FileService
 	 * @param UploadPartUrl              $uploadPartUrl        The upload part authorization data.
 	 */
 	public function uploadPart(
-		mixed $body,
+		$body,
 		string $fileId,
 		?int $partNumber = 1,
-		?mixed $serverSideEncryption = null,
+		 $serverSideEncryption = null,
 		?UploadPartUrl $uploadPartUrl = null
 	): File {
 		if (!$uploadPartUrl instanceof UploadPartUrl) {
@@ -700,7 +700,7 @@ trait FileService
 
 		$uploadMetadata = FileUploadMetadata::fromResource($body);
 
-		$response = $this->client->guzzle->request('POST', $uploadPartUrl->getUploadUrl(), [
+		$response = $this->guzzle->request('POST', $uploadPartUrl->getUploadUrl(), [
 			'body' => $body,
 			'headers' => self::filterRequestOptions([
 				'Authorization'                  => $uploadPartUrl->getAuthorizationToken(),

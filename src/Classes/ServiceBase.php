@@ -6,7 +6,9 @@ namespace Zaxbux\BackblazeB2\Classes;
 
 use function sprintf;
 
+use GuzzleHttp\ClientInterface;
 use InvalidArgumentException;
+use Zaxbux\BackblazeB2\B2\Object\AccountAuthorization;
 use Zaxbux\BackblazeB2\Client;
 
 abstract class ServiceBase
@@ -14,9 +16,18 @@ abstract class ServiceBase
 	/** @var Client */
 	protected $client;
 
-	public function __construct(Client $client)
+	/** @var ClientInterface */
+	public $guzzle;
+
+	public function __construct(Client $client, ClientInterface $guzzle)
 	{
 		$this->client = $client;
+		$this->guzzle = $guzzle;
+	}
+	
+	public function getAccountAuthorization(): ?AccountAuthorization
+	{
+		return $this->client->getAccountAuthorization();
 	}
 	
 	/**

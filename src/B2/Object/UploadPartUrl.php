@@ -21,7 +21,7 @@ class UploadPartUrl {
 	public function __construct(
 		string $fileId,
 		string $uploadUrl,
-		string $authorizationToken,
+		string $authorizationToken
 	) {
 		$this->fileId = $fileId;
 		$this->uploadUrl = $uploadUrl;

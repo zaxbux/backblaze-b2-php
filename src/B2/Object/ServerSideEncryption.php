@@ -68,7 +68,7 @@ class ServerSideEncryption implements JsonSerializable, ArrayAccess {
 	{
 		$digest = md5($raw ? $key : base64_decode($key));
 
-		return static(
+		return new ServerSideEncryption(
 			static::MODE_CUSTOMER,
 			static::ALGORITHM_AES256,
 			$raw ? base64_encode($key) : $key,
@@ -193,11 +193,11 @@ class ServerSideEncryption implements JsonSerializable, ArrayAccess {
 		$customerKey    = $data[static::ATTRIBUTE_CUSTOMER_KEY] ?? null;
 		$customerKeyMd5 = $data[static::ATTRIBUTE_CUSTOMER_KEY_MD5] ?? null;
 		
-		return static(
+		return new ServerSideEncryption(
 			$data[static::ATTRIBUTE_MODE] ?? static::MODE_CUSTOMER,
 			$data[static::ATTRIBUTE_ALGORITHM] ?? static::ALGORITHM_AES256,
-			!$customerKey ?: ($rawKeys ? base64_encode($customerKey) : $customerKey),
-			!$customerKeyMd5 ?: ($rawKeys ? base64_encode($customerKeyMd5) : $customerKeyMd5)
+			$customerKey ? ($rawKeys ? base64_encode($customerKey) : $customerKey) : null,
+			$customerKeyMd5 ? ($rawKeys ? base64_encode($customerKeyMd5) : $customerKeyMd5) : null
 		);
 	}
 

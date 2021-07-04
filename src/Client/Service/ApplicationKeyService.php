@@ -33,9 +33,9 @@ trait ApplicationKeyService
 		?string $bucketId = null,
 		?string $namePrefix = null
 	): Key {
-		$response = $this->client->guzzle->request('POST', '/b2_create_key', [
+		$response = $this->guzzle->request('POST', '/b2_create_key', [
 			'json' => ServiceBase::filterRequestOptions([
-				Key::ATTRIBUTE_ACCOUNT_ID    => $this->client->getAccountAuthorization()->getAccountId(),
+				Key::ATTRIBUTE_ACCOUNT_ID    => $this->getAccountAuthorization()->getAccountId(),
 				Key::ATTRIBUTE_CAPABILITIES  => $capabilities,
 				Key::ATTRIBUTE_KEY_NAME      => $keyName,
 			], [
@@ -57,7 +57,7 @@ trait ApplicationKeyService
 	 */
 	public function deleteKey(string $applicationKeyId): Key
 	{
-		$response = $this->client->guzzle->request('POST', '/b2_delete_key', [
+		$response = $this->guzzle->request('POST', '/b2_delete_key', [
 			'json' => [
 				Key::ATTRIBUTE_APPLICATION_KEY_ID => $applicationKeyId,
 			]
@@ -80,9 +80,9 @@ trait ApplicationKeyService
 		?string $startApplicationKeyId = null,
 		?int $maxKeyCount = 1000
 	): KeyListResponse {
-		$response = $this->client->guzzle->request('POST', '/b2_list_keys', [
+		$response = $this->guzzle->request('POST', '/b2_list_keys', [
 			'json' => ServiceBase::filterRequestOptions([
-				Key::ATTRIBUTE_ACCOUNT_ID => $this->client->getAccountAuthorization()->getAccountId(),
+				Key::ATTRIBUTE_ACCOUNT_ID => $this->getAccountAuthorization()->getAccountId(),
 			], [
 				Key::ATTRIBUTE_MAX_KEY_COUNT => $maxKeyCount,
 				Key::ATTRIBUTE_START_APPLICATION_KEY_ID => $startApplicationKeyId

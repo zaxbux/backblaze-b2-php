@@ -21,7 +21,7 @@ class UploadUrl {
 	public function __construct(
 		string $bucketId,
 		string $uploadUrl,
-		string $authorizationToken,
+		string $authorizationToken
 	) {
 		$this->bucketId = $bucketId;
 		$this->uploadUrl = $uploadUrl;

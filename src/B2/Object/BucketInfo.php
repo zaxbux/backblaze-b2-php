@@ -11,4 +11,8 @@ use Zaxbux\BackblazeB2\Classes\ObjectInfoBase;
  * 
  * @package Zaxbux\BackblazeB2\B2\Object
  */
-final class BucketInfo extends ObjectInfoBase {}
+final class BucketInfo extends ObjectInfoBase {
+	public static function fromArray(array $data): BucketInfo {
+		return new BucketInfo($data);
+	}
+}

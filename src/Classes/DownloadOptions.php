@@ -60,6 +60,19 @@ final class DownloadOptions implements ArrayAccess, JsonSerializable
 	/** @var bool */
 	private $sseHeadersEnabled = false;
 	
+	/**
+	 * 
+	 * @param string                     $authorization 
+	 * @param string                     $contentDisposition 
+	 * @param string                     $contentEncoding 
+	 * @param string                     $contentLanguage 
+	 * @param string                     $contentType 
+	 * @param string                     $cacheControl 
+	 * @param string                     $expires 
+	 * @param string                     $range 
+	 * @param ServerSideEncryption|array $serverSideEncryption 
+	 * @return void 
+	 */
 	public function __construct(
 		?string $authorization = null,
 		?string $contentDisposition = null,
@@ -69,7 +82,7 @@ final class DownloadOptions implements ArrayAccess, JsonSerializable
 		?string $cacheControl = null,
 		?string $expires = null,
 		?string $range = null,
-		ServerSideEncryption|array $serverSideEncryption = null,
+		$serverSideEncryption = null
 	) {
 		$this->authorization = $authorization;
 		$this->contentDisposition = $contentDisposition;
@@ -245,11 +258,11 @@ final class DownloadOptions implements ArrayAccess, JsonSerializable
 	 *
 	 * @param ServerSideEncryption|array|null
 	 */ 
-	public function setServerSideEncryption(ServerSideEncryption|array|null $serverSideEncryption): DownloadOptions
+	public function setServerSideEncryption($serverSideEncryption): DownloadOptions
 	{
-		$this->serverSideEncryption = is_array($serverSideEncryption)
-			? ServerSideEncryption::fromArray($serverSideEncryption)
-			: $serverSideEncryption;
+		$this->serverSideEncryption = $serverSideEncryption instanceof ServerSideEncryption
+			? $serverSideEncryption
+			: ServerSideEncryption::fromArray($serverSideEncryption);
 
 		return $this;
 	}
@@ -341,7 +354,7 @@ final class DownloadOptions implements ArrayAccess, JsonSerializable
 	 */
 	public static function fromArray(array $data)
 	{
-		return static(
+		return new DownloadOptions(
 			$data[static::OPTION_AUTHORIZATION] ?? null,
 			$data[static::OPTION_CONTENT_DISPOSITION] ?? null,
 			$data[static::OPTION_CONTENT_ENCODING] ?? null,

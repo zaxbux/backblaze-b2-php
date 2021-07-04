@@ -5,7 +5,7 @@ namespace Zaxbux\BackblazeB2\Http\Middleware;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Utils;
 use Psr\Http\Message\RequestInterface;
-use Zaxbux\BackblazeB2\Client\AccountAuthorization;
+use Zaxbux\BackblazeB2\B2\Object\AccountAuthorization;
 use Zaxbux\BackblazeB2\Http\Config;
 
 //use function \GuzzleHttp\json_decode;
@@ -61,7 +61,7 @@ class RefreshAuthorizationMiddleware
 	private function acquireAccessToken(): void
 	{
 		/*$parameters = $this->getTokenRequestParameters();
-		$response = $this->client->guzzle->request('POST', $this->config->getTokenRoute(), [
+		$response = $this->guzzle->request('POST', $this->config->getTokenRoute(), [
 			'form_params' => $parameters,
 			// We'll use the default handler so we don't rerun our middleware
 			'handler' => HandlerStack::create(),
@@ -72,13 +72,9 @@ class RefreshAuthorizationMiddleware
 			(int) $response['expires_in'],
 			$response['refresh_token']
 		);*/
-		$accountAuthorization = AccountAuthorization::refresh(
-			$this->config->client->getApplicationKeyId(),
-			$this->config->client->getApplicationKey(),
-			$this->client
-		);
+		//$accountAuthorization = AccountAuthorization::refresh();
 
-		$this->config->client->setAccountAuthorization($accountAuthorization);
+		//$this->config->client->setAccountAuthorization($accountAuthorization);
 	}
 	
 	/*private function getTokenRequestParameters(): array

@@ -11,7 +11,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
 use Zaxbux\BackblazeB2\Client as B2Client;
 use Zaxbux\BackblazeB2\Classes\B2ObjectBase;
-use Zaxbux\BackblazeB2\Client\IAuthorizationCache;
+use Zaxbux\BackblazeB2\Classes\IAuthorizationCache;
 use Zaxbux\BackblazeB2\Traits\ProxyArrayAccessToProperties;
 
 /** @package Zaxbux\BackblazeB2\Client */
@@ -31,6 +31,8 @@ class AccountAuthorization implements B2ObjectBase
 
 	/**  @deprecated */
 	public const ATTRIBUTE_MINIMUM_PART_SIZE          = 'minimumPartSize';
+
+	protected $client;
 
 	/** @var string */
 	private $accountId;
@@ -60,14 +62,14 @@ class AccountAuthorization implements B2ObjectBase
 	private $authorizationTimestamp;
 
 	public function __construct(
-		string $accountId,
-		string $authorizationToken,
-		array $allowed,
-		string $apiUrl,
-		string $downloadUrl,
-		int $recommendedPartSize,
-		int $absoluteMinimumPartSize,
-		string $s3ApiUrl,
+		?string $accountId = null,
+		?string $authorizationToken = null,
+		?array $allowed = null,
+		?string $apiUrl = null,
+		?string $downloadUrl = null,
+		?int $recommendedPartSize = null,
+		?int $absoluteMinimumPartSize = null,
+		?string $s3ApiUrl = null,
 		?int $authorizationTimestamp = -1
 	) {
 		$this->accountId = $accountId;
@@ -84,102 +86,42 @@ class AccountAuthorization implements B2ObjectBase
 	/**
 	 * Get the value of accountId
 	 */
-	public function getAccountId(): string
+	public function getAccountId(): ?string
 	{
 		return $this->accountId;
 	}
 
 	/**
-	 * Set the value of accountId
-	 */
-	/*
-	public function setAccountId($accountId)
-	{
-		$this->accountId = $accountId;
-
-		return $this;
-	}
-	*/
-
-	/**
 	 * Get the value of authorizationToken
 	 */
-	public function getAuthorizationToken(): string
+	public function getAuthorizationToken(): ?string
 	{
 		return $this->authorizationToken;
 	}
 
 	/**
-	 * Set the value of authorizationToken
-	 */
-	/*
-	public function setAuthorizationToken($authorizationToken)
-	{
-		$this->authorizationToken = $authorizationToken;
-
-		return $this;
-	}
-	*/
-
-	/**
 	 * Get the capabilities, bucket restrictions, and prefix restrictions.
 	 */
-	public function getAllowed(): array
+	public function getAllowed(): ?array
 	{
 		return $this->allowed;
 	}
 
 	/**
-	 * Set the value of allowed
-	 */
-	/*
-	public function setAllowed($allowed)
-	{
-		$this->allowed = $allowed;
-
-		return $this;
-	}
-	*/
-
-	/**
 	 * Get the value of apiUrl
 	 */
-	public function getApiUrl(): string
+	public function getApiUrl(): ?string
 	{
 		return $this->apiUrl;
 	}
 
 	/**
-	 * Set the value of apiUrl
-	 */
-	/*
-	public function setApiUrl($apiUrl)
-	{
-		$this->apiUrl = $apiUrl;
-
-		return $this;
-	}
-	*/
-
-	/**
 	 * Get the value of downloadUrl
 	 */
-	public function getDownloadUrl(): string
+	public function getDownloadUrl(): ?string
 	{
 		return $this->downloadUrl;
 	}
-
-	/**
-	 * Set the value of downloadUrl
-	 */
-	/*
-	public function setDownloadUrl($downloadUrl)
-	{
-		$this->downloadUrl = $downloadUrl;
-
-		return $this;
-	}
-	*/
 
 	/**
 	 * The recommended part size for each part of a large file (except the last one).
@@ -187,22 +129,10 @@ class AccountAuthorization implements B2ObjectBase
 	 * 
 	 * @return int The recomended part size in bytes.
 	 */
-	public function getRecommendedPartSize(): int
+	public function getRecommendedPartSize(): ?int
 	{
 		return $this->recommendedPartSize;
 	}
-
-	/**
-	 * Set the value of recommendedPartSize
-	 */
-	/*
-	public function setRecommendedPartSize($recommendedPartSize)
-	{
-		$this->recommendedPartSize = $recommendedPartSize;
-
-		return $this;
-	}
-	*/
 
 	/**
 	 * The smallest possible size of a part of a large file (except the last one).
@@ -210,42 +140,18 @@ class AccountAuthorization implements B2ObjectBase
 	 * 
 	 * @return int The absolute minimum part size in bytes.
 	 */
-	public function getAbsoluteMinimumPartSize(): int
+	public function getAbsoluteMinimumPartSize(): ?int
 	{
 		return $this->absoluteMinimumPartSize;
 	}
 
 	/**
-	 * Set the value of absoluteMinimumPartSize
-	 */
-	/*
-	public function setAbsoluteMinimumPartSize($absoluteMinimumPartSize)
-	{
-		$this->absoluteMinimumPartSize = $absoluteMinimumPartSize;
-
-		return $this;
-	}
-	*/
-
-	/**
 	 * Get the value of s3ApiUrl
 	 */
-	public function getS3ApiUrl(): string
+	public function getS3ApiUrl(): ?string
 	{
 		return $this->s3ApiUrl;
 	}
-
-	/**
-	 * Set the value of s3ApiUrl
-	 */
-	/*
-	public function setS3ApiUrl($s3ApiUrl)
-	{
-		$this->s3ApiUrl = $s3ApiUrl;
-
-		return $this;
-	}
-	*/
 
 	/**
 	 * Get the value of authorizationTimestamp
@@ -255,19 +161,12 @@ class AccountAuthorization implements B2ObjectBase
 		return $this->authorizationTimestamp;
 	}
 
-	/**
-	 * Set the value of authorizationTimestamp
-	 *
-	 * @param int $authorizationTimestamp
-	 */
-	/*
-	public function setAuthorizationTimestamp(int $authorizationTimestamp): AccountAuthorization
-	{
-		$this->authorizationTimestamp = $authorizationTimestamp;
+	public static function create(B2Client $client) {
+		$o = new AccountAuthorization();
+		$o->client = $client;
 
-		return $this;
+		return $o;
 	}
-	*/
 
 	/**
 	 * Check if the authorization token has expired, based on the `authorizationTimestamp`.
@@ -280,18 +179,27 @@ class AccountAuthorization implements B2ObjectBase
 		return time() - IAuthorizationCache::EXPIRES >= $this->authorizationTimestamp ?? -1;
 	}
 
-	public static function refresh(string $applicationKeyId, string $applicationKey, ClientInterface $client = null): AccountAuthorization {
-		$client = $client ?: new Client([
+	public function refresh(): void {
+		/*$client = $client ?: new Client([
 			'base_uri' => B2Client::B2_API_BASE_URL . B2Client::B2_API_V2,
-		]);
+		]);*/
 
-		$response = $client->request('GET', '/b2_authorize_account', [
+		$response = $this->client->guzzle->request('GET', '/b2_authorize_account', [
 			'headers' => [
-				'Authorization' => static::getBasicAuthorization($applicationKeyId, $applicationKey)
-			]
+				'Authorization' => static::getBasicAuthorization($this->client->getApplicationKeyId(), $this->client->getApplicationKey()),
+			],
 		]);
 
-		return AccountAuthorization::fromArray(json_decode((string) $response->getBody(), true));
+		$data = json_decode((string) $response->getBody(), true);
+
+		$this->accountId =  $data[static::ATTRIBUTE_ACCOUNT_ID];
+		$this->authorizationToken =  $data[static::ATTRIBUTE_AUTHORIZATION_TOKEN];
+		$this->allowed =  $data[static::ATTRIBUTE_ALLOWED];
+		$this->apiUrl =  $data[static::ATTRIBUTE_API_URL];
+		$this->downloadUrl =  $data[static::ATTRIBUTE_DOWNLOAD_URL];
+		$this->recommendedPartSize =  $data[static::ATTRIBUTE_RECOMMENDED_PART_SIZE];
+		$this->absoluteMinimumPartSize =  $data[static::ATTRIBUTE_ABSOLUTE_MINIMUM_PART_SIZE];
+		$this->s3ApiUrl =  $data[static::ATTRIBUTE_S3_API_URL];
 	}
 
 	public static function fromArray(array $data): AccountAuthorization

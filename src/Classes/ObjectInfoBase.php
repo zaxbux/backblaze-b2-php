@@ -59,7 +59,12 @@ abstract class ObjectInfoBase {
 		return $this;
 	}
 
-	public function get(?string $key = null): string|array
+	/**
+	 * 
+	 * @param null|string $key 
+	 * @return string|array 
+	 */
+	public function get(?string $key = null)
 	{
 		if ($key === null) {
 			return $this->data;
@@ -89,10 +94,7 @@ abstract class ObjectInfoBase {
 		return $headers;
 	}
 
-	public static function fromArray(array $data): ObjectInfoBase
-	{
-		return static($data);
-	}
+	abstract public static function fromArray(array $data): ObjectInfoBase;
 
 	/** @inheritdoc */
 	/*

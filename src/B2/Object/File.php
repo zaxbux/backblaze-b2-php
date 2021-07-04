@@ -137,7 +137,7 @@ class File implements B2ObjectBase
 		?string $accountId = null,
 		?array $retention = null,
 		?array $legalHold = null,
-		?int $partNumber = null,
+		?int $partNumber = null
 	) {
 		$this->id            = $id;
 		$this->name          = $name;

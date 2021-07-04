@@ -30,13 +30,13 @@ class Client
 	public const B2_API_V2              = '/b2api/v2';
 
 	/** @var ApplicationKeyServiceInstance */
-	public $key;
+	//public $key;
 
 	/** @var FileServiceInstance */
-	public $file;
+	//public $file;
 
 	/** @var BucketServiceInstance */
-	public $bucket;
+	//public $bucket;
 
 	/** @var ClientInterface */
 	public $guzzle;
@@ -73,23 +73,33 @@ class Client
 		$this->authorizationCache = $authorizationCache;
 
 		$config = new Config();
-		$config->client = $this;
+		//$config->applicationKeyId = $applicationKeyId;
+		//$config->applicationKey = $applicationKey;
+
+		//$config->client = $this;
 
 		$this->guzzle = $guzzle ?: ClientFactory::create($config);
+		$this->authorize();
 
-		$this->key = new ApplicationKeyServiceInstance($this);
-		$this->file = new FileServiceInstance($this);
-		$this->bucket = new BucketServiceInstance($this);
+		fwrite(STDERR, print_r($this->getAccountAuthorization(), true));
+
+		/*
+		$this->key = new ApplicationKeyServiceInstance($this, $this->guzzle);
+		$this->file = new FileServiceInstance($this, $this->guzzle);
+		$this->bucket = new BucketServiceInstance($this, $this->guzzle);
+		*/
+
+		
 	}
 
 	public function getApplicationKeyId(): string
 	{
-		return $this->getApplicationKeyId;
+		return $this->applicationKeyId;
 	}
 
 	public function getApplicationKey(): string
 	{
-		return $this->getApplicationKey;
+		return $this->applicationKey;
 	}
 
 	public function getAccountAuthorization(): ?AccountAuthorization
@@ -109,7 +119,7 @@ class Client
 	 * 
 	 * @throws \Exception
 	 */
-	protected function authorize()
+	public function authorize()
 	{
 		// Try to fetch existing authorization token from cache.
 		if ($this->authorizationCache instanceof IAuthorizationCache) {
@@ -118,12 +128,14 @@ class Client
 
 		// Fetch a new authorization token from the API.
 		if (!$this->accountAuthorization) {
-			$this->accountAuthorization = AccountAuthorization::refresh($this->applicationKeyId, $this->applicationKey);
+			$this->accountAuthorization = AccountAuthorization::create($this);
+		} //else {
+			$this->accountAuthorization->refresh();
+		//}
 
-			// Cache the new authorization token.
-			if ($this->authorizationCache instanceof IAuthorizationCache && !$this->accountAuthorization) {
-				$this->authorizationCache->put($this->applicationKeyId, $this->accountAuthorization);
-			}
+		// Cache the new authorization token.
+		if ($this->authorizationCache instanceof IAuthorizationCache && !$this->accountAuthorization) {
+			$this->authorizationCache->put($this->applicationKeyId, $this->accountAuthorization);
 		}
 
 		if (empty($this->accountAuthorization)) {

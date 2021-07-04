@@ -115,13 +115,13 @@ trait FileServiceHelpersTrait
 
 	public function getFileByName(string $bucketId, string $fileName): File
 	{
-		$files = $this->_listFileNames($bucketId, '', null, $fileName, 1);
+		$files = $this->listFileNames($bucketId, '', null, $fileName, 1);
 
-		if (iterator_count($files) < 1) {
+		if (iterator_count($files->getFiles()) < 1) {
 			throw new NotFoundException();
 		}
 
-		return File::fromArray($files[0]);
+		return File::fromArray($files->getFiles()[0]);
 	}
 
 	/**
@@ -160,13 +160,13 @@ trait FileServiceHelpersTrait
 
 	public function getFileById(string $bucketId, string $fileId): File
 	{
-		$files = $this->_listFileVersions($bucketId, '', null, null, $fileId, 1);
+		$files = $this->listFileVersions($bucketId, '', null, null, $fileId, 1);
 
-		if (iterator_count($files) < 1) {
+		if (iterator_count($files->getFiles()) < 1) {
 			throw new NotFoundException();
 		}
 
-		return File::fromArray($files[0]);
+		return File::fromArray($files->getFiles()[0]);
 	}
 
 	/**
@@ -227,25 +227,25 @@ trait FileServiceHelpersTrait
 	 * @param string                 $downloadUrl The URL to make the request to.
 	 * @param array                  $query       Query parameters.
 	 * @param DownloadOptions|array  $options     Additional options for the B2 API.
-	 * @param mixed                  $sink        A string, stream, or StreamInterface that specifies where to save the file.
+	 * @param string|resource        $sink        A string, stream, or StreamInterface that specifies where to save the file.
 	 * @param bool                   $headersOnly Only get the file headers, without downloading the whole file.
 	 */
 	protected function download(
 		string $downloadUrl,
 		?array $query = null,
-		?mixed $options = null,
-		?mixed $sink = null,
+		$options = null,
+		$sink = null,
 		?bool $headersOnly = false
 	): DownloadResponse {
 		if (! $options instanceof DownloadOptions) {
 			/** @var DownloadOptions */
-			$options = DownloadOptions::fromArray($options);
+			$options = DownloadOptions::fromArray($options ?? []);
 		}
 
 		// Build query string from query parameters and download options.
 		$queryString = join('&', [http_build_query($query ?? []), $options->toQueryString() ?? []]);
 
-		$response = $this->client->guzzle->request($headersOnly ? 'HEAD' :'GET', $downloadUrl, [
+		$response = $this->guzzle->request($headersOnly ? 'HEAD' :'GET', $downloadUrl, [
 			'query'   => $queryString,
 			'headers' => $options->getHeaders(),
 			'sink'    => $sink ?: null,

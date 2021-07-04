@@ -14,6 +14,8 @@ use Zaxbux\BackblazeB2\Traits\BucketServiceHelpersTrait;
 trait BucketService
 {
 	use BucketServiceHelpersTrait;
+
+	abstract public function getAccountAuthorization();
 	
 	/**
 	 * Create a bucket with the given name and type.
@@ -31,13 +33,13 @@ trait BucketService
 	public function createBucket(
 		string $bucketName,
 		?string $bucketType = BucketType::PRIVATE,
-		?mixed $bucketInfo = null,
+		 $bucketInfo = null,
 		?array $corsRules = null,
 		?array $lifecycleRules = null
 	): Bucket {
-		$response = $this->client->guzzle->request('POST', '/b2_create_bucket', [
+		$response = $this->guzzle->request('POST', '/b2_create_bucket', [
 			'json' => ServiceBase::filterRequestOptions([
-				Bucket::ATTRIBUTE_ACCOUNT_ID  => $this->client->getAccountAuthorization()->getAccountId(),
+				Bucket::ATTRIBUTE_ACCOUNT_ID  => $this->getAccountAuthorization()->getAccountId(),
 				Bucket::ATTRIBUTE_BUCKET_NAME => $bucketName,
 				Bucket::ATTRIBUTE_BUCKET_TYPE => $bucketType,
 			], [
@@ -59,9 +61,9 @@ trait BucketService
 	 */
 	public function deleteBucket(string $bucketId): Bucket
 	{
-		$response = $this->client->guzzle->request('POST', '/b2_delete_bucket', [
+		$response = $this->guzzle->request('POST', '/b2_delete_bucket', [
 			'json' => [
-				Bucket::ATTRIBUTE_ACCOUNT_ID => $this->client->getAccountAuthorization()->getAccountId(),
+				Bucket::ATTRIBUTE_ACCOUNT_ID => $this->getAccountAuthorization()->getAccountId(),
 				Bucket::ATTRIBUTE_BUCKET_ID  => $bucketId
 			]
 		]);
@@ -88,9 +90,9 @@ trait BucketService
 		?string $bucketName = null,
 		?array $bucketTypes = null
 	): BucketListResponse {
-		$response = $this->client->guzzle->request('POST', '/b2_list_buckets', [
+		$response = $this->guzzle->request('POST', '/b2_list_buckets', [
 			'json' => ServiceBase::filterRequestOptions([
-				Bucket::ATTRIBUTE_ACCOUNT_ID => $this->client->getAccountAuthorization()->getAccountId(),
+				Bucket::ATTRIBUTE_ACCOUNT_ID => $this->getAccountAuthorization()->getAccountId(),
 			], [
 				Bucket::ATTRIBUTE_BUCKET_ID    => $bucketId,
 				Bucket::ATTRIBUTE_BUCKET_NAME  => $bucketName,
@@ -124,9 +126,9 @@ trait BucketService
 		?array $lifecycleRules = null,
 		?int $ifRevisionIs = null
 	): Bucket {
-		$response = $this->client->guzzle->request('POST', '/b2_update_bucket', [
+		$response = $this->guzzle->request('POST', '/b2_update_bucket', [
 			'json' => ServiceBase::filterRequestOptions([
-				Bucket::ATTRIBUTE_ACCOUNT_ID => $this->client->getAccountAuthorization()->getAccountId(),
+				Bucket::ATTRIBUTE_ACCOUNT_ID => $this->getAccountAuthorization()->getAccountId(),
 				Bucket::ATTRIBUTE_BUCKET_ID  => $bucketId,
 			], [
 				Bucket::ATTRIBUTE_BUCKET_TYPE     => $bucketType,
