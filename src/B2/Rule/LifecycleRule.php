@@ -1,11 +1,16 @@
 <?php
 
-namespace Zaxbux\BackblazeB2\B2Object;
+declare(strict_types=1);
+
+namespace Zaxbux\BackblazeB2\B2\Object\Rule;
+
+use JsonSerializable;
 
 /**
  * A Lifecycle rule object for the Backblaze B2 API
  */
-class LifecycleRule implements \JsonSerializable {
+class LifecycleRule implements JsonSerializable
+{
 
 	/**
 	 * @var string The files in a bucket that this rule applies to.

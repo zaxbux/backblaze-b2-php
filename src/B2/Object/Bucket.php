@@ -1,25 +1,31 @@
 <?php
 
-namespace Zaxbux\BackblazeB2\B2Object;
+declare(strict_types=1);
+
+namespace Zaxbux\BackblazeB2\B2\Object;
 
 use Zaxbux\BackblazeB2\Class\B2ObjectBase;
-use Zaxbux\BackblazeB2\Class\IterableFromArrayTrait;
-use Zaxbux\BackblazeB2\Class\ProxyArrayAccessToProperties;
+//use Zaxbux\BackblazeB2\Trait\IterableFromArrayTrait;
+use Zaxbux\BackblazeB2\Trait\ProxyArrayAccessToProperties;
 
 class Bucket implements B2ObjectBase
 {
 	use ProxyArrayAccessToProperties;
-	use IterableFromArrayTrait;
+	//use IterableFromArrayTrait;
 
+	public const ATTRIBUTE_ACCOUNT_ID       = 'accountId';
+	public const ATTRIBUTE_BUCKET_ID        = 'bucketId';
+	public const ATTRIBUTE_BUCKET_INFO      = 'bucketInfo';
 	public const ATTRIBUTE_BUCKET_NAME      = 'bucketName';
 	public const ATTRIBUTE_BUCKET_TYPE      = 'bucketType';
-	public const ATTRIBUTE_BUCKET_INFO      = 'bucketInfo';
+	public const ATTRIBUTE_BUCKET_TYPES     = 'bucketTypes';
 	public const ATTRIBUTE_CORS_RULES       = 'corsRules';
 	public const ATTRIBUTE_DEFAULT_SSE      = 'defaultServerSideEncryption';
 	public const ATTRIBUTE_FILE_LOCK_CONFIG = 'fileLockConfiguration';
+	public const ATTRIBUTE_IF_REVISION_IS   = 'ifRevisionIs';
 	public const ATTRIBUTE_LIFECYCLE_RULES  = 'lifecycleRules';
-	public const ATTRIBUTE_REVISION         = 'revision';
 	public const ATTRIBUTE_OPTIONS          = 'options';
+	public const ATTRIBUTE_REVISION         = 'revision';
 
 
 	/** @var string */

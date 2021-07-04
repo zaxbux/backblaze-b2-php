@@ -34,7 +34,7 @@ class ClientFactory {
 				'Content-Type' => 'application/json; charset=utf-8',
 				'User-Agent' => sprintf(
 					'backblaze-b2-php/%s+php/%s github.com/zaxbux/backblaze-b2-php',
-					B2Client::CLIENT_VERSION,
+					B2Client::B2_API_CLIENT_VERSION,
 					PHP_VERSION
 				),
 			],

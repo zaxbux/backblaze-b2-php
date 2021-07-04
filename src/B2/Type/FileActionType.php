@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Zaxbux\BackblazeB2\B2\Type;
 
 use InvalidArgumentException;
 
-final class FileActionType {
+final class FileActionType
+{
 	/**
 	 * A file that was uploaded to B2 Cloud Storage.
 	 */

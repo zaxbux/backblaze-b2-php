@@ -1,11 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Zaxbux\BackblazeB2\Class;
 
 use function pathinfo;
 
 /** @package Zaxbux\BackblazeB2 */
-final class FilePathInfo {
+final class FilePathInfo
+{
 	
 	/**
 	 * Directory path containing the file.

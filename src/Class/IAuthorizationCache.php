@@ -1,9 +1,14 @@
 <?php
 
-namespace Zaxbux\BackblazeB2\Client;
+declare(strict_types=1);
 
-/** @package Zaxbux\BackblazeB2\Client */
-interface IAuthorizationCache {
+namespace Zaxbux\BackblazeB2\Class;
+
+use Zaxbux\BackblazeB2\B2\Object\AccountAuthorization;
+
+/** @package Zaxbux\BackblazeB2\Class */
+interface IAuthorizationCache
+{
 
 	/**
 	 * The maximum number of seconds to cache the authorization token

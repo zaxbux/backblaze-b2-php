@@ -1,14 +1,17 @@
 <?php
 
-namespace Zaxbux\BackblazeB2\B2Object;
+declare(strict_types=1);
+
+namespace Zaxbux\BackblazeB2\B2\Object;
 
 use Zaxbux\BackblazeB2\Class\B2ObjectBase;
-use Zaxbux\BackblazeB2\Class\ProxyArrayAccessToProperties;
+use Zaxbux\BackblazeB2\Trait\ProxyArrayAccessToProperties;
 
 class DownloadAuthorization implements B2ObjectBase
 {
 	use ProxyArrayAccessToProperties;
 
+	public const ATTRIBUTE_BUCKET_ID        = 'bucketId';
 	public const ATTRIBUTE_FILE_NAME_PREFIX    = 'fileNamePrefix';
 	public const ATTRIBUTE_AUTHORIZATION_TOKEN = 'authorizationToken';
 

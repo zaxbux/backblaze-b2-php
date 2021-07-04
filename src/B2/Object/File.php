@@ -1,32 +1,56 @@
 <?php
 
-namespace Zaxbux\BackblazeB2\B2Object;
+declare(strict_types=1);
+
+namespace Zaxbux\BackblazeB2\B2\Object;
 
 use Zaxbux\BackblazeB2\B2\Type\FileActionType;
 use Zaxbux\BackblazeB2\Class\B2ObjectBase;
 use Zaxbux\BackblazeB2\Class\FilePathInfo;
-use Zaxbux\BackblazeB2\Class\IterableFromArrayTrait;
-use Zaxbux\BackblazeB2\Class\ProxyArrayAccessToProperties;
+use Zaxbux\BackblazeB2\Trait\ProxyArrayAccessToProperties;
 
 /** @package Zaxbux\BackblazeB2 */
 class File implements B2ObjectBase
 {
 	use ProxyArrayAccessToProperties;
-	use IterableFromArrayTrait;
 
-	public const ATTRIBUTE_ACTION           = 'action';
-	public const ATTRIBUTE_CONTENT_LENGTH   = 'contentLength';
-	public const ATTRIBUTE_CONTENT_SHA1     = 'contentSha1';
-	public const ATTRIBUTE_CONTENT_MD5      = 'contentMd5';
-	public const ATTRIBUTE_CONTENT_TYPE     = 'contentType';
-	public const ATTRIBUTE_FILE_ID          = 'fileId';
-	public const ATTRIBUTE_FILE_INFO        = 'fileInfo';
-	public const ATTRIBUTE_FILE_NAME        = 'fileName';
-	public const ATTRIBUTE_FILE_RETENTION   = 'fileRetention';
-	public const ATTRIBUTE_LEGAL_HOLD       = 'legalHold';
-	public const ATTRIBUTE_SSE              = 'serverSideEncryption';
-	public const ATTRIBUTE_UPLOAD_TIMESTAMP = 'uploadTimestamp';
-	public const ATTRIBUTE_PART_NUMBER      = 'partNumber';
+	public const ATTRIBUTE_ACCOUNT_ID            = 'accountId';
+	public const ATTRIBUTE_ACTION                = 'action';
+	public const ATTRIBUTE_BUCKET_ID             = 'bucketId';
+	public const ATTRIBUTE_BYPASS_GOVERNANCE     = 'bypassGovernance';
+	public const ATTRIBUTE_CONTENT_LENGTH        = 'contentLength';
+	public const ATTRIBUTE_CONTENT_MD5           = 'contentMd5';
+	public const ATTRIBUTE_CONTENT_SHA1          = 'contentSha1';
+	public const ATTRIBUTE_CONTENT_TYPE          = 'contentType';
+	public const ATTRIBUTE_DELIMITER             = 'delimiter';
+	public const ATTRIBUTE_DESTINATION_BUCKET_ID = 'destinationBucketId';
+	public const ATTRIBUTE_DESTINATION_SSE       = 'destinationServerSideEncryption';
+	public const ATTRIBUTE_FILE_ID               = 'fileId';
+	public const ATTRIBUTE_LARGE_FILE_ID         = 'largeFileId';
+	public const ATTRIBUTE_FILE_INFO             = 'fileInfo';
+	public const ATTRIBUTE_FILE_NAME             = 'fileName';
+	public const ATTRIBUTE_NAME_PREFIX           = 'namePrefix';
+	public const ATTRIBUTE_FILE_NAME_PREFIX      = 'fileNamePrefix';
+	public const ATTRIBUTE_FILE_RETENTION        = 'fileRetention';
+	public const ATTRIBUTE_LEGAL_HOLD            = 'legalHold';
+	public const ATTRIBUTE_METADATA_DIRECTIVE    = 'metadataDirective';
+	public const ATTRIBUTE_MAX_FILE_COUNT        = 'maxFileCount';
+	public const ATTRIBUTE_MAX_PART_COUNT        = 'maxPartCount';
+	public const ATTRIBUTE_NEXT_FILE_ID          = 'nextFileId';
+	public const ATTRIBUTE_NEXT_FILE_NAME        = 'nextFileName';
+	public const ATTRIBUTE_PREFIX                = 'prefix';
+	public const ATTRIBUTE_PART_NUMBER           = 'partNumber';
+	public const ATTRIBUTE_START_PART_NUMBER     = 'startPartNumber';
+	public const ATTRIBUTE_NEXT_PART_NUMBER      = 'nextPartNumber';
+	public const ATTRIBUTE_PART_SHA1_ARRAY       = 'partSha1Array';
+	public const ATTRIBUTE_RANGE                 = 'range';
+	public const ATTRIBUTE_START_FILE_ID         = 'startFileId';
+	public const ATTRIBUTE_START_FILE_NAME       = 'startFileName';
+	public const ATTRIBUTE_SOURCE_FILE_ID        = 'sourceFileId';
+	public const ATTRIBUTE_SOURCE_SSE            = 'sourceServerSideEncryption';
+	public const ATTRIBUTE_SSE                   = 'serverSideEncryption';
+	public const ATTRIBUTE_UPLOAD_TIMESTAMP      = 'uploadTimestamp';
+	public const ATTRIBUTE_VALID_DURATION        = 'validDurationInSeconds';
 
 	public const CONTENT_TYPE_AUTO = 'b2/x-auto';
 

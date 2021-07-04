@@ -1,11 +1,13 @@
 <?php
 
-namespace Zaxbux\BackblazeB2\B2\Rule;
+namespace Zaxbux\BackblazeB2\B2\Object\Rule;
+
+use JsonSerializable;
 
 /**
  * A CORS rule object for the Backblaze B2 API
  */
-class CORSRule implements \JsonSerializable {
+class CORSRule implements JsonSerializable {
 
 	/**
 	 * @var string A name for humans to recognize the rule in a user interface.

@@ -61,7 +61,7 @@ class RefreshAuthorizationMiddleware
 	private function acquireAccessToken(): void
 	{
 		/*$parameters = $this->getTokenRequestParameters();
-		$response = $this->client->request('POST', $this->config->getTokenRoute(), [
+		$response = $this->client->guzzle->request('POST', $this->config->getTokenRoute(), [
 			'form_params' => $parameters,
 			// We'll use the default handler so we don't rerun our middleware
 			'handler' => HandlerStack::create(),

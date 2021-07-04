@@ -1,8 +1,8 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
-namespace Zaxbux\BackblazeB2\Client;
+namespace Zaxbux\BackblazeB2\B2\Object;
 
 use function time;
 use function json_encode;
@@ -11,14 +11,15 @@ use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
 use Zaxbux\BackblazeB2\Client as B2Client;
 use Zaxbux\BackblazeB2\Class\B2ObjectBase;
-use Zaxbux\BackblazeB2\Class\ProxyArrayAccessToProperties;
+use Zaxbux\BackblazeB2\Client\IAuthorizationCache;
+use Zaxbux\BackblazeB2\Trait\ProxyArrayAccessToProperties;
 
 /** @package Zaxbux\BackblazeB2\Client */
 class AccountAuthorization implements B2ObjectBase
 {
 	use ProxyArrayAccessToProperties;
 
-	//public const ATTRIBUTE_ACCOUNT_ID                 = 'accountId';
+	public const ATTRIBUTE_ACCOUNT_ID                 = 'accountId';
 	public const ATTRIBUTE_AUTHORIZATION_TOKEN        = 'authorizationToken';
 	public const ATTRIBUTE_ALLOWED                    = 'allowed';
 	public const ATTRIBUTE_API_URL                    = 'apiUrl';
@@ -83,162 +84,168 @@ class AccountAuthorization implements B2ObjectBase
 	/**
 	 * Get the value of accountId
 	 */
-	public function getAccountId()
+	public function getAccountId(): string
 	{
 		return $this->accountId;
 	}
 
 	/**
 	 * Set the value of accountId
-	 *
-	 * @return  self
 	 */
+	/*
 	public function setAccountId($accountId)
 	{
 		$this->accountId = $accountId;
 
 		return $this;
 	}
+	*/
 
 	/**
 	 * Get the value of authorizationToken
 	 */
-	public function getAuthorizationToken()
+	public function getAuthorizationToken(): string
 	{
 		return $this->authorizationToken;
 	}
 
 	/**
 	 * Set the value of authorizationToken
-	 *
-	 * @return  self
 	 */
+	/*
 	public function setAuthorizationToken($authorizationToken)
 	{
 		$this->authorizationToken = $authorizationToken;
 
 		return $this;
 	}
+	*/
 
 	/**
-	 * Get the value of allowed
+	 * Get the capabilities, bucket restrictions, and prefix restrictions.
 	 */
-	public function getAllowed()
+	public function getAllowed(): array
 	{
 		return $this->allowed;
 	}
 
 	/**
 	 * Set the value of allowed
-	 *
-	 * @return  self
 	 */
+	/*
 	public function setAllowed($allowed)
 	{
 		$this->allowed = $allowed;
 
 		return $this;
 	}
+	*/
 
 	/**
 	 * Get the value of apiUrl
 	 */
-	public function getApiUrl()
+	public function getApiUrl(): string
 	{
 		return $this->apiUrl;
 	}
 
 	/**
 	 * Set the value of apiUrl
-	 *
-	 * @return  self
 	 */
+	/*
 	public function setApiUrl($apiUrl)
 	{
 		$this->apiUrl = $apiUrl;
 
 		return $this;
 	}
+	*/
 
 	/**
 	 * Get the value of downloadUrl
 	 */
-	public function getDownloadUrl()
+	public function getDownloadUrl(): string
 	{
 		return $this->downloadUrl;
 	}
 
 	/**
 	 * Set the value of downloadUrl
-	 *
-	 * @return  self
 	 */
+	/*
 	public function setDownloadUrl($downloadUrl)
 	{
 		$this->downloadUrl = $downloadUrl;
 
 		return $this;
 	}
+	*/
 
 	/**
-	 * Get the value of recommendedPartSize
+	 * The recommended part size for each part of a large file (except the last one).
+	 * It is recommended to use this part size for optimal performance.
+	 * 
+	 * @return int The recomended part size in bytes.
 	 */
-	public function getRecommendedPartSize()
+	public function getRecommendedPartSize(): int
 	{
 		return $this->recommendedPartSize;
 	}
 
 	/**
 	 * Set the value of recommendedPartSize
-	 *
-	 * @return  self
 	 */
+	/*
 	public function setRecommendedPartSize($recommendedPartSize)
 	{
 		$this->recommendedPartSize = $recommendedPartSize;
 
 		return $this;
 	}
+	*/
 
 	/**
-	 * Get the value of absoluteMinimumPartSize
+	 * The smallest possible size of a part of a large file (except the last one).
+	 * Upload performance may be impacted if you use this value.
+	 * 
+	 * @return int The absolute minimum part size in bytes.
 	 */
-	public function getAbsoluteMinimumPartSize()
+	public function getAbsoluteMinimumPartSize(): int
 	{
 		return $this->absoluteMinimumPartSize;
 	}
 
 	/**
 	 * Set the value of absoluteMinimumPartSize
-	 *
-	 * @return  self
 	 */
+	/*
 	public function setAbsoluteMinimumPartSize($absoluteMinimumPartSize)
 	{
 		$this->absoluteMinimumPartSize = $absoluteMinimumPartSize;
 
 		return $this;
 	}
+	*/
 
 	/**
 	 * Get the value of s3ApiUrl
 	 */
-	public function getS3ApiUrl()
+	public function getS3ApiUrl(): string
 	{
 		return $this->s3ApiUrl;
 	}
 
 	/**
 	 * Set the value of s3ApiUrl
-	 *
-	 * @return  self
 	 */
+	/*
 	public function setS3ApiUrl($s3ApiUrl)
 	{
 		$this->s3ApiUrl = $s3ApiUrl;
 
 		return $this;
 	}
+	*/
 
 	/**
 	 * Get the value of authorizationTimestamp
@@ -252,13 +259,15 @@ class AccountAuthorization implements B2ObjectBase
 	 * Set the value of authorizationTimestamp
 	 *
 	 * @param int $authorizationTimestamp
-	 */ 
+	 */
+	/*
 	public function setAuthorizationTimestamp(int $authorizationTimestamp): AccountAuthorization
 	{
 		$this->authorizationTimestamp = $authorizationTimestamp;
 
 		return $this;
 	}
+	*/
 
 	/**
 	 * Check if the authorization token has expired, based on the `authorizationTimestamp`.
