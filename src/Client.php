@@ -66,30 +66,22 @@ class Client
 		string $applicationKeyId,
 		string $applicationKey,
 		?IAuthorizationCache $authorizationCache = null,
-		?ClientInterface $guzzle = null
+		?array $options = []
 	) {
 		$this->applicationKeyId   = $applicationKeyId;
 		$this->applicationKey     = $applicationKey;
 		$this->authorizationCache = $authorizationCache;
 
-		$config = new Config();
-		//$config->applicationKeyId = $applicationKeyId;
-		//$config->applicationKey = $applicationKey;
+		$config = new Config($this->getAccountAuthorization());
 
-		//$config->client = $this;
-
-		$this->guzzle = $guzzle ?: ClientFactory::create($config);
+		$this->guzzle = $options['client'] ?? ClientFactory::create($config, $options['handler'] ?? null);
 		$this->authorize();
-
-		fwrite(STDERR, print_r($this->getAccountAuthorization(), true));
 
 		/*
 		$this->key = new ApplicationKeyServiceInstance($this, $this->guzzle);
 		$this->file = new FileServiceInstance($this, $this->guzzle);
 		$this->bucket = new BucketServiceInstance($this, $this->guzzle);
 		*/
-
-		
 	}
 
 	public function getApplicationKeyId(): string
@@ -104,20 +96,22 @@ class Client
 
 	public function getAccountAuthorization(): ?AccountAuthorization
 	{
+		if (!$this->accountAuthorization) {
+			$this->accountAuthorization = new AccountAuthorization($this->applicationKeyId, $this->applicationKey);
+		}
+
 		return $this->accountAuthorization;
 	}
 
-	public function setAccountAuthorization(AccountAuthorization $accountAuthorization): void
+	/*public function setAccountAuthorization(AccountAuthorization $accountAuthorization): void
 	{
-		$this->accountAuthorization = $accountAuthorization;
-	}
+		//$this->accountAuthorization = $accountAuthorization;
+	}*/
 
 	/**
 	 * Authorize the B2 account in order to get an auth token and API/download URLs.
 	 * 
 	 * @link https://www.backblaze.com/b2/docs/b2_authorize_account.html
-	 * 
-	 * @throws \Exception
 	 */
 	public function authorize()
 	{
@@ -128,18 +122,14 @@ class Client
 
 		// Fetch a new authorization token from the API.
 		if (!$this->accountAuthorization) {
-			$this->accountAuthorization = AccountAuthorization::create($this);
+			$this->accountAuthorization = $this->getAccountAuthorization();
 		} //else {
-			$this->accountAuthorization->refresh();
+			$this->accountAuthorization->refresh($this->guzzle);
 		//}
 
 		// Cache the new authorization token.
-		if ($this->authorizationCache instanceof IAuthorizationCache && !$this->accountAuthorization) {
+		if ($this->authorizationCache instanceof IAuthorizationCache && $this->accountAuthorization) {
 			$this->authorizationCache->put($this->applicationKeyId, $this->accountAuthorization);
-		}
-
-		if (empty($this->accountAuthorization)) {
-			throw new \Exception('Failed to authorize account.');
 		}
 	}
 }

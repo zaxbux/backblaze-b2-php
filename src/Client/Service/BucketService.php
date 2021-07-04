@@ -16,6 +16,15 @@ trait BucketService
 	use BucketServiceHelpersTrait;
 
 	abstract public function getAccountAuthorization();
+
+	public abstract function deleteAllFileVersions(
+		string $bucketId,
+		?string $prefix = '',
+		?string $delimiter = null,
+		?string $startFileName = null,
+		?string $startFileId = null,
+		?bool $bypassGovernance = false
+	): void;
 	
 	/**
 	 * Create a bucket with the given name and type.
@@ -57,10 +66,16 @@ trait BucketService
 	 * 
 	 * @link https://www.backblaze.com/b2/docs/b2_delete_bucket.html 
 	 *
-	 * @param string $bucketId The ID of the bucket to delete.
+	 * @param string $bucketId  The ID of the bucket to delete.
+	 * @param bool   $withFiles Delete all file versions first.
 	 */
-	public function deleteBucket(string $bucketId): Bucket
+	public function deleteBucket(string $bucketId, ?bool $withFiles = false): Bucket
 	{
+		if ($withFiles) {
+			// Delete all files from the bucket first, so that the bucket itself can be deleted.
+			$this->deleteAllFileVersions($bucketId);
+		}
+
 		$response = $this->guzzle->request('POST', '/b2_delete_bucket', [
 			'json' => [
 				Bucket::ATTRIBUTE_ACCOUNT_ID => $this->getAccountAuthorization()->getAccountId(),

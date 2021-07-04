@@ -2,4 +2,4 @@
 
 namespace Zaxbux\BackblazeB2\Client\Exception;
 
-class TransactionCapExceededException extends \Exception {}
+class TransactionCapExceededException extends CapExceededException {}

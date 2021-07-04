@@ -29,8 +29,6 @@ trait FileService
 	 * @link https://www.backblaze.com/b2/docs/b2_cancel_large_file.html
 	 * 
 	 * @param string $fileId The ID returned by `b2_start_large_file`.
-	 * 
-	 * @return array
 	 */
 	public function cancelLargeFile(string $fileId)
 	{
@@ -139,8 +137,6 @@ trait FileService
 	 *                               source file data using Server-Side Encryption.
 	 * @param array  $destinationSSE Specifies the parameters for B2 to use for encrypting the
 	 *                               copied data before storing the destination file using Server-Side Encryption.
-	 * 
-	 * @return File
 	 */
 	public function copyPart(
 		string $sourceFileId,
@@ -174,8 +170,6 @@ trait FileService
 	 * @param string $fileId           The ID of the file.
 	 * @param bool   $bypassGovernance Must be specified and set to true if deleting a file version protected by
 	 *                                 File Lock governance mode retention settings.
-	 * 
-	 * @return array
 	 */
 	public function deleteFileVersion(string $fileName, string $fileId, ?bool $bypassGovernance = false): File
 	{
@@ -202,8 +196,6 @@ trait FileService
 	 * @param string|resource       $sink        A string, stream, or `StreamInterface` that specifies where to save the file.
 	 *                                           {@link https://docs.guzzlephp.org/en/stable/request-options.html#sink}
 	 * @param bool                  $headersOnly Only get the file headers, without downloading the whole file.
-	 * 
-	 * @return array
 	 */
 	public function downloadFileById(
 		string $fileId,
@@ -228,8 +220,6 @@ trait FileService
 	 * @param string|resource        $sink        A string, stream, or `StreamInterface` that specifies where to save the file.
 	 *                                            {@link https://docs.guzzlephp.org/en/stable/request-options.html#sink}
 	 * @param bool                   $headersOnly Only get the file headers, without downloading the whole file.
-	 * 
-	 * @return DownloadResponse
 	 */
 	public function downloadFileByName(
 		string $fileName,
@@ -322,8 +312,6 @@ trait FileService
 	 * @link https://www.backblaze.com/b2/docs/b2_get_upload_part_url.html
 	 * 
 	 * @param string $fileId The ID of the large file to upload parts of.
-	 * 
-	 * @return UploadPartUrl
 	 */
 	public function getUploadPartUrl(string $fileId): UploadPartUrl
 	{
@@ -364,10 +352,8 @@ trait FileService
 	 * 
 	 * @param string $bucketId
 	 * @param string $fileName
-	 * 
-	 * @return File
 	 */
-	public function hideFile(string $bucketId, string $fileName)
+	public function hideFile(string $bucketId, string $fileName): File
 	{
 
 		$response = $this->guzzle->request('POST', '/b2_hide_file', [
@@ -396,8 +382,6 @@ trait FileService
 	 *                              returned in the list.
 	 * @param int    $maxFileCount  The maximum number of files to return from this call. The default value is 100, and
 	 *                              the maximum is 10000.
-	 * 
-	 * @return FileListResponse
 	 */
 	public function listFileNames(
 		string $bucketId,
@@ -439,8 +423,6 @@ trait FileService
 	 * @param int    $maxFileCount  The maximum number of files to return from this call. The default value is 1000, and
 	 *                              the maximum is 10000. The maximum number of files returned per transaction is 1000.
 	 *                              If more than 1000 are returned, the call will be billed as multiple transactions.
-	 * 
-	 * @return FileListResponse
 	 */
 	public function listFileVersions(
 		string $bucketId,
@@ -479,8 +461,6 @@ trait FileService
 	 *                                is 1000.
 	 *                                If more than 1000 are returned, the call will be billed as multiple transactions.
 	 * @param bool   $loop            Make API requests until there are no keys left.
-	 * 
-	 * @return FilePartListResponse
 	 */
 	public function listParts(
 		string $fileId,
@@ -539,8 +519,6 @@ trait FileService
 	 * @param string         $fileName    The name of the file.
 	 * @param string         $contentType The MIME type of the content of the file.
 	 * @param FileInfo|array $fileInfo    A JSON object holding the name/value pairs for the custom file info.
-	 * 
-	 * @return File
 	 */
 	public function startLargeFile(
 		string $bucketId,
@@ -573,7 +551,6 @@ trait FileService
 	 * @param string $fileName  The name of the file.
 	 * @param string $fileId    The ID of the file.
 	 * @param string $legalHold The legal hold status of the file. `on` = *enabled*; `off` = *disabled*.
-	 * @return File 
 	 */
 	public function updateFileLegalHold(
 		string $fileName,
@@ -601,8 +578,6 @@ trait FileService
 	 * @param string $fileRetention    The legal hold status of the file. `on` = *enabled*; `off` = *disabled*.
 	 * @param bool   $bypassGovernance To shorten or remove an existing governance mode retention setting,
 	 *                                 this must also be specified and set to `true`.
-	 * 
-	 * @return File 
 	 */
 	public function updateFileRetention(
 		string $fileName,
@@ -633,8 +608,6 @@ trait FileService
 	 * @param string                     $contentType          The MIME type of the content of the file.
 	 * @param FileInfo|array             $fileInfo             The custom file info to add to the uploaded file.
 	 * @param ServerSideEncryption|array $serverSideEncryption The parameters for B2 to encrypt the uploaded file.
-	 * 
-	 * @return File
 	 */
 	public function uploadFile(
 		$body,
@@ -658,19 +631,23 @@ trait FileService
 		}
 
 		$uploadMetadata = FileUploadMetadata::fromResource($body);
+		$mtime = $uploadMetadata->getLastModifiedTimestamp();
+		if ($mtime > 0){
+			$fileInfo->setLastModifiedTimestamp($mtime);
+		}
 
 		$response = $this->guzzle->request('POST', $uploadUrl->getUploadUrl(), [
 			'body'    => $body,
 			'headers' => ServiceBase::filterRequestOptions([
-				'Authorization'                  => $uploadUrl->getAuthorizationToken(),
-				'Content-Type'                   => $contentType ?? File::CONTENT_TYPE_AUTO,
-				'Content-Length'                 => $uploadMetadata->getLength(),
+				'Authorization'                => $uploadUrl->getAuthorizationToken(),
+				'Content-Type'                 => $contentType ?? File::CONTENT_TYPE_AUTO,
+				'Content-Length'               => $uploadMetadata->getLength(),
 				File::HEADER_X_BZ_CONTENT_SHA1 => $uploadMetadata->getSha1(),
 				File::HEADER_X_BZ_FILE_NAME    => urlencode($fileName),
-			], [
-				...($serverSideEncryption->getHeaders() ?? []),
-				...($fileInfo->getHeaders() ?? []),
-			]),
+			], 
+				($serverSideEncryption->getHeaders() ?? []) +
+				($fileInfo->getHeaders() ?? [])
+			),
 		]);
 
 		return File::fromArray(json_decode((string) $response->getBody(), true));

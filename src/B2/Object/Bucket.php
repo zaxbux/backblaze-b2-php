@@ -19,6 +19,7 @@ class Bucket implements B2ObjectBase
 	public const ATTRIBUTE_BUCKET_NAME      = 'bucketName';
 	public const ATTRIBUTE_BUCKET_TYPE      = 'bucketType';
 	public const ATTRIBUTE_BUCKET_TYPES     = 'bucketTypes';
+	public const ATTRIBUTE_BUCKETS          = 'buckets';
 	public const ATTRIBUTE_CORS_RULES       = 'corsRules';
 	public const ATTRIBUTE_DEFAULT_SSE      = 'defaultServerSideEncryption';
 	public const ATTRIBUTE_FILE_LOCK_CONFIG = 'fileLockConfiguration';
@@ -65,14 +66,14 @@ class Bucket implements B2ObjectBase
 		string $id,
 		string $name,
 		string $type,
-		?string $info = null,
+		?array $info = null,
 		?string $accountId = null,
 		?array $corsRules = null,
 		?array $defaultServerSideEncryption = null,
 		?array $fileLockConfiguration = null,
 		?array $lifecycleRules = null,
 		?int $revision = null,
-		?string $options = null
+		?array $options = null
 	) {
 		$this->id                          = $id;
 		$this->name                        = $name;
@@ -313,14 +314,14 @@ class Bucket implements B2ObjectBase
 			$data[static::ATTRIBUTE_BUCKET_ID],
 			$data[static::ATTRIBUTE_BUCKET_NAME],
 			$data[static::ATTRIBUTE_BUCKET_TYPE],
-			$data[static::ATTRIBUTE_BUCKET_INFO],
-			$data[static::ATTRIBUTE_ACCOUNT_ID],
-			$data[static::ATTRIBUTE_CORS_RULES],
-			$data[static::ATTRIBUTE_DEFAULT_SSE],
-			$data[static::ATTRIBUTE_FILE_LOCK_CONFIG],
-			$data[static::ATTRIBUTE_LIFECYCLE_RULES],
-			$data[static::ATTRIBUTE_REVISION],
-			$data[static::ATTRIBUTE_OPTIONS],
+			$data[static::ATTRIBUTE_BUCKET_INFO] ?? null,
+			$data[static::ATTRIBUTE_ACCOUNT_ID] ?? null,
+			$data[static::ATTRIBUTE_CORS_RULES] ?? null,
+			$data[static::ATTRIBUTE_DEFAULT_SSE] ?? null,
+			$data[static::ATTRIBUTE_FILE_LOCK_CONFIG] ?? null,
+			$data[static::ATTRIBUTE_LIFECYCLE_RULES] ?? null,
+			$data[static::ATTRIBUTE_REVISION] ?? null,
+			$data[static::ATTRIBUTE_OPTIONS] ?? null,
 		);
 	}
 

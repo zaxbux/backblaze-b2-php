@@ -2,4 +2,4 @@
 
 namespace Zaxbux\BackblazeB2\Client\Exception;
 
-class UnauthorizedException extends \Exception {}
+class UnauthorizedException extends HttpException {}

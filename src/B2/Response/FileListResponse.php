@@ -2,6 +2,7 @@
 
 namespace Zaxbux\BackblazeB2\B2\Response;
 
+use Generator;
 use Psr\Http\Message\ResponseInterface;
 use Zaxbux\BackblazeB2\B2\Object\File;
 use Zaxbux\BackblazeB2\Classes\ListResponseBase;
@@ -33,11 +34,30 @@ class FileListResponse extends ListResponseBase {
 	/**
 	 * Get the value of files.
 	 * 
-	 * @return iterable<File>
+	 * @return Generator
 	 */ 
-	public function getFiles(): iterable
+	public function getFiles(): Generator
 	{
 		return $this->files;
+	}
+
+	/**
+	 * Get the value of files.
+	 * 
+	 * @return iterable<File>
+	 */ 
+	public function getFilesArray(): iterable
+	{
+		return iterator_to_array($this->getFiles());
+	}
+
+	/**
+	 * 
+	 * @return null|File 
+	 */
+	public function first(): ?File
+	{
+		return $this->getFiles()->current();
 	}
 
 	/**
@@ -63,8 +83,14 @@ class FileListResponse extends ListResponseBase {
 	 */
 	public static function create(ResponseInterface $response): FileListResponse
 	{
-		$responseData = json_decode((string) $response->getBody());
+		$data = json_decode((string) $response->getBody(), true);
 
-		return static($responseData->files, $responseData->nextFileId, $responseData->nextFileName);
+		return new FileListResponse(
+			$data[File::ATTRIBUTE_FILES],
+			// Not set when listing files by name
+			$data[File::ATTRIBUTE_NEXT_FILE_ID] ?? null,
+			// Not set when listing large files
+			$data[File::ATTRIBUTE_NEXT_FILE_NAME] ?? null
+		);
 	}
 }

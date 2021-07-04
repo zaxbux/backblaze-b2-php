@@ -2,20 +2,18 @@
 
 namespace Zaxbux\BackblazeB2\Http\Middleware;
 
-use GuzzleHttp\Client;
+use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Psr7\Utils;
 use Psr\Http\Message\RequestInterface;
 use Zaxbux\BackblazeB2\B2\Object\AccountAuthorization;
 use Zaxbux\BackblazeB2\Http\Config;
-
-//use function \GuzzleHttp\json_decode;
 
 class RefreshAuthorizationMiddleware
 {
 	private $client;
 	private $config;
 
-	public function __construct(Client $client, Config $config = null)
+	public function __construct(Config $config, ClientInterface $client)
 	{
 		$this->client = $client;
 		$this->config = $config;
@@ -24,7 +22,10 @@ class RefreshAuthorizationMiddleware
 	public function __invoke(callable $next): callable
 	{
 		return function (RequestInterface $request, array $options = []) use ($next) {
-			$request = $this->applyToken($request);
+			if (strpos($request->getUri()->getPath(), '/b2_authorize_account') < 0) {
+				$request = $this->applyToken($request);
+			}
+			
 			
 			return $next($request, $options);
 		};
@@ -40,7 +41,7 @@ class RefreshAuthorizationMiddleware
 		}
 
 		return Utils::modifyRequest($request, [
-			'uri' => $this->config->client->getAccountAuthorization()->getApiUrl(),
+			'uri' => $this->config->auth->getApiUrl(),
 			'set_headers' => [
 				'Authorization' => $this->getToken(),
 			],
@@ -49,17 +50,19 @@ class RefreshAuthorizationMiddleware
 
 	private function getToken(): string
 	{
-		return $this->config->client->getAccountAuthorization()->getAuthorizationToken();
+		return $this->config->auth->getAuthorizationToken();
 	}
 
 	private function hasValidToken(): bool
 	{
-		return false;
-		return $this->config->client->getAccountAuthorization() instanceof AccountAuthorization && !$this->config->client->getAccountAuthorization()->isStale();
+		
+		return $this->config->auth instanceof AccountAuthorization && !$this->config->auth->isStale();
 	}
 
 	private function acquireAccessToken(): void
 	{
+		$this->config->auth->refresh($this->client);
+
 		/*$parameters = $this->getTokenRequestParameters();
 		$response = $this->guzzle->request('POST', $this->config->getTokenRoute(), [
 			'form_params' => $parameters,

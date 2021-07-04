@@ -48,7 +48,7 @@ abstract class ObjectInfoBase {
 		return $this;
 	}
 
-	public function set(string $key, string $value): ObjectInfoBase
+	public function set(string $key, $value): ObjectInfoBase
 	{
 		if ($this->size() >= 10) {
 			throw new RuntimeException('Custom object information can only be up to 10 key/value pairs.');
@@ -62,15 +62,16 @@ abstract class ObjectInfoBase {
 	/**
 	 * 
 	 * @param null|string $key 
+	 * @param mixed       $default 
 	 * @return string|array 
 	 */
-	public function get(?string $key = null)
+	public function get(?string $key = null, $default = null)
 	{
 		if ($key === null) {
 			return $this->data;
 		}
 
-		return $this->data[$key];
+		return $this->data[$key] ?? $default;
 	}
 
 	public function size(): int
@@ -88,7 +89,7 @@ abstract class ObjectInfoBase {
 		$headers = [];
 
 		foreach ($this->data as $key => $value) {
-			$headers[static::HEADER_PREFIX . $key] = rawurlencode($value);
+			$headers[static::HEADER_PREFIX . $key] = rawurlencode((string) $value);
 		}
 
 		return $headers;

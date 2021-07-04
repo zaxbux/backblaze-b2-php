@@ -2,4 +2,4 @@
 
 namespace Zaxbux\BackblazeB2\Client\Exception;
 
-class TooManyBucketsException extends \Exception {}
+class TooManyBucketsException extends B2APIException {}

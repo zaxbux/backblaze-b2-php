@@ -92,11 +92,11 @@ class ServerSideEncryption implements JsonSerializable, ArrayAccess {
 	 */ 
 	public function setMode(string $mode): ServerSideEncryption
 	{
-		if ($mode !== static::MODE_B2 || $mode !== static::MODE_CUSTOMER) {
+		/*if ($mode !== static::MODE_B2 || $mode !== static::MODE_CUSTOMER) {
 			throw new InvalidArgumentException(
 				'Argument $mode must be either "' . static::MODE_B2 . '" or "' . static::MODE_CUSTOMER . '".'
 			);
-		}
+		}*/
 
 		$this->mode = $mode;
 

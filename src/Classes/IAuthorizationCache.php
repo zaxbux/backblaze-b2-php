@@ -21,7 +21,7 @@ interface IAuthorizationCache
 	 * @param int|string $key
 	 * @param AccountAuthorization $authorization
 	 */
-	public function put(int|string $key, AccountAuthorization $authorization): void;
+	public function put($key, AccountAuthorization $authorization): void;
 
 	/**
 	 * Returns the account authorization given key.
@@ -29,5 +29,5 @@ interface IAuthorizationCache
 	 * @param int|string $key
 	 * @return null|AccountAuthorization
 	 */
-	public function get(int|string $key): ?AccountAuthorization;
+	public function get($key): ?AccountAuthorization;
 }

@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace Zaxbux\BackblazeB2\Traits;
 
-use function is_string;
+use function sprintf, is_string;
 
 use AppendIterator;
+use Iterator;
 use NoRewindIterator;
 use Psr\Http\Message\StreamInterface;
 use Zaxbux\BackblazeB2\Client;
@@ -37,7 +38,8 @@ trait FileServiceHelpersTrait
 		string $bucketId,
 		?string $prefix = '',
 		?string $delimiter = null,
-		?string $startFileName = null
+		?string $startFileName = null,
+		?int $maxFileCount = 1000
 	): FileListResponse;
 
 	public abstract function listFileVersions(
@@ -45,7 +47,8 @@ trait FileServiceHelpersTrait
 		?string $prefix = '',
 		?string $delimiter = null,
 		?string $startFileName = null,
-		?string $startFileId = null
+		?string $startFileId = null,
+		?int $maxFileCount = 1000
 	): FileListResponse;
 
 	public abstract function listParts(
@@ -63,17 +66,27 @@ trait FileServiceHelpersTrait
 	/* End abstract methods */
 
 	/**
-	 * Deletes all versions of a file in a bucket.
+	 * Deletes all versions of a file(s) in a bucket.
 	 * 
-	 * @see Client::deleteFileVersion()
+	 * @see FileService::deleteFileVersion()
 	 * 
-	 * @param string $bucketId 
-	 * @param string $fileName 
-	 * @param null|bool $bypassGovernance 
+	 * @param string      $bucketId         The ID of the bucket containing file versions to delete.
+	 * @param null|string $prefix           
+	 * @param null|string $delimiter        
+	 * @param null|string $startFileName    
+	 * @param null|string $startFileId      
+	 * @param null|bool   $bypassGovernance 
+	 * @return void 
 	 */
-	public function deleteAllFileVersions(string $bucketId, string $fileName, ?bool $bypassGovernance = false): void
-	{
-		$fileVersions = $this->listAllFileVersions($bucketId, null, null, $fileName);
+	public function deleteAllFileVersions(
+		string $bucketId,
+		?string $prefix = '',
+		?string $delimiter = null,
+		?string $startFileName = null,
+		?string $startFileId = null,
+		?bool $bypassGovernance = false
+	): void {
+		$fileVersions = $this->listAllFileVersions($bucketId, $prefix, $delimiter, $startFileName, $startFileId);
 
 		foreach ($fileVersions as $version) {
 			$this->deleteFileVersion($version->getName(), $version->getId(), $bypassGovernance);
@@ -93,35 +106,27 @@ trait FileServiceHelpersTrait
 		string $delimiter = null,
 		string $startFileName = null,
 		int $maxFileCount = 1000
-	): iterable {
-		$files = [];
+	): Iterator {
+		$allFiles = new AppendIterator();
+		$nextFileName = $startFileName ?? '';
 
-		while (true) {
-			$response = $this->listFileNames($bucketId, $prefix, $delimiter, $startFileName, $maxFileCount);
+		while ($nextFileName !== null) {
+			$response     = $this->listFileNames($bucketId, $prefix, $delimiter, $startFileName, $maxFileCount);
+			$nextFileName = $response->getNextFileName();
 
-			array_merge($files, $response['files']);
-			$startFileName = $response['nextFileName'];
-
-			if ($response['nextFileName'] == null) {
-				break;
-			}
+			$allFiles->append(new NoRewindIterator($response->getFiles()));
 		}
 
-		return [
-			'files'        => $files,
-			'nextFileName' => null,
-		];
+		return $allFiles;
 	}
 
 	public function getFileByName(string $bucketId, string $fileName): File
 	{
-		$files = $this->listFileNames($bucketId, '', null, $fileName, 1);
-
-		if (iterator_count($files->getFiles()) < 1) {
-			throw new NotFoundException();
+		if (!$file = $this->listFileNames($bucketId, '', null, $fileName, 1)->first()) {
+			throw new NotFoundException(sprintf('No results returned for file name "%s"'));
 		}
 
-		return File::fromArray($files->getFiles()[0]);
+		return $file;
 	}
 
 	/**
@@ -130,7 +135,6 @@ trait FileServiceHelpersTrait
 	 * @see Client::listFileVersions()
 	 * 
 	 * @return iterable<File>
-	 * @throws ValidationException 
 	 */
 	public function listAllFileVersions(
 		string $bucketId,
@@ -139,10 +143,6 @@ trait FileServiceHelpersTrait
 		?string $startFileName = null,
 		?string $startFileId = null
 	): iterable {
-		if ($startFileId && !$startFileName) {
-			throw new ValidationException('$startFileName is required if $startFileId is provided.');
-		}
-
 		$allFiles = new AppendIterator();
 		$nextFileId = $startFileId;
 		$nextFileName = $startFileName;
@@ -160,13 +160,11 @@ trait FileServiceHelpersTrait
 
 	public function getFileById(string $bucketId, string $fileId): File
 	{
-		$files = $this->listFileVersions($bucketId, '', null, null, $fileId, 1);
-
-		if (iterator_count($files->getFiles()) < 1) {
-			throw new NotFoundException();
+		if (!$file = $this->listFileVersions($bucketId, '', null, null, $fileId, 1)->first()) {
+			throw new NotFoundException(sprintf('No results returned for file id "%s"'));
 		}
 
-		return File::fromArray($files->getFiles()[0]);
+		return $file;
 	}
 
 	/**
@@ -252,7 +250,7 @@ trait FileServiceHelpersTrait
 			'stream'  => static::isStream($sink),
 		]);
 
-		return DownloadResponse::create($response, !is_string($sink) ?: $sink);
+		return DownloadResponse::create($response, !is_string($sink) ? null : $sink);
 	}
 
 	private static function isStream($var): bool

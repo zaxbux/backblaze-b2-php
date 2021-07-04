@@ -2,5 +2,27 @@
   "accountId": "accountId",
   "bucketId": "bucketId",
   "bucketName": "test-bucket",
-  "bucketType": "allPublic"
+  "bucketType": "allPublic",
+  "bucketInfo": {},
+  "corsRules": [],
+  "defaultServerSideEncryption": {
+    "isClientAuthorizedToRead" : true,
+      "value": {
+        "algorithm" : null,
+        "mode" : null
+      }
+  },
+  "fileLockConfiguration": {
+    "isClientAuthorizedToRead": true,
+    "value": {
+      "defaultRetention": {
+        "mode": null,
+        "period": null
+      },
+      "isFileLockEnabled": false
+    }
+  },
+  "lifecycleRules": [],
+  "options": [],
+  "revision": 2
 }

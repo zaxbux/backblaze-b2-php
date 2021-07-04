@@ -7,9 +7,8 @@ namespace Zaxbux\BackblazeB2\B2\Object;
 use function time;
 use function json_encode;
 
-use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
-use Zaxbux\BackblazeB2\Client as B2Client;
+use GuzzleHttp\HandlerStack;
 use Zaxbux\BackblazeB2\Classes\B2ObjectBase;
 use Zaxbux\BackblazeB2\Classes\IAuthorizationCache;
 use Zaxbux\BackblazeB2\Traits\ProxyArrayAccessToProperties;
@@ -19,20 +18,26 @@ class AccountAuthorization implements B2ObjectBase
 {
 	use ProxyArrayAccessToProperties;
 
+	public const ATTRIBUTE_ABSOLUTE_MINIMUM_PART_SIZE = 'absoluteMinimumPartSize';
 	public const ATTRIBUTE_ACCOUNT_ID                 = 'accountId';
-	public const ATTRIBUTE_AUTHORIZATION_TOKEN        = 'authorizationToken';
 	public const ATTRIBUTE_ALLOWED                    = 'allowed';
 	public const ATTRIBUTE_API_URL                    = 'apiUrl';
+	public const ATTRIBUTE_APPLICATION_KEY            = 'applicationKey';
+	public const ATTRIBUTE_APPLICATION_KEY_ID         = 'applicationKeyId';
+	public const ATTRIBUTE_AUTHORIZATION_TIMESTAMP    = 'authorizationTimestamp';
+	public const ATTRIBUTE_AUTHORIZATION_TOKEN        = 'authorizationToken';
 	public const ATTRIBUTE_DOWNLOAD_URL               = 'downloadUrl';
 	public const ATTRIBUTE_RECOMMENDED_PART_SIZE      = 'recommendedPartSize';
-	public const ATTRIBUTE_ABSOLUTE_MINIMUM_PART_SIZE = 'absoluteMinimumPartSize';
 	public const ATTRIBUTE_S3_API_URL                 = 's3ApiUrl';
-	public const ATTRIBUTE_AUTHORIZATION_TIMESTAMP    = 'authorizationTimestamp';
 
 	/**  @deprecated */
 	public const ATTRIBUTE_MINIMUM_PART_SIZE          = 'minimumPartSize';
 
-	protected $client;
+	/** @var string */
+	private $applicationKeyId;
+
+	/** @var string */
+	private $applicationKey;
 
 	/** @var string */
 	private $accountId;
@@ -62,6 +67,8 @@ class AccountAuthorization implements B2ObjectBase
 	private $authorizationTimestamp;
 
 	public function __construct(
+		string $applicationKeyId,
+		string $applicationKey,
 		?string $accountId = null,
 		?string $authorizationToken = null,
 		?array $allowed = null,
@@ -72,6 +79,8 @@ class AccountAuthorization implements B2ObjectBase
 		?string $s3ApiUrl = null,
 		?int $authorizationTimestamp = -1
 	) {
+		$this->applicationKey = $applicationKey;
+		$this->applicationKeyId = $applicationKeyId;
 		$this->accountId = $accountId;
 		$this->authorizationToken = $authorizationToken;
 		$this->allowed = $allowed;
@@ -81,6 +90,22 @@ class AccountAuthorization implements B2ObjectBase
 		$this->absoluteMinimumPartSize = $absoluteMinimumPartSize;
 		$this->s3ApiUrl = $s3ApiUrl;
 		$this->authorizationTimestamp = $authorizationTimestamp;
+	}
+
+	/**
+	 * Get the value of applicationKeyId
+	 */ 
+	public function getApplicationKeyId(): string
+	{
+		return $this->applicationKeyId;
+	}
+
+	/**
+	 * Get the value of applicationKey
+	 */ 
+	public function getApplicationKey(): string
+	{
+		return $this->applicationKey;
 	}
 
 	/**
@@ -161,13 +186,6 @@ class AccountAuthorization implements B2ObjectBase
 		return $this->authorizationTimestamp;
 	}
 
-	public static function create(B2Client $client) {
-		$o = new AccountAuthorization();
-		$o->client = $client;
-
-		return $o;
-	}
-
 	/**
 	 * Check if the authorization token has expired, based on the `authorizationTimestamp`.
 	 * Will always return `false` if there is no `authorizationTimestamp`.
@@ -179,32 +197,31 @@ class AccountAuthorization implements B2ObjectBase
 		return time() - IAuthorizationCache::EXPIRES >= $this->authorizationTimestamp ?? -1;
 	}
 
-	public function refresh(): void {
-		/*$client = $client ?: new Client([
-			'base_uri' => B2Client::B2_API_BASE_URL . B2Client::B2_API_V2,
-		]);*/
-
-		$response = $this->client->guzzle->request('GET', '/b2_authorize_account', [
+	public function refresh(ClientInterface $client): void {
+		$response = $client->request('GET', '/b2_authorize_account', [
 			'headers' => [
-				'Authorization' => static::getBasicAuthorization($this->client->getApplicationKeyId(), $this->client->getApplicationKey()),
+				'Authorization' => static::getBasicAuthorization($this->applicationKeyId, $this->applicationKey),
 			],
 		]);
 
 		$data = json_decode((string) $response->getBody(), true);
 
-		$this->accountId =  $data[static::ATTRIBUTE_ACCOUNT_ID];
-		$this->authorizationToken =  $data[static::ATTRIBUTE_AUTHORIZATION_TOKEN];
-		$this->allowed =  $data[static::ATTRIBUTE_ALLOWED];
-		$this->apiUrl =  $data[static::ATTRIBUTE_API_URL];
-		$this->downloadUrl =  $data[static::ATTRIBUTE_DOWNLOAD_URL];
-		$this->recommendedPartSize =  $data[static::ATTRIBUTE_RECOMMENDED_PART_SIZE];
-		$this->absoluteMinimumPartSize =  $data[static::ATTRIBUTE_ABSOLUTE_MINIMUM_PART_SIZE];
-		$this->s3ApiUrl =  $data[static::ATTRIBUTE_S3_API_URL];
+		$this->accountId               = $data[static::ATTRIBUTE_ACCOUNT_ID];
+		$this->authorizationToken      = $data[static::ATTRIBUTE_AUTHORIZATION_TOKEN];
+		$this->allowed                 = $data[static::ATTRIBUTE_ALLOWED];
+		$this->apiUrl                  = $data[static::ATTRIBUTE_API_URL];
+		$this->downloadUrl             = $data[static::ATTRIBUTE_DOWNLOAD_URL];
+		$this->recommendedPartSize     = $data[static::ATTRIBUTE_RECOMMENDED_PART_SIZE];
+		$this->absoluteMinimumPartSize = $data[static::ATTRIBUTE_ABSOLUTE_MINIMUM_PART_SIZE];
+		$this->s3ApiUrl                = $data[static::ATTRIBUTE_S3_API_URL];
+		$this->authorizationTimestamp  = time();
 	}
 
 	public static function fromArray(array $data): AccountAuthorization
 	{
 		return new AccountAuthorization(
+			$data[static::ATTRIBUTE_APPLICATION_KEY_ID],
+			$data[static::ATTRIBUTE_APPLICATION_KEY],
 			$data[static::ATTRIBUTE_ACCOUNT_ID] ?? null,
 			$data[static::ATTRIBUTE_AUTHORIZATION_TOKEN] ?? null,
 			$data[static::ATTRIBUTE_ALLOWED] ?? null,
@@ -220,6 +237,8 @@ class AccountAuthorization implements B2ObjectBase
 	public function jsonSerialize(): array
 	{
 		return [
+			static::ATTRIBUTE_APPLICATION_KEY_ID => $this->applicationKeyId,
+			static::ATTRIBUTE_APPLICATION_KEY => $this->applicationKey,
 			static::ATTRIBUTE_ACCOUNT_ID => $this->accountId,
 			static::ATTRIBUTE_AUTHORIZATION_TOKEN => $this->authorizationToken,
 			static::ATTRIBUTE_ALLOWED => $this->allowed,

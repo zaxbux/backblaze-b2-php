@@ -2,4 +2,4 @@
 
 namespace Zaxbux\BackblazeB2\Client\Exception;
 
-class BadAuthTokenException extends \Exception {}
+class BadAuthTokenException extends B2APIException {}

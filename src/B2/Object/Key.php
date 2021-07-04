@@ -17,10 +17,12 @@ class Key implements B2ObjectBase
 	public const ATTRIBUTE_CAPABILITIES             = 'capabilities';
 	public const ATTRIBUTE_EXPIRATION_TIMESTAMP     = 'expirationTimestamp';
 	public const ATTRIBUTE_KEY_NAME                 = 'keyName';
+	public const ATTRIBUTE_KEYS                     = 'keys';
 	public const ATTRIBUTE_MAX_KEY_COUNT            = 'maxKeyCount';
 	public const ATTRIBUTE_NAME_PREFIX              = 'namePrefix';
 	public const ATTRIBUTE_OPTIONS                  = 'options';
 	public const ATTRIBUTE_START_APPLICATION_KEY_ID = 'startApplicationKeyId';
+	public const ATTRIBUTE_NEXT_APPLICATION_KEY_ID  = 'nextApplicationKeyId';
 	public const ATTRIBUTE_VALID_DURATION           = 'validDurationInSeconds';
 
 	/** @var string */

@@ -25,10 +25,11 @@ final class FileUploadMetadata {
 	 * @param string $hash 
 	 * @return void 
 	 */
-	public function __construct(int $length, string $hash)
+	public function __construct(int $length, string $hash, ?int $mtime = null)
 	{
 		$this->length = $length;
 		$this->hash = $hash;
+		$this->mtime = $mtime > 0 ? $mtime : null;
 	}
 
 	/**
@@ -36,7 +37,7 @@ final class FileUploadMetadata {
 	 * @param string|resource $body The resource used to calculate a length in bytes and SHA1 hash.
 	 * @return FileUploadMetadata
 	 */
-	public static function fromResource( $body)
+	public static function fromResource($body)
 	{
 		if (is_resource($body)) {
 			// Calculate the file's hash incrementally from the stream.
@@ -44,20 +45,20 @@ final class FileUploadMetadata {
 			hash_update_stream($context, $body);
 			$hash = hash_final($context);
 
-			// Get the length of the stream.
-			$length = fstat($body)['length'];
+			// Get the length and mtime of the stream.
+			$fileInfo = fstat($body);
 
 			// Rewind the stream before passing it to the HTTP client.
 			rewind($body);
 
-			return static($length, $hash);
+			return new FileUploadMetadata($fileInfo['size'], $hash, $fileInfo['mtime'] ?? null);
 		}
 
 		// Calculate the length and hash of a string.
 		$hash = sha1($body);
 		$length = mb_strlen($body);
 
-		return static($length, $hash);
+		return new FileUploadMetadata($length, $hash);
 	}
 
 	/**
@@ -74,5 +75,13 @@ final class FileUploadMetadata {
 	public function getSha1(): string
 	{
 		return $this->hash;
+	}
+
+	/**
+	 * Get the last modified timestamp in seconds since the UNIX epoch.
+	 */ 
+	public function getLastModifiedTimestamp(): ?int
+	{
+		return $this->mtime;
 	}
 }

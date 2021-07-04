@@ -3,6 +3,7 @@
 namespace Zaxbux\BackblazeB2\B2\Response;
 
 use Psr\Http\Message\ResponseInterface;
+use Zaxbux\BackblazeB2\B2\Object\File;
 use Zaxbux\BackblazeB2\Classes\ListResponseBase;
 
 use function GuzzleHttp\json_decode;
@@ -49,8 +50,11 @@ class FilePartListResponse extends ListResponseBase {
 	 */
 	public static function create(ResponseInterface $response): FilePartListResponse
 	{
-		$responseData = json_decode((string) $response->getBody());
+		$responseData = json_decode((string) $response->getBody(), true);
 
-		return static($responseData->parts, $responseData->nextPartNumber);
+		return new FilePartListResponse(
+			$responseData[File::ATTRIBUTE_PARTS],
+			$responseData[File::ATTRIBUTE_NEXT_PART_NUMBER]
+		);
 	}
 }

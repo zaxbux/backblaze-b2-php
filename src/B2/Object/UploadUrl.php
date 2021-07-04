@@ -55,7 +55,7 @@ class UploadUrl {
 	/** @inheritdoc */
 	public static function fromArray(array $data): UploadUrl
 	{
-		return static(
+		return new UploadUrl(
 			$data[static::ATTRIBUTE_BUCKET_ID],
 			$data[static::ATTRIBUTE_UPLOAD_URL],
 			$data[static::ATTRIBUTE_AUTHORIZATION_TOKEN],

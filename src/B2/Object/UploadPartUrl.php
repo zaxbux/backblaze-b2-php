@@ -55,7 +55,7 @@ class UploadPartUrl {
 	/** @inheritdoc */
 	public static function fromArray(array $data): UploadPartUrl
 	{
-		return static(
+		return new UploadPartUrl(
 			$data[static::ATTRIBUTE_FILE_ID],
 			$data[static::ATTRIBUTE_UPLOAD_URL],
 			$data[static::ATTRIBUTE_AUTHORIZATION_TOKEN],

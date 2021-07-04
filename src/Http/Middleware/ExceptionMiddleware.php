@@ -7,7 +7,7 @@ use Psr\Http\Message\ResponseInterface;
 use Zaxbux\BackblazeB2\Client\Exception\B2APIException;
 use Zaxbux\BackblazeB2\Client\Exception\NotFoundException;
 use Zaxbux\BackblazeB2\Client\Exception\UnauthorizedException;
-use Zaxbux\BackblazeB2\Client\Exception\ValidationException;
+use Zaxbux\BackblazeB2\Http\ErrorHandler;
 use Zaxbux\BackblazeB2\Http\Response;
 
 class ExceptionMiddleware
@@ -15,11 +15,13 @@ class ExceptionMiddleware
 	public function __invoke(callable $handler)
 	{
 		return function (RequestInterface $request, array $options = []) use ($handler) {
-			$response = $handler($request, $options);
-			if ($this->isSuccessful($response)) {
-				return $response;
-			}
-			$this->handleErrorResponse($response);
+			$promise = $handler($request, $options);
+			return $promise->then(function (ResponseInterface $response) {
+				if ($this->isSuccessful($response)) {
+					return $response;
+				}
+				$this->handleErrorResponse($response);
+			});
 		};
 	}
 
@@ -32,15 +34,19 @@ class ExceptionMiddleware
 
 	public function handleErrorResponse(ResponseInterface $response)
 	{
+		throw ErrorHandler::getException($response);
+		/*
 		switch ($response->getStatusCode()) {
-			case Response::HTTP_UNPROCESSABLE_ENTITY:
-				throw new ValidationException(json_decode($response->getBody(), true));
+			//case Response::HTTP_UNPROCESSABLE_ENTITY:
+			//	throw new ValidationException(Utils::jsonDecode($response->getBody(), true));
 			case Response::HTTP_NOT_FOUND:
 				throw new NotFoundException;
 			case Response::HTTP_UNAUTHORIZED:
 				throw new UnauthorizedException;
 			default:
-				throw new B2APIException((string) $response->getBody());
+				throw ErrorHandler::getException($response);
+				//throw new B2APIException((string) $response->getBody());
 		}
+		*/
 	}
 }

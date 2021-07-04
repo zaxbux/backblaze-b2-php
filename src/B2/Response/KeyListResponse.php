@@ -32,8 +32,12 @@ class KeyListResponse extends ListResponseBase {
 	 * 
 	 * @return iterable<Key>
 	 */ 
-	public function getKeys(): iterable
+	public function getKeys(?bool $asArray = false): iterable
 	{
+		if ($asArray) {
+			return iterator_to_array($this->keys);
+		}
+
 		return $this->keys;
 	}
 
@@ -52,8 +56,11 @@ class KeyListResponse extends ListResponseBase {
 	 */
 	public static function create(ResponseInterface $response): KeyListResponse
 	{
-		$responseData = json_decode((string) $response->getBody());
+		$responseData = json_decode((string) $response->getBody(), true);
 
-		return static($responseData->keys, $responseData->nextApplicationKeyId);
+		return new KeyListResponse(
+			$responseData[Key::ATTRIBUTE_KEYS],
+			$responseData[Key::ATTRIBUTE_NEXT_APPLICATION_KEY_ID]
+		);
 	}
 }

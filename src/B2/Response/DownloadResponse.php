@@ -105,6 +105,6 @@ class DownloadResponse extends ResponseBase {
 		ResponseInterface $response,
 		?string $filePath = null
 	): DownloadResponse {
-		return static($response, $filePath);
+		return new DownloadResponse($response, $filePath);
 	}
 }

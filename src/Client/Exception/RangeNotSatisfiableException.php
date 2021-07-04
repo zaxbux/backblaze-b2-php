@@ -2,4 +2,4 @@
 
 namespace Zaxbux\BackblazeB2\Client\Exception;
 
-class RangeNotSatisfiableException extends \Exception {}
+class RangeNotSatisfiableException extends HttpException {}

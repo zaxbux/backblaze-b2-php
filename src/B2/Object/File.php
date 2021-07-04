@@ -26,29 +26,31 @@ class File implements B2ObjectBase
 	public const ATTRIBUTE_DESTINATION_BUCKET_ID = 'destinationBucketId';
 	public const ATTRIBUTE_DESTINATION_SSE       = 'destinationServerSideEncryption';
 	public const ATTRIBUTE_FILE_ID               = 'fileId';
-	public const ATTRIBUTE_LARGE_FILE_ID         = 'largeFileId';
 	public const ATTRIBUTE_FILE_INFO             = 'fileInfo';
 	public const ATTRIBUTE_FILE_NAME             = 'fileName';
-	public const ATTRIBUTE_NAME_PREFIX           = 'namePrefix';
 	public const ATTRIBUTE_FILE_NAME_PREFIX      = 'fileNamePrefix';
 	public const ATTRIBUTE_FILE_RETENTION        = 'fileRetention';
+	public const ATTRIBUTE_FILES                 = 'files';
+	public const ATTRIBUTE_LARGE_FILE_ID         = 'largeFileId';
 	public const ATTRIBUTE_LEGAL_HOLD            = 'legalHold';
-	public const ATTRIBUTE_METADATA_DIRECTIVE    = 'metadataDirective';
 	public const ATTRIBUTE_MAX_FILE_COUNT        = 'maxFileCount';
 	public const ATTRIBUTE_MAX_PART_COUNT        = 'maxPartCount';
+	public const ATTRIBUTE_METADATA_DIRECTIVE    = 'metadataDirective';
+	public const ATTRIBUTE_NAME_PREFIX           = 'namePrefix';
 	public const ATTRIBUTE_NEXT_FILE_ID          = 'nextFileId';
 	public const ATTRIBUTE_NEXT_FILE_NAME        = 'nextFileName';
-	public const ATTRIBUTE_PREFIX                = 'prefix';
-	public const ATTRIBUTE_PART_NUMBER           = 'partNumber';
-	public const ATTRIBUTE_START_PART_NUMBER     = 'startPartNumber';
 	public const ATTRIBUTE_NEXT_PART_NUMBER      = 'nextPartNumber';
+	public const ATTRIBUTE_PART_NUMBER           = 'partNumber';
 	public const ATTRIBUTE_PART_SHA1_ARRAY       = 'partSha1Array';
+	public const ATTRIBUTE_PARTS                 = 'parts';
+	public const ATTRIBUTE_PREFIX                = 'prefix';
 	public const ATTRIBUTE_RANGE                 = 'range';
-	public const ATTRIBUTE_START_FILE_ID         = 'startFileId';
-	public const ATTRIBUTE_START_FILE_NAME       = 'startFileName';
 	public const ATTRIBUTE_SOURCE_FILE_ID        = 'sourceFileId';
 	public const ATTRIBUTE_SOURCE_SSE            = 'sourceServerSideEncryption';
 	public const ATTRIBUTE_SSE                   = 'serverSideEncryption';
+	public const ATTRIBUTE_START_FILE_ID         = 'startFileId';
+	public const ATTRIBUTE_START_FILE_NAME       = 'startFileName';
+	public const ATTRIBUTE_START_PART_NUMBER     = 'startPartNumber';
 	public const ATTRIBUTE_UPLOAD_TIMESTAMP      = 'uploadTimestamp';
 	public const ATTRIBUTE_VALID_DURATION        = 'validDurationInSeconds';
 
@@ -113,20 +115,22 @@ class File implements B2ObjectBase
 	 * @param string $id 
 	 * @param string $name 
 	 * @param string $bucketId 
-	 * @param null|string $action 
-	 * @param null|array $fileInfo 
-	 * @param null|int $contentLength 
-	 * @param null|string $contentType 
-	 * @param null|string $contentMd5 
-	 * @param null|string $contentSha1 
-	 * @param null|string $accountId 
-	 * @param null|array $retention 
-	 * @param null|array $legalHold 
-	 * @param null|int $partNumber 
+	 * @param string $action 
+	 * @param array  $fileInfo 
+	 * @param int    $contentLength 
+	 * @param string $contentType 
+	 * @param string $contentMd5 
+	 * @param string $contentSha1 
+	 * @param string $accountId 
+	 * @param int    $uploadTimestamp 
+	 * @param array  $retention 
+	 * @param array  $legalHold 
+	 * @param array  $serverSideEncryption 
+	 * @param int    $partNumber 
 	 */
 	public function __construct(
 		string $id,
-		string $name,
+		?string $name = null,
 		?string $bucketId = null,
 		?string $action = null,
 		?array $fileInfo = null,
@@ -134,24 +138,28 @@ class File implements B2ObjectBase
 		?string $contentType = null,
 		?string $contentMd5 = null,
 		?string $contentSha1 = null,
+		?int $uploadTimestamp = null,
 		?string $accountId = null,
 		?array $retention = null,
 		?array $legalHold = null,
+		?array $serverSideEncryption = null,
 		?int $partNumber = null
 	) {
-		$this->id            = $id;
-		$this->name          = $name;
-		$this->bucketId      = $bucketId;
-		$this->action        = FileActionType::fromString($action);
-		$this->fileInfo      = $fileInfo;
-		$this->contentLength = $contentLength;
-		$this->contentType   = $contentType;
-		$this->contentMd5    = $contentMd5;
-		$this->contentSha1   = $contentSha1;
-		$this->accountId     = $accountId;
-		$this->retention     = $retention;
-		$this->legalHold     = $legalHold;
-		$this->partNumber    = $partNumber;
+		$this->id                   = $id;
+		$this->name                 = $name;
+		$this->bucketId             = $bucketId;
+		$this->action               = $action ? FileActionType::fromString($action) : null;
+		$this->fileInfo             = $fileInfo;
+		$this->contentLength        = $contentLength;
+		$this->contentType          = $contentType;
+		$this->contentMd5           = $contentMd5;
+		$this->contentSha1          = $contentSha1;
+		$this->uploadTimestamp      = $uploadTimestamp;
+		$this->accountId            = $accountId;
+		$this->retention            = $retention;
+		$this->legalHold            = $legalHold;
+		$this->serverSideEncryption = $serverSideEncryption;
+		$this->partNumber           = $partNumber;
 	}
 
 	/**
@@ -451,6 +459,22 @@ class File implements B2ObjectBase
 	}
 
 	/**
+	 * Get the timestamp of when the file was last modified, if available.
+	 * 
+	 * @param null|bool $milliseconds Set to `false` to get timestamp in seconds.
+	 * @return null|int Time since UNIX epoch.
+	 */
+	public function getLastModifiedTimestamp(?bool $milliseconds = true): ?int
+	{
+		if ($this->info) {
+			$t = FileInfo::fromArray($this->info)->get(FileInfo::B2_FILE_INFO_MTIME, null);
+			return $milliseconds ? $t : $t * 1000;
+		}
+
+		return null;
+	}
+
+	/**
 	 * @see pathinfo()
 	 */
 	public function getPathInfo(): FilePathInfo
@@ -462,7 +486,7 @@ class File implements B2ObjectBase
 	{
 		return new File(
 			$data[static::ATTRIBUTE_FILE_ID],
-			$data[static::ATTRIBUTE_FILE_NAME],
+			$data[static::ATTRIBUTE_FILE_NAME] ?? null,
 			$data[static::ATTRIBUTE_BUCKET_ID] ?? null,
 			$data[static::ATTRIBUTE_ACTION] ?? null,
 			$data[static::ATTRIBUTE_FILE_INFO] ?? null,
@@ -470,7 +494,7 @@ class File implements B2ObjectBase
 			$data[static::ATTRIBUTE_CONTENT_TYPE] ?? null,
 			$data[static::ATTRIBUTE_CONTENT_SHA1] ?? null,
 			$data[static::ATTRIBUTE_CONTENT_MD5] ?? null,
-			$data[static::ATTRIBUTE_UPLOAD_TIMESTAMP] ?? null,
+			(int) ($data[static::ATTRIBUTE_UPLOAD_TIMESTAMP] ?? null),
 			$data[static::ATTRIBUTE_ACCOUNT_ID] ?? null,
 			$data[static::ATTRIBUTE_FILE_RETENTION] ?? null,
 			$data[static::ATTRIBUTE_LEGAL_HOLD] ?? null,
