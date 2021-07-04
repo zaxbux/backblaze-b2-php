@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Zaxbux\BackblazeB2\Trait;
+namespace Zaxbux\BackblazeB2\Traits;
 
 use RuntimeException;
 

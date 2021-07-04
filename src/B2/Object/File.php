@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Zaxbux\BackblazeB2\B2\Object;
 
 use Zaxbux\BackblazeB2\B2\Type\FileActionType;
-use Zaxbux\BackblazeB2\Class\B2ObjectBase;
-use Zaxbux\BackblazeB2\Class\FilePathInfo;
-use Zaxbux\BackblazeB2\Trait\ProxyArrayAccessToProperties;
+use Zaxbux\BackblazeB2\Classes\B2ObjectBase;
+use Zaxbux\BackblazeB2\Classes\FilePathInfo;
+use Zaxbux\BackblazeB2\Traits\ProxyArrayAccessToProperties;
 
 /** @package Zaxbux\BackblazeB2 */
 class File implements B2ObjectBase
@@ -56,6 +56,13 @@ class File implements B2ObjectBase
 
 	public const METADATA_DIRECTIVE_COPY    = 'COPY';
 	public const METADATA_DIRECTIVE_REPLACE = 'REPLACE';
+
+	public const HEADER_X_BZ_CONTENT_SHA1 = 'X-Bz-Content-Sha1';
+	public const HEADER_X_BZ_FILE_NAME    = 'X-Bz-File-Name';
+	public const HEADER_X_BZ_PART_NUMBER  = 'X-Bz-Part-Number';
+
+	public const LEGAL_HOLD_ENABLED  = 'on';
+	public const LEGAL_HOLD_DISABLED = 'off';
 
 	/** @var string */
 	private $accountId;

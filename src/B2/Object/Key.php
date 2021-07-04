@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Zaxbux\BackblazeB2\B2\Object;
 
-use Zaxbux\BackblazeB2\Class\B2ObjectBase;
-use Zaxbux\BackblazeB2\Trait\ProxyArrayAccessToProperties;
+use Zaxbux\BackblazeB2\Classes\B2ObjectBase;
+use Zaxbux\BackblazeB2\Traits\ProxyArrayAccessToProperties;
 
 class Key implements B2ObjectBase
 {

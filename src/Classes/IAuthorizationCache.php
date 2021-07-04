@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Zaxbux\BackblazeB2\Class;
+namespace Zaxbux\BackblazeB2\Classes;
 
 use Zaxbux\BackblazeB2\B2\Object\AccountAuthorization;
 
-/** @package Zaxbux\BackblazeB2\Class */
+/** @package Zaxbux\BackblazeB2\Classes */
 interface IAuthorizationCache
 {
 

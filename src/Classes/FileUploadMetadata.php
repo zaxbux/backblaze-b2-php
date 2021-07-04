@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Zaxbux\BackblazeB2\Class;
+namespace Zaxbux\BackblazeB2\Classes;
 
 use function hash_init, hash_update_stream, hash_final;
 use function sha1, fstat, rewind, mb_strlen, is_resource;
@@ -10,7 +10,7 @@ use function sha1, fstat, rewind, mb_strlen, is_resource;
 /**
  * Calculate the length and hash of a string or stream.
  * 
- * @package Zaxbux\BackblazeB2\Class
+ * @package Zaxbux\BackblazeB2\Classes
  */
 final class FileUploadMetadata {
 	

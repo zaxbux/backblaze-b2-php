@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Zaxbux\BackblazeB2\Class;
+namespace Zaxbux\BackblazeB2\Classes;
 
 use Psr\Http\Message\ResponseInterface;
 
-/** @package Zaxbux\BackblazeB2\Class */
+/** @package Zaxbux\BackblazeB2\Classes */
 abstract class ResponseBase {
 
 	/** @var ResponseInterface */

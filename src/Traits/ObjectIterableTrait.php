@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Zaxbux\BackblazeB2\Trait;
+namespace Zaxbux\BackblazeB2\Traits;
 
 use RuntimeException;
-use Zaxbux\BackblazeB2\Class\B2ObjectBase;
+use Zaxbux\BackblazeB2\Classes\B2ObjectBase;
 
 trait ObjectIterableTrait
 {

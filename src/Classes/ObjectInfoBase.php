@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Zaxbux\BackblazeB2\Class;
+namespace Zaxbux\BackblazeB2\Classes;
 
 use function sizeof;
 use function rawurlencode;
@@ -11,7 +11,7 @@ use function rawurlencode;
 //use JsonSerializable;
 use RuntimeException;
 
-//use Zaxbux\BackblazeB2\Trait\ProxyArrayAccessToProperties;
+//use Zaxbux\BackblazeB2\Traits\ProxyArrayAccessToProperties;
 
 /**
  * @link https://www.backblaze.com/b2/docs/files.html#fileInfo

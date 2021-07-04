@@ -6,12 +6,13 @@ namespace Zaxbux\BackblazeB2\Client\Service;
 
 use Zaxbux\BackblazeB2\B2\Object\Key;
 use Zaxbux\BackblazeB2\B2\Response\KeyListResponse;
-use Zaxbux\BackblazeB2\Class\ServiceBase;
-use Zaxbux\BackblazeB2\Trait\KeyServiceHelpersTrait;
+use Zaxbux\BackblazeB2\Classes\ServiceBase;
+//use Zaxbux\BackblazeB2\Traits\ApplicationKeyServiceHelpersTrait;
 
-class KeyService extends ServiceBase
+trait ApplicationKeyService
 {
-	use KeyServiceHelpersTrait;
+	//use ApplicationKeyServiceHelpersTrait;
+
 	/**
 	 * Creates a new application key.
 	 * 
@@ -33,7 +34,7 @@ class KeyService extends ServiceBase
 		?string $namePrefix = null
 	): Key {
 		$response = $this->client->guzzle->request('POST', '/b2_create_key', [
-			'json' => static::filterRequestOptions([
+			'json' => ServiceBase::filterRequestOptions([
 				Key::ATTRIBUTE_ACCOUNT_ID    => $this->client->getAccountAuthorization()->getAccountId(),
 				Key::ATTRIBUTE_CAPABILITIES  => $capabilities,
 				Key::ATTRIBUTE_KEY_NAME      => $keyName,
@@ -80,7 +81,7 @@ class KeyService extends ServiceBase
 		?int $maxKeyCount = 1000
 	): KeyListResponse {
 		$response = $this->client->guzzle->request('POST', '/b2_list_keys', [
-			'json' => static::filterRequestOptions([
+			'json' => ServiceBase::filterRequestOptions([
 				Key::ATTRIBUTE_ACCOUNT_ID => $this->client->getAccountAuthorization()->getAccountId(),
 			], [
 				Key::ATTRIBUTE_MAX_KEY_COUNT => $maxKeyCount,

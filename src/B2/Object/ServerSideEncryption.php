@@ -11,7 +11,7 @@ use function base64_decode;
 use ArrayAccess;
 use InvalidArgumentException;
 use JsonSerializable;
-use Zaxbux\BackblazeB2\Trait\ProxyArrayAccessToProperties;
+use Zaxbux\BackblazeB2\Traits\ProxyArrayAccessToProperties;
 
 /**
  * @link https://www.backblaze.com/b2/docs/server_side_encryption.html

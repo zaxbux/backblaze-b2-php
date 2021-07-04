@@ -10,9 +10,9 @@ use function json_encode;
 use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
 use Zaxbux\BackblazeB2\Client as B2Client;
-use Zaxbux\BackblazeB2\Class\B2ObjectBase;
+use Zaxbux\BackblazeB2\Classes\B2ObjectBase;
 use Zaxbux\BackblazeB2\Client\IAuthorizationCache;
-use Zaxbux\BackblazeB2\Trait\ProxyArrayAccessToProperties;
+use Zaxbux\BackblazeB2\Traits\ProxyArrayAccessToProperties;
 
 /** @package Zaxbux\BackblazeB2\Client */
 class AccountAuthorization implements B2ObjectBase

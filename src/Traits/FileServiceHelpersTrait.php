@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Zaxbux\BackblazeB2\Trait;
+namespace Zaxbux\BackblazeB2\Traits;
 
 use function is_string;
 
@@ -14,7 +14,7 @@ use Zaxbux\BackblazeB2\B2\Object\File;
 use Zaxbux\BackblazeB2\B2\Response\DownloadResponse;
 use Zaxbux\BackblazeB2\B2\Response\FileListResponse;
 use Zaxbux\BackblazeB2\B2\Response\FilePartListResponse;
-use Zaxbux\BackblazeB2\Class\DownloadOptions;
+use Zaxbux\BackblazeB2\Classes\DownloadOptions;
 use Zaxbux\BackblazeB2\Client\Exception\NotFoundException;
 use Zaxbux\BackblazeB2\Client\Exception\ValidationException;
 
@@ -25,7 +25,7 @@ trait FileServiceHelpersTrait
 	\*******************************************************/
 
 	/** @var Client */
-	private $client;
+	protected $client;
 
 	public abstract function deleteFileVersion(
 		string $fileName,
@@ -55,9 +55,9 @@ trait FileServiceHelpersTrait
 
 	public abstract function listUnfinishedLargeFiles(
 		string $bucketId,
-		string $namePrefix,
-		string $startFileId,
-		int $maxFileCount
+		?string $namePrefix,
+		?string $startFileId,
+		?int $maxFileCount
 	): FileListResponse;
 
 	/* End abstract methods */
@@ -233,7 +233,7 @@ trait FileServiceHelpersTrait
 	protected function download(
 		string $downloadUrl,
 		?array $query = null,
-		DownloadOptions|array|null $options = null,
+		?mixed $options = null,
 		?mixed $sink = null,
 		?bool $headersOnly = false
 	): DownloadResponse {

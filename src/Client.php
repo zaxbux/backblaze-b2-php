@@ -8,27 +8,34 @@ use Exception;
 
 use GuzzleHttp\ClientInterface;
 use Zaxbux\BackblazeB2\B2\Object\AccountAuthorization;
-use Zaxbux\BackblazeB2\Class\IAuthorizationCache;
+use Zaxbux\BackblazeB2\Classes\IAuthorizationCache;
 use Zaxbux\BackblazeB2\Client\Service\BucketService;
 use Zaxbux\BackblazeB2\Client\Service\FileService;
-use Zaxbux\BackblazeB2\Client\Service\KeyService;
+use Zaxbux\BackblazeB2\Client\Service\ApplicationKeyService;
+use Zaxbux\BackblazeB2\Client\Service\ApplicationKeyServiceInstance;
+use Zaxbux\BackblazeB2\Client\Service\BucketServiceInstance;
+use Zaxbux\BackblazeB2\Client\Service\FileServiceInstance;
 use Zaxbux\BackblazeB2\Http\Config;
 use Zaxbux\BackblazeB2\Http\ClientFactory;
 
 /** @package Zaxbux\BackblazeB2 */
 class Client
 {
+	use FileService;
+	use BucketService;
+	use ApplicationKeyService;
+
 	public const B2_API_CLIENT_VERSION  = '2.0.0';
 	public const B2_API_BASE_URL        = 'https://api.backblazeb2.com';
 	public const B2_API_V2              = '/b2api/v2';
 
-	/** @var KeyService */
+	/** @var ApplicationKeyServiceInstance */
 	public $key;
 
-	/** @var FileService */
+	/** @var FileServiceInstance */
 	public $file;
 
-	/** @var BucketService */
+	/** @var BucketServiceInstance */
 	public $bucket;
 
 	/** @var ClientInterface */
@@ -70,9 +77,9 @@ class Client
 
 		$this->guzzle = $guzzle ?: ClientFactory::create($config);
 
-		$this->key = new KeyService($this);
-		$this->file = new FileService($this);
-		$this->bucket = new BucketService($this);
+		$this->key = new ApplicationKeyServiceInstance($this);
+		$this->file = new FileServiceInstance($this);
+		$this->bucket = new BucketServiceInstance($this);
 	}
 
 	public function getApplicationKeyId(): string

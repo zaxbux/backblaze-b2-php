@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Zaxbux\BackblazeB2\Class;
+namespace Zaxbux\BackblazeB2\Classes;
 
 use function is_array;
 use function array_filter;
@@ -11,7 +11,7 @@ use function http_build_query;
 use ArrayAccess;
 use JsonSerializable;
 use Zaxbux\BackblazeB2\B2\Object\ServerSideEncryption;
-use Zaxbux\BackblazeB2\Trait\ProxyArrayAccessToProperties;
+use Zaxbux\BackblazeB2\Traits\ProxyArrayAccessToProperties;
 
 final class DownloadOptions implements ArrayAccess, JsonSerializable
 {

@@ -9,7 +9,7 @@ use function sprintf;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 use RuntimeException;
-use Zaxbux\BackblazeB2\Class\ResponseBase;
+use Zaxbux\BackblazeB2\Classes\ResponseBase;
 
 /** 
  * A response representing a file download.

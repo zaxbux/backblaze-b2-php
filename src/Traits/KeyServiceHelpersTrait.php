@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Zaxbux\BackblazeB2\Trait;
+namespace Zaxbux\BackblazeB2\Traits;
 
 use AppendIterator;
 use NoRewindIterator;
 use Zaxbux\BackblazeB2\B2\Response\KeyListResponse;
 
-trait KeyServiceHelpersTrait
+trait ApplicationKeyServiceHelpersTrait
 {
 	public abstract function listKeys(
 		?string $startApplicationKeyId = null,

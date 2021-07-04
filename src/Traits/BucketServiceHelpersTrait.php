@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Zaxbux\BackblazeB2\Trait;
+namespace Zaxbux\BackblazeB2\Traits;
 
 use Zaxbux\BackblazeB2\B2\Object\Bucket;
 use Zaxbux\BackblazeB2\B2\Response\BucketListResponse;

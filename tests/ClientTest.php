@@ -2,20 +2,20 @@
 
 namespace Zaxbux\BackblazeB2\Tests;
 
-use Zaxbux\BackblazeB2\Client;
-use Zaxbux\BackblazeB2\B2ObjectBase\Bucket;
-use Zaxbux\BackblazeB2\Client\Exception\BadValueException;
-use Zaxbux\BackblazeB2\Client\Exception\BucketNotEmptyException;
-use Zaxbux\BackblazeB2\Client\Exception\NotFoundException;
-use Zaxbux\BackblazeB2\B2ObjectBase\File;
-use Zaxbux\BackblazeB2\Client\Exception\BucketAlreadyExistsException;
-use Zaxbux\BackblazeB2\Client\Exception\BadJsonException;
-use Zaxbux\BackblazeB2\Client\Exception\ValidationException;
+use InvalidArgumentException;
 use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Stream;
-use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
-use Zaxbux\BackblazeB2\B2ObjectBase\BucketType;
+use Zaxbux\BackblazeB2\Client;
+use Zaxbux\BackblazeB2\B2\Object\Bucket;
+use Zaxbux\BackblazeB2\B2\Object\File;
+use Zaxbux\BackblazeB2\B2\Type\BucketType;
+use Zaxbux\BackblazeB2\Client\Exception\BadJsonException;
+use Zaxbux\BackblazeB2\Client\Exception\BadValueException;
+use Zaxbux\BackblazeB2\Client\Exception\BucketAlreadyExistsException;
+use Zaxbux\BackblazeB2\Client\Exception\BucketNotEmptyException;
+use Zaxbux\BackblazeB2\Client\Exception\NotFoundException;
+
 
 class ClientTest extends TestCase
 {

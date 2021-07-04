@@ -4,17 +4,14 @@ declare(strict_types=1);
 
 namespace Zaxbux\BackblazeB2\Client\Service;
 
-use InvalidArgumentException;
 use Zaxbux\BackblazeB2\B2\Object\Bucket;
 use Zaxbux\BackblazeB2\B2\Object\BucketInfo;
 use Zaxbux\BackblazeB2\B2\Response\BucketListResponse;
 use Zaxbux\BackblazeB2\B2\Type\BucketType;
-use Zaxbux\BackblazeB2\Class\ServiceBase;
-use Zaxbux\BackblazeB2\Client\Exception\NotFoundException;
-use Zaxbux\BackblazeB2\Client\Exception\ValidationException;
-use Zaxbux\BackblazeB2\Trait\BucketServiceHelpersTrait;
+use Zaxbux\BackblazeB2\Classes\ServiceBase;
+use Zaxbux\BackblazeB2\Traits\BucketServiceHelpersTrait;
 
-class BucketService extends ServiceBase
+trait BucketService
 {
 	use BucketServiceHelpersTrait;
 	
@@ -34,12 +31,12 @@ class BucketService extends ServiceBase
 	public function createBucket(
 		string $bucketName,
 		?string $bucketType = BucketType::PRIVATE,
-		BucketInfo|null $bucketInfo = null,
+		?mixed $bucketInfo = null,
 		?array $corsRules = null,
 		?array $lifecycleRules = null
 	): Bucket {
 		$response = $this->client->guzzle->request('POST', '/b2_create_bucket', [
-			'json' => static::filterRequestOptions([
+			'json' => ServiceBase::filterRequestOptions([
 				Bucket::ATTRIBUTE_ACCOUNT_ID  => $this->client->getAccountAuthorization()->getAccountId(),
 				Bucket::ATTRIBUTE_BUCKET_NAME => $bucketName,
 				Bucket::ATTRIBUTE_BUCKET_TYPE => $bucketType,
@@ -92,7 +89,7 @@ class BucketService extends ServiceBase
 		?array $bucketTypes = null
 	): BucketListResponse {
 		$response = $this->client->guzzle->request('POST', '/b2_list_buckets', [
-			'json' => static::filterRequestOptions([
+			'json' => ServiceBase::filterRequestOptions([
 				Bucket::ATTRIBUTE_ACCOUNT_ID => $this->client->getAccountAuthorization()->getAccountId(),
 			], [
 				Bucket::ATTRIBUTE_BUCKET_ID    => $bucketId,
@@ -128,7 +125,7 @@ class BucketService extends ServiceBase
 		?int $ifRevisionIs = null
 	): Bucket {
 		$response = $this->client->guzzle->request('POST', '/b2_update_bucket', [
-			'json' => static::filterRequestOptions([
+			'json' => ServiceBase::filterRequestOptions([
 				Bucket::ATTRIBUTE_ACCOUNT_ID => $this->client->getAccountAuthorization()->getAccountId(),
 				Bucket::ATTRIBUTE_BUCKET_ID  => $bucketId,
 			], [

@@ -3,7 +3,7 @@
 namespace Zaxbux\BackblazeB2\B2\Response;
 
 use Psr\Http\Message\ResponseInterface;
-use Zaxbux\BackblazeB2\Class\ListResponseBase;
+use Zaxbux\BackblazeB2\Classes\ListResponseBase;
 
 use function GuzzleHttp\json_decode;
 

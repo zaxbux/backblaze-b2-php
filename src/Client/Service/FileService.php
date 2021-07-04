@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Zaxbux\BackblazeB2\Client\Service;
 
-use InvalidArgumentException;
 use Zaxbux\BackblazeB2\Client;
 use Zaxbux\BackblazeB2\B2\Object\File;
 use Zaxbux\BackblazeB2\B2\Object\DownloadAuthorization;
@@ -15,21 +14,14 @@ use Zaxbux\BackblazeB2\B2\Object\UploadUrl;
 use Zaxbux\BackblazeB2\B2\Response\DownloadResponse;
 use Zaxbux\BackblazeB2\B2\Response\FileListResponse;
 use Zaxbux\BackblazeB2\B2\Response\FilePartListResponse;
-use Zaxbux\BackblazeB2\Class\DownloadOptions;
-use Zaxbux\BackblazeB2\Class\FileUploadMetadata;
-use Zaxbux\BackblazeB2\Class\ServiceBase;
-use Zaxbux\BackblazeB2\Trait\FileServiceHelpersTrait;
+use Zaxbux\BackblazeB2\Classes\DownloadOptions;
+use Zaxbux\BackblazeB2\Classes\FileUploadMetadata;
+use Zaxbux\BackblazeB2\Classes\ServiceBase;
+use Zaxbux\BackblazeB2\Traits\FileServiceHelpersTrait;
 
-class FileService extends ServiceBase
+trait FileService
 {
 	use FileServiceHelpersTrait;
-
-	public const HEADER_X_BZ_CONTENT_SHA1 = 'X-Bz-Content-Sha1';
-	public const HEADER_X_BZ_FILE_NAME    = 'X-Bz-File-Name';
-	public const HEADER_X_BZ_PART_NUMBER  = 'X-Bz-Part-Number';
-
-	public const LEGAL_HOLD_ENABLED  = 'on';
-	public const LEGAL_HOLD_DISABLED = 'off';
 
 	/**
 	 * Cancel the upload of a large file, and deletes all of the parts that have been uploaded.
@@ -70,10 +62,6 @@ class FileService extends ServiceBase
 	 * @param array $legalHold                      The File Lock legal hold status for the new file.
 	 * @param ServerSideEncryption $sourceSSE       The parameters for B2 to decrypt the source file.
 	 * @param ServerSideEncryption $destinationSSE  The parameters for B2 to encrypt the copied data before storing the destination file.
-	 * 
-	 * @return File
-	 * 
-	 * @throws InvalidArgumentException
 	 */
 	public function copyFile(
 		string $sourceFileId,
@@ -85,9 +73,9 @@ class FileService extends ServiceBase
 		?array $fileInfo = null,
 		?array $fileRetention = null,
 		?array $legalHold = null,
-		ServerSideEncryption|null $sourceSSE = null,
-		ServerSideEncryption|null $destinationSSE = null,
-	) {
+		?ServerSideEncryption $sourceSSE = null,
+		?ServerSideEncryption $destinationSSE = null
+	): File {
 
 		/*
 		if ($metadataDirective) {
@@ -116,7 +104,7 @@ class FileService extends ServiceBase
 		*/
 
 		$response = $this->client->guzzle->request('POST', '/b2_copy_file', [
-			'json' => static::filterRequestOptions([
+			'json' => ServiceBase::filterRequestOptions([
 				File::ATTRIBUTE_SOURCE_FILE_ID => $sourceFileId,
 				File::ATTRIBUTE_FILE_NAME      => $fileName,
 			], [
@@ -159,11 +147,11 @@ class FileService extends ServiceBase
 		string $largeFileId,
 		int $partNumber,
 		?string $range = null,
-		?array $sourceSSE = null,
-		?array $destinationSSE = null
+		?ServerSideEncryption $sourceSSE = null,
+		?ServerSideEncryption $destinationSSE = null
 	): File {
 		$response = $this->client->guzzle->request('POST', '/b2_copy_part', [
-			'json' => static::filterRequestOptions([
+			'json' => ServiceBase::filterRequestOptions([
 				File::ATTRIBUTE_SOURCE_FILE_ID => $sourceFileId,
 				File::ATTRIBUTE_LARGE_FILE_ID  => $largeFileId,
 				File::ATTRIBUTE_PART_NUMBER    => $partNumber,
@@ -192,7 +180,7 @@ class FileService extends ServiceBase
 	public function deleteFileVersion(string $fileName, string $fileId, ?bool $bypassGovernance = false): File
 	{
 		$response = $this->client->guzzle->request('POST', '/b2_delete_file_version', [
-			'json' => static::filterRequestOptions([
+			'json' => ServiceBase::filterRequestOptions([
 				File::ATTRIBUTE_FILE_NAME => $fileName,
 				File::ATTRIBUTE_FILE_ID   => $fileId,
 			], [
@@ -208,19 +196,18 @@ class FileService extends ServiceBase
 	 * 
 	 * @link https://www.backblaze.com/b2/docs/b2_download_file_by_id.html
 	 * 
-	 * @param string $fileId      The file ID to download.
-	 * @param array  $options     An optional array of additional B2 API options. Setting $options['stream'] to true to
-	 *                            stream a response. {@link http://docs.guzzlephp.org/en/stable/request-options.html#stream}
-	 * @param string $range       A standard RFC 7233 byte-range request, which will return just part of the stored file.
-	 * @param mixed  $sink        A string, stream, or StreamInterface that specifies where to save the file.
-	 *                            {@link http://docs.guzzlephp.org/en/stable/request-options.html#sink}
-	 * @param bool   $headersOnly Only get the file headers, without downloading the whole file.
+	 * @param string                $fileId      The file ID to download.
+	 * @param DownloadOptions|array $options     An optional array of additional B2 API options.
+	 * @param string                $range       A standard RFC 7233 byte-range request, that will only return part of the stored file.
+	 * @param mixed                 $sink        A string, stream, or `StreamInterface` that specifies where to save the file.
+	 *                                           {@link https://docs.guzzlephp.org/en/stable/request-options.html#sink}
+	 * @param bool                  $headersOnly Only get the file headers, without downloading the whole file.
 	 * 
 	 * @return array
 	 */
 	public function downloadFileById(
 		string $fileId,
-		DownloadOptions|array $options = null,
+		mixed $options = null,
 		?mixed $sink = null,
 		?bool $headersOnly = false
 	): DownloadResponse {
@@ -234,21 +221,20 @@ class FileService extends ServiceBase
 	 * 
 	 * @link https://www.backblaze.com/b2/docs/b2_download_file_by_name.html
 	 * 
-	 * @param string $fileName    The file name to download.
-	 * @param string $bucketName  The bucket the file is contained in.
-	 * @param array  $options     An optional array of additional B2 API options. Setting $options['stream'] to true to
-	 *                            stream a response. {@link http://docs.guzzlephp.org/en/stable/request-options.html#stream}
-	 * @param string $range       A standard RFC 7233 byte-range request, which will return just part of the stored file.
-	 * @param mixed  $sink        A string, stream, or StreamInterface that specifies where to save the file.
-	 *                            {@link http://docs.guzzlephp.org/en/stable/request-options.html#sink}
-	 * @param bool   $headersOnly Only get the file headers, without downloading the whole file.
+	 * @param string                 $fileName    The file name to download.
+	 * @param string                 $bucketName  The bucket the file is contained in.
+	 * @param DownloadOptions|array  $options     An optional array of additional B2 API options.
+	 * @param string                 $range       A standard RFC 7233 byte-range request, that will only return part of the stored file.
+	 * @param mixed                  $sink        A string, stream, or `StreamInterface` that specifies where to save the file.
+	 *                                            {@link https://docs.guzzlephp.org/en/stable/request-options.html#sink}
+	 * @param bool                   $headersOnly Only get the file headers, without downloading the whole file.
 	 * 
 	 * @return DownloadResponse
 	 */
 	public function downloadFileByName(
 		string $fileName,
 		string $bucketName,
-		DownloadOptions|array $options = null,
+		mixed $options = null,
 		?mixed $sink = null,
 		?bool $headersOnly = false
 	): DownloadResponse {
@@ -285,24 +271,24 @@ class FileService extends ServiceBase
 	 * 
 	 * @link https://www.backblaze.com/b2/docs/b2_get_download_authorization.html
 	 * 
-	 * @param string $bucketId       The identifier for the bucket.
-	 * @param string $fileNamePrefix The file name prefix of files the download authorization token will allow access.
-	 * @param int    $validDuration  The number of seconds before the authorization token will expire. The minimum
-	 *                               value is 1 second. The maximum value is 604800.
-	 * @param array  $options        Additional options to pass to the API.
+	 * @param string                 $bucketId       The identifier for the bucket.
+	 * @param string                 $fileNamePrefix The file name prefix of files the download authorization token will allow access.
+	 * @param int                    $validDuration  The number of seconds before the authorization token will expire. The minimum
+	 *                                               value is `1` second. The maximum value is `604800`. Default: `604800`.
+	 * @param DownloadOptions|array  $options        Additional options to pass to the API.
 	 */
 	public function getDownloadAuthorization(
 		string $bucketId,
 		string $fileNamePrefix,
-		int $validDuration,
-		DownloadOptions|array $options = []
+		?int $validDuration = DownloadAuthorization::VALID_DURATION_MAX,
+		?mixed $options = null
 	): DownloadAuthorization {
-		if (! $options instanceof DownloadOptions) {
+		if (!$options instanceof DownloadOptions) {
 			$options = DownloadOptions::fromArray($options);
 		}
 
 		$response = $this->client->guzzle->request('POST', '/b2_get_download_authorization', [
-			'json' => static::filterRequestOptions([
+			'json' => ServiceBase::filterRequestOptions([
 				File::ATTRIBUTE_BUCKET_ID        => $bucketId,
 				File::ATTRIBUTE_FILE_NAME_PREFIX => $fileNamePrefix,
 				File::ATTRIBUTE_VALID_DURATION   => $validDuration,
@@ -418,10 +404,10 @@ class FileService extends ServiceBase
 		?string $prefix = null,
 		?string $delimiter = null,
 		?string $startFileName = null,
-		?string $maxFileCount = 1000
+		?int $maxFileCount = 1000
 	): FileListResponse {
 		$response = $this->client->guzzle->request('POST', '/b2_list_file_names', [
-			'json' => static::filterRequestOptions([
+			'json' => ServiceBase::filterRequestOptions([
 				File::ATTRIBUTE_BUCKET_ID      => $bucketId,
 				File::ATTRIBUTE_MAX_FILE_COUNT => $maxFileCount,
 			], [
@@ -465,7 +451,7 @@ class FileService extends ServiceBase
 		?int $maxFileCount = 1000
 	): FileListResponse {
 		$response = $this->client->guzzle->request('POST', '/b2_list_file_versions', [
-			'json' => static::filterRequestOptions([
+			'json' => ServiceBase::filterRequestOptions([
 				File::ATTRIBUTE_BUCKET_ID      => $bucketId,
 				File::ATTRIBUTE_MAX_FILE_COUNT => $maxFileCount,
 			], [
@@ -478,7 +464,7 @@ class FileService extends ServiceBase
 
 		return FileListResponse::create($response);
 	}
-	
+
 	/**
 	 * Lists the parts that have been uploaded for a large file that has not been finished yet. 
 	 * 
@@ -502,7 +488,7 @@ class FileService extends ServiceBase
 		?int $maxPartCount = 1000
 	): FilePartListResponse {
 		$response = $this->client->guzzle->request('POST', '/b2_list_parts', [
-			'json' => static::filterRequestOptions([
+			'json' => ServiceBase::filterRequestOptions([
 				File::ATTRIBUTE_FILE_ID => $fileId
 			], [
 				File::ATTRIBUTE_START_PART_NUMBER => $startPartNumber,
@@ -532,7 +518,7 @@ class FileService extends ServiceBase
 		?int $maxFileCount = 100
 	): FileListResponse {
 		$response = $this->client->guzzle->request('POST', '/b2_list_unfinished_large_files', [
-			'json' => static::filterRequestOptions([
+			'json' => ServiceBase::filterRequestOptions([
 				File::ATTRIBUTE_BUCKET_ID      => $bucketId,
 				File::ATTRIBUTE_MAX_FILE_COUNT => $maxFileCount,
 			], [
@@ -549,10 +535,10 @@ class FileService extends ServiceBase
 	 * 
 	 * @link https://www.backblaze.com/b2/docs/b2_start_large_file.html
 	 * 
-	 * @param string $bucketId    The ID of the bucket that the file will go in. 
-	 * @param string $fileName    The name of the file.
-	 * @param string $contentType The MIME type of the content of the file.
-	 * @param array  $fileInfo    A JSON object holding the name/value pairs for the custom file info.
+	 * @param string         $bucketId    The ID of the bucket that the file will go in. 
+	 * @param string         $fileName    The name of the file.
+	 * @param string         $contentType The MIME type of the content of the file.
+	 * @param FileInfo|array $fileInfo    A JSON object holding the name/value pairs for the custom file info.
 	 * 
 	 * @return File
 	 */
@@ -560,14 +546,14 @@ class FileService extends ServiceBase
 		string $bucketId,
 		string $fileName,
 		?string $contentType = null,
-		FileInfo|array $fileInfo = []
+		?mixed $fileInfo = null
 	): File {
 		if (!$fileInfo instanceof FileInfo) {
 			$fileInfo = FileInfo::fromArray($fileInfo);
 		}
 
 		$response = $this->client->guzzle->request('POST', '/b2_start_large_file', [
-			'json' => static::filterRequestOptions([
+			'json' => ServiceBase::filterRequestOptions([
 				File::ATTRIBUTE_BUCKET_ID    => $bucketId,
 				File::ATTRIBUTE_FILE_NAME    => $fileName,
 				File::ATTRIBUTE_CONTENT_TYPE => $contentType ?? File::CONTENT_TYPE_AUTO,
@@ -592,10 +578,10 @@ class FileService extends ServiceBase
 	public function updateFileLegalHold(
 		string $fileName,
 		string $fileId,
-		string $legalHold,
+		string $legalHold
 	): File {
 		$response = $this->client->guzzle->request('POST', '/b2_update_file_legal_hold', [
-			'json' => static::filterRequestOptions([
+			'json' => ServiceBase::filterRequestOptions([
 				File::ATTRIBUTE_FILE_NAME  => $fileName,
 				File::ATTRIBUTE_FILE_ID    => $fileId,
 				File::ATTRIBUTE_LEGAL_HOLD => $legalHold,
@@ -622,10 +608,10 @@ class FileService extends ServiceBase
 		string $fileName,
 		string $fileId,
 		string $fileRetention,
-		?bool $bypassGovernance = false,
+		?bool $bypassGovernance = false
 	): File {
 		$response = $this->client->guzzle->request('POST', '/b2_update_file_retention', [
-			'json' => static::filterRequestOptions([
+			'json' => ServiceBase::filterRequestOptions([
 				File::ATTRIBUTE_FILE_NAME         => $fileName,
 				File::ATTRIBUTE_FILE_ID           => $fileId,
 				File::ATTRIBUTE_FILE_RETENTION    => $fileRetention,
@@ -641,11 +627,12 @@ class FileService extends ServiceBase
 	 * 
 	 * @link https://www.backblaze.com/b2/docs/b2_upload_file.html
 	 *
-	 * @param string|resource $body        The file to be uploaded. String or stream resource.
-	 * @param string          $bucketId    The ID of the bucket to upload the file to.
-	 * @param string          $fileName    The name of the file.
-	 * @param string          $contentType The MIME type of the content of the file.
-	 * @param FileInfo|array  $fileInfo    The custom file info to add to the uploaded file.
+	 * @param string|resource            $body                 The file to be uploaded. String or stream resource.
+	 * @param string                     $bucketId             The ID of the bucket to upload the file to.
+	 * @param string                     $fileName             The name of the file.
+	 * @param string                     $contentType          The MIME type of the content of the file.
+	 * @param FileInfo|array             $fileInfo             The custom file info to add to the uploaded file.
+	 * @param ServerSideEncryption|array $serverSideEncryption The parameters for B2 to encrypt the uploaded file.
 	 * 
 	 * @return File
 	 */
@@ -654,10 +641,18 @@ class FileService extends ServiceBase
 		string $bucketId,
 		string $fileName,
 		?string $contentType = null,
-		FileInfo|array $fileInfo = [],
-		ServerSideEncryption $serverSideEncryption = null,
-		UploadUrl $uploadUrl = null
+		?mixed $fileInfo = null,
+		?mixed $serverSideEncryption = null,
+		?UploadUrl $uploadUrl = null
 	): File {
+		if (!$fileInfo instanceof FileInfo) {
+			$fileInfo = FileInfo::fromArray($fileInfo);
+		}
+
+		if (!$serverSideEncryption instanceof ServerSideEncryption) {
+			$serverSideEncryption = ServerSideEncryption::fromArray($serverSideEncryption);
+		}
+
 		if (!$uploadUrl instanceof UploadUrl) {
 			$uploadUrl = $this->getUploadUrl($bucketId);
 		}
@@ -666,12 +661,12 @@ class FileService extends ServiceBase
 
 		$response = $this->client->guzzle->request('POST', $uploadUrl->getUploadUrl(), [
 			'body'    => $body,
-			'headers' => static::filterRequestOptions([
+			'headers' => ServiceBase::filterRequestOptions([
 				'Authorization'                  => $uploadUrl->getAuthorizationToken(),
 				'Content-Type'                   => $contentType ?? File::CONTENT_TYPE_AUTO,
 				'Content-Length'                 => $uploadMetadata->getLength(),
-				static::HEADER_X_BZ_CONTENT_SHA1 => $uploadMetadata->getSha1(),
-				static::HEADER_X_BZ_FILE_NAME    => urlencode($fileName),
+				File::HEADER_X_BZ_CONTENT_SHA1 => $uploadMetadata->getSha1(),
+				File::HEADER_X_BZ_FILE_NAME    => urlencode($fileName),
 			], [
 				...($serverSideEncryption->getHeaders() ?? []),
 				...($fileInfo->getHeaders() ?? []),
@@ -686,16 +681,18 @@ class FileService extends ServiceBase
 	 * 
 	 * @link https://www.backblaze.com/b2/docs/b2_upload_part.html
 	 * 
-	 * @param string|resource $body       The file part to be uploaded. String or stream resource.
-	 * @param string          $fileId     The ID of the large file whose parts you want to upload.
-	 * @param int             $partNumber The parts uploaded for one file must have contiguous numbers, starting with 1.
+	 * @param string|resource            $body                 The file part to be uploaded. String or stream resource.
+	 * @param string                     $fileId               The ID of the large file whose parts you want to upload.
+	 * @param int                        $partNumber           The parts uploaded for one file must have contiguous numbers, starting with 1.
+	 * @param ServerSideEncryption|array $serverSideEncryption The parameters for B2 to encrypt the uploaded file.
+	 * @param UploadPartUrl              $uploadPartUrl        The upload part authorization data.
 	 */
 	public function uploadPart(
 		mixed $body,
 		string $fileId,
 		?int $partNumber = 1,
-		ServerSideEncryption $serverSideEncryption = null,
-		UploadPartUrl $uploadPartUrl = null
+		?mixed $serverSideEncryption = null,
+		?UploadPartUrl $uploadPartUrl = null
 	): File {
 		if (!$uploadPartUrl instanceof UploadPartUrl) {
 			$uploadPartUrl = $this->getUploadPartUrl($fileId);
@@ -708,8 +705,8 @@ class FileService extends ServiceBase
 			'headers' => self::filterRequestOptions([
 				'Authorization'                  => $uploadPartUrl->getAuthorizationToken(),
 				'Content-Length'                 => $uploadMetadata->getLength(),
-				static::HEADER_X_BZ_CONTENT_SHA1 => $uploadMetadata->getSha1(),
-				static::HEADER_X_BZ_PART_NUMBER  => $partNumber,
+				File::HEADER_X_BZ_CONTENT_SHA1 => $uploadMetadata->getSha1(),
+				File::HEADER_X_BZ_PART_NUMBER  => $partNumber,
 			], [
 				...($serverSideEncryption->getHeaders() ?? []),
 			]),
