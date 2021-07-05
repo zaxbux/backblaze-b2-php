@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Zaxbux\BackblazeB2\Response;
 
+use Generator;
 use GuzzleHttp\Utils;
 use Psr\Http\Message\ResponseInterface;
 use Zaxbux\BackblazeB2\Object\Key;
@@ -27,16 +28,15 @@ class KeyList extends AbstractListResponse {
 
 	/**
 	 * Get the value of keys.
-	 * 
-	 * @return iterable<Key>
 	 */ 
-	public function getKeys(?bool $asArray = false): iterable
+	public function getKeys(): Generator
 	{
-		if ($asArray) {
-			return iterator_to_array($this->keys, false);
-		}
-
 		return $this->keys;
+	}
+
+	public function getKeysArray(): iterable
+	{
+		return iterator_to_array($this->getKeys());
 	}
 
 	/**

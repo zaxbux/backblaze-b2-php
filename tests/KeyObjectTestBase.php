@@ -78,7 +78,7 @@ abstract class KeyObjectTestBase extends TestCase
 		static::assertIsIterable($keyList->getKeys());
 
 		// Get a copy of keys as an array to avoid generator issues
-		$keys = $keyList->getKeys(true);
+		$keys = $keyList->getKeysArray();
 
 		static::assertCount(1000, $keys);
 		static::assertContainsOnlyInstancesOf(Key::class, $keys);

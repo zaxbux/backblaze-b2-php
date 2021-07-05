@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Zaxbux\BackblazeB2\Object;
 
 use Zaxbux\BackblazeB2\Interfaces\B2ObjectInterface;
+use Zaxbux\BackblazeB2\Object\Bucket\BucketInfo;
 //use Zaxbux\BackblazeB2\Traits\IterableFromArrayTrait;
 use Zaxbux\BackblazeB2\Traits\ProxyArrayAccessToPropertiesTrait;
 
@@ -66,7 +67,7 @@ class Bucket implements B2ObjectInterface
 		string $id,
 		string $name,
 		string $type,
-		?array $info = null,
+		$info = null,
 		?string $accountId = null,
 		?array $corsRules = null,
 		?array $defaultServerSideEncryption = null,
@@ -78,7 +79,8 @@ class Bucket implements B2ObjectInterface
 		$this->id                          = $id;
 		$this->name                        = $name;
 		$this->type                        = $type;
-		$this->info                        = $info;
+		$this->info                        = $info instanceof BucketInfo ?
+			$info : BucketInfo::fromArray($info ?? []);
 		$this->accountId                   = $accountId;
 		$this->corsRules                   = $corsRules;
 		$this->defaultServerSideEncryption = $defaultServerSideEncryption;
