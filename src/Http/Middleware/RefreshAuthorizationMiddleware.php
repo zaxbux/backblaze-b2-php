@@ -5,8 +5,8 @@ namespace Zaxbux\BackblazeB2\Http\Middleware;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Psr7\Utils;
 use Psr\Http\Message\RequestInterface;
-use Zaxbux\BackblazeB2\B2\Object\AccountAuthorization;
-use Zaxbux\BackblazeB2\Http\Config;
+use Zaxbux\BackblazeB2\Object\AccountAuthorization;
+use Zaxbux\BackblazeB2\Config;
 
 class RefreshAuthorizationMiddleware
 {

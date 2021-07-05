@@ -5,16 +5,16 @@ namespace tests;
 use BlastCloud\Guzzler\UsesGuzzler;
 use GuzzleHttp\Psr7\Stream;
 use PHPUnit\Framework\TestCase;
+use Zaxbux\BackblazeB2\Response\FileList;
 use Zaxbux\BackblazeB2\Client;
-use Zaxbux\BackblazeB2\B2\Object\Bucket;
-use Zaxbux\BackblazeB2\B2\Object\File;
-use Zaxbux\BackblazeB2\B2\Object\FileInfo;
-use Zaxbux\BackblazeB2\B2\Response\FileListResponse;
-use Zaxbux\BackblazeB2\B2\Type\BucketType;
-use Zaxbux\BackblazeB2\Client\Exception\B2APIException;
-use Zaxbux\BackblazeB2\Client\Exception\BadRequestException;
-use Zaxbux\BackblazeB2\Client\Exception\DuplicateBucketNameException;
-use Zaxbux\BackblazeB2\Client\Exception\NotFoundException;
+use Zaxbux\BackblazeB2\Object\Bucket;
+use Zaxbux\BackblazeB2\Object\File;
+use Zaxbux\BackblazeB2\Object\File\FileInfo;
+use Zaxbux\BackblazeB2\Object\Bucket\BucketType;
+use Zaxbux\BackblazeB2\Exceptions\B2APIException;
+use Zaxbux\BackblazeB2\Exceptions\BadRequestException;
+use Zaxbux\BackblazeB2\Exceptions\DuplicateBucketNameException;
+use Zaxbux\BackblazeB2\Exceptions\NotFoundException;
 
 
 class ClientTest extends TestCase
@@ -466,7 +466,7 @@ class ClientTest extends TestCase
 		]);
 
 		$response = $client->listFileNames('bucketId');
-		$this->assertInstanceOf(FileListResponse::class, $response);
+		$this->assertInstanceOf(FileList::class, $response);
 		$files = $response->getFilesArray();
 		$this->assertCount(0, $files);
 	}
@@ -625,7 +625,7 @@ class ClientTest extends TestCase
 		]);
 
 		$response = $client->listUnfinishedLargeFiles('bucketId');
-		$this->assertInstanceOf(FileListResponse::class, $response);
+		$this->assertInstanceOf(FileList::class, $response);
 
 		$files = $response->getFilesArray();
 		$this->assertInstanceOf(File::class, $files[0]);

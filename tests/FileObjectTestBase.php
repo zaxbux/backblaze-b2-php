@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace tests;
 
 use PHPUnit\Framework\TestCase;
-use Zaxbux\BackblazeB2\B2\Object\File;
-use Zaxbux\BackblazeB2\B2\Object\FileInfo;
-use Zaxbux\BackblazeB2\B2\Object\FileLock;
-use Zaxbux\BackblazeB2\B2\Object\ServerSideEncryption;
-use Zaxbux\BackblazeB2\B2\Type\FileActionType;
+use Zaxbux\BackblazeB2\Object\File;
+use Zaxbux\BackblazeB2\Object\File\FileInfo;
+use Zaxbux\BackblazeB2\Object\File\FileLock;
+use Zaxbux\BackblazeB2\Object\File\ServerSideEncryption;
+use Zaxbux\BackblazeB2\Object\File\FileActionType;
 use Zaxbux\BackblazeB2\Classes\FilePathInfo;
 
 abstract class FileObjectTestBase extends TestCase

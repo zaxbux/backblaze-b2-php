@@ -6,14 +6,14 @@ namespace Zaxbux\BackblazeB2\Traits;
 
 use AppendIterator;
 use NoRewindIterator;
-use Zaxbux\BackblazeB2\B2\Response\KeyListResponse;
+use Zaxbux\BackblazeB2\Response\KeyList;
 
 trait ApplicationKeyServiceHelpersTrait
 {
 	public abstract function listKeys(
 		?string $startApplicationKeyId = null,
 		?int $maxKeyCount = 1000
-	): KeyListResponse;
+	): KeyList;
 
 	/**
 	 * Lists *all* application keys associated with an account.

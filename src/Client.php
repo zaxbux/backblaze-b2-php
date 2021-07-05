@@ -4,19 +4,15 @@ declare(strict_types=1);
 
 namespace Zaxbux\BackblazeB2;
 
-use Exception;
-
 use GuzzleHttp\ClientInterface;
-use Zaxbux\BackblazeB2\B2\Object\AccountAuthorization;
-use Zaxbux\BackblazeB2\Classes\IAuthorizationCache;
-use Zaxbux\BackblazeB2\Client\Service\BucketService;
-use Zaxbux\BackblazeB2\Client\Service\FileService;
-use Zaxbux\BackblazeB2\Client\Service\ApplicationKeyService;
-use Zaxbux\BackblazeB2\Client\Service\ApplicationKeyServiceInstance;
-use Zaxbux\BackblazeB2\Client\Service\BucketServiceInstance;
-use Zaxbux\BackblazeB2\Client\Service\FileServiceInstance;
-use Zaxbux\BackblazeB2\Http\Config;
 use Zaxbux\BackblazeB2\Http\ClientFactory;
+use Zaxbux\BackblazeB2\Config;
+use Zaxbux\BackblazeB2\Interfaces\AuthorizationCacheInterface;
+use Zaxbux\BackblazeB2\Object\AccountAuthorization;
+use Zaxbux\BackblazeB2\Service\ApplicationKeyService;
+use Zaxbux\BackblazeB2\Service\BucketService;
+use Zaxbux\BackblazeB2\Service\FileService;
+use Zaxbux\BackblazeB2\Traits\FileServiceHelpersTrait;
 
 /** @package Zaxbux\BackblazeB2 */
 class Client
@@ -24,6 +20,9 @@ class Client
 	use FileService;
 	use BucketService;
 	use ApplicationKeyService;
+	use FileServiceHelpersTrait {
+		FileServiceHelpersTrait::deleteAllFileVersions as deleteAllFileVersions;
+	}
 
 	public const B2_API_CLIENT_VERSION  = '2.0.0';
 	public const B2_API_BASE_URL        = 'https://api.backblazeb2.com';
@@ -50,7 +49,7 @@ class Client
 	/** @var AccountAuthorization */
 	protected $accountAuthorization;
 
-	/** @var IAuthorizationCache */
+	/** @var AuthorizationCacheInterface */
 	protected $authorizationCache;
 
 	/**
@@ -59,13 +58,13 @@ class Client
 	 * @param string $applicationKeyId The identifier for the key. The account ID can also be used.
 	 * @param string $applicationKey   The secret part of the key. The master application key can also be used.
 	 * 
-	 * @param IAuthorizationCache $authorizationCache [optional] An object implementing an authorization cache.
+	 * @param AuthorizationCacheInterface $authorizationCache [optional] An object implementing an authorization cache.
 	 * @param ClientInterface     $client             [optional] A client compatible with `GuzzleHttp\ClientInterface`.
 	 */
 	public function __construct(
 		string $applicationKeyId,
 		string $applicationKey,
-		?IAuthorizationCache $authorizationCache = null,
+		?AuthorizationCacheInterface $authorizationCache = null,
 		?array $options = []
 	) {
 		$this->applicationKeyId   = $applicationKeyId;
@@ -76,12 +75,6 @@ class Client
 
 		$this->guzzle = $options['client'] ?? ClientFactory::create($config, $options['handler'] ?? null);
 		$this->authorize();
-
-		/*
-		$this->key = new ApplicationKeyServiceInstance($this, $this->guzzle);
-		$this->file = new FileServiceInstance($this, $this->guzzle);
-		$this->bucket = new BucketServiceInstance($this, $this->guzzle);
-		*/
 	}
 
 	public function getApplicationKeyId(): string
@@ -116,7 +109,7 @@ class Client
 	public function authorize()
 	{
 		// Try to fetch existing authorization token from cache.
-		if ($this->authorizationCache instanceof IAuthorizationCache) {
+		if ($this->authorizationCache instanceof AuthorizationCacheInterface) {
 			$this->accountAuthorization = $this->authorizationCache->get($this->applicationKeyId);
 		}
 
@@ -128,7 +121,7 @@ class Client
 		//}
 
 		// Cache the new authorization token.
-		if ($this->authorizationCache instanceof IAuthorizationCache && $this->accountAuthorization) {
+		if ($this->authorizationCache instanceof AuthorizationCacheInterface && $this->accountAuthorization) {
 			$this->authorizationCache->put($this->applicationKeyId, $this->accountAuthorization);
 		}
 	}

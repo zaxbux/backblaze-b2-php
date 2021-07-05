@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Zaxbux\BackblazeB2\Traits;
 
-use Zaxbux\BackblazeB2\B2\Object\Bucket;
-use Zaxbux\BackblazeB2\B2\Response\BucketListResponse;
-use Zaxbux\BackblazeB2\Client\Exception\NotFoundException;
+use Zaxbux\BackblazeB2\Object\Bucket;
+use Zaxbux\BackblazeB2\Response\BucketList;
+use Zaxbux\BackblazeB2\Exceptions\NotFoundException;
 
 use function sprintf;
 
@@ -17,7 +17,7 @@ trait BucketServiceHelpersTrait
 		?string $bucketId,
 		?string $bucketName,
 		?array $bucketTypes
-	): BucketListResponse;
+	): BucketList;
 
 	/**
 	 * Get a bucket by ID.

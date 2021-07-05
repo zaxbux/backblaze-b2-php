@@ -4,9 +4,9 @@ namespace Zaxbux\BackblazeB2\Http\Middleware;
 
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
-use Zaxbux\BackblazeB2\Client\Exception\B2APIException;
-use Zaxbux\BackblazeB2\Client\Exception\NotFoundException;
-use Zaxbux\BackblazeB2\Client\Exception\UnauthorizedException;
+use Zaxbux\BackblazeB2\Exceptions\B2APIException;
+use Zaxbux\BackblazeB2\Exceptions\NotFoundException;
+use Zaxbux\BackblazeB2\Exceptions\UnauthorizedException;
 use Zaxbux\BackblazeB2\Http\ErrorHandler;
 use Zaxbux\BackblazeB2\Http\Response;
 

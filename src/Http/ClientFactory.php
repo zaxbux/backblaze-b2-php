@@ -10,7 +10,8 @@ use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
 use Psr\Http\Message\RequestInterface;
 use Zaxbux\BackblazeB2\Client as B2Client;
-use Zaxbux\BackblazeB2\B2\Object\AccountAuthorization;
+use Zaxbux\BackblazeB2\Config;
+use Zaxbux\BackblazeB2\Object\AccountAuthorization;
 use Zaxbux\BackblazeB2\Http\Middleware\ExceptionMiddleware;
 use Zaxbux\BackblazeB2\Http\Middleware\RefreshAuthorizationMiddleware;
 

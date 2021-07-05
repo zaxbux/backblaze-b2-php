@@ -9,21 +9,20 @@ use function sprintf, is_string;
 use AppendIterator;
 use Iterator;
 use NoRewindIterator;
-use Psr\Http\Message\StreamInterface;
 use RuntimeException;
+use Psr\Http\Message\StreamInterface;
+use Zaxbux\BackblazeB2\Response\FileList;
+use Zaxbux\BackblazeB2\Response\FilePartList;
+use Zaxbux\BackblazeB2\Object\File\DownloadOptions;
+use Zaxbux\BackblazeB2\Object\File\FileUploadMetadata;
 use Zaxbux\BackblazeB2\Client;
-use Zaxbux\BackblazeB2\B2\Object\File;
-use Zaxbux\BackblazeB2\B2\Object\FileInfo;
-use Zaxbux\BackblazeB2\B2\Object\ServerSideEncryption;
-use Zaxbux\BackblazeB2\B2\Object\UploadUrl;
-use Zaxbux\BackblazeB2\B2\Response\DownloadResponse;
-use Zaxbux\BackblazeB2\B2\Response\FileListResponse;
-use Zaxbux\BackblazeB2\B2\Response\FilePartListResponse;
-use Zaxbux\BackblazeB2\Classes\DownloadOptions;
-use Zaxbux\BackblazeB2\Classes\FileUploadMetadata;
-use Zaxbux\BackblazeB2\Classes\LargeFileUpload;
-use Zaxbux\BackblazeB2\Client\Exception\NotFoundException;
-use Zaxbux\BackblazeB2\Client\Exception\ValidationException;
+use Zaxbux\BackblazeB2\Exceptions\NotFoundException;
+use Zaxbux\BackblazeB2\Helpers\LargeFileUpload;
+use Zaxbux\BackblazeB2\Object\File;
+use Zaxbux\BackblazeB2\Object\File\FileInfo;
+use Zaxbux\BackblazeB2\Object\File\ServerSideEncryption;
+use Zaxbux\BackblazeB2\Object\File\UploadUrl;
+use Zaxbux\BackblazeB2\Response\FileDownload;
 
 trait FileServiceHelpersTrait
 {
@@ -46,7 +45,7 @@ trait FileServiceHelpersTrait
 		?string $delimiter = null,
 		?string $startFileName = null,
 		?int $maxFileCount = 1000
-	): FileListResponse;
+	): FileList;
 
 	public abstract function listFileVersions(
 		string $bucketId,
@@ -55,19 +54,19 @@ trait FileServiceHelpersTrait
 		?string $startFileName = null,
 		?string $startFileId = null,
 		?int $maxFileCount = 1000
-	): FileListResponse;
+	): FileList;
 
 	public abstract function listParts(
 		string $fileId,
 		?int $startPartNumber = null
-	): FilePartListResponse;
+	): FilePartList;
 
 	public abstract function listUnfinishedLargeFiles(
 		string $bucketId,
 		?string $namePrefix,
 		?string $startFileId,
 		?int $maxFileCount
-	): FileListResponse;
+	): FileList;
 
 	/* End abstract methods */
 
@@ -240,7 +239,7 @@ trait FileServiceHelpersTrait
 		$options = null,
 		$sink = null,
 		?bool $headersOnly = false
-	): DownloadResponse {
+	): FileDownload {
 		if (!$options instanceof DownloadOptions) {
 			/** @var DownloadOptions */
 			$options = DownloadOptions::fromArray($options ?? []);
@@ -256,7 +255,7 @@ trait FileServiceHelpersTrait
 			'stream'  => static::isStream($sink),
 		]);
 
-		return DownloadResponse::create($response, !is_string($sink) ? null : $sink);
+		return FileDownload::create($response, !is_string($sink) ? null : $sink);
 	}
 
 	/**
