@@ -13,10 +13,11 @@ class Key implements B2ObjectInterface
 
 	public const ATTRIBUTE_ACCOUNT_ID               = 'accountId';
 	public const ATTRIBUTE_APPLICATION_KEY_ID       = 'applicationKeyId';
+	public const ATTRIBUTE_APPLICATION_KEY          = 'applicationKey';
 	public const ATTRIBUTE_BUCKET_ID                = 'bucketId';
 	public const ATTRIBUTE_CAPABILITIES             = 'capabilities';
 	public const ATTRIBUTE_EXPIRATION_TIMESTAMP     = 'expirationTimestamp';
-	public const ATTRIBUTE_KEY_NAME                 = 'keyName';
+	public const ATTRIBUTE_KEY_NAME                 = 'name';
 	public const ATTRIBUTE_KEYS                     = 'keys';
 	public const ATTRIBUTE_MAX_KEY_COUNT            = 'maxKeyCount';
 	public const ATTRIBUTE_NAME_PREFIX              = 'namePrefix';
@@ -32,10 +33,13 @@ class Key implements B2ObjectInterface
 	private $bucketId;
 
 	/** @var string */
-	private $keyName;
+	private $name;
 
 	/** @var string */
 	private $applicationKeyId;
+
+	/** @var string */
+	private $applicationKey;
 
 	/** @var array */
 	private $capabilities;
@@ -58,16 +62,6 @@ class Key implements B2ObjectInterface
 	}
 
 	/**
-	 * Set the value of accountId.
-	 */ 
-	public function setAccountId($accountId): Key
-	{
-		$this->accountId = $accountId;
-
-		return $this;
-	}
-
-	/**
 	 * Get the value of bucketId.
 	 */ 
 	public function getBucketId(): string
@@ -76,31 +70,19 @@ class Key implements B2ObjectInterface
 	}
 
 	/**
-	 * Set the value of bucketId.
+	 * Get the value of name.
 	 */ 
-	public function setBucketId($bucketId): Key
+	public function getName(): string
 	{
-		$this->bucketId = $bucketId;
-
-		return $this;
+		return $this->name;
 	}
 
 	/**
-	 * Get the value of keyName.
+	 * Get the value of applicationKey.
 	 */ 
-	public function getKeyName(): string
+	public function getApplicationKey(): string
 	{
-		return $this->keyName;
-	}
-
-	/**
-	 * Set the value of keyName.
-	 */ 
-	public function setKeyName($keyName): Key
-	{
-		$this->keyName = $keyName;
-
-		return $this;
+		return $this->applicationKey;
 	}
 
 	/**
@@ -112,16 +94,6 @@ class Key implements B2ObjectInterface
 	}
 
 	/**
-	 * Set the value of applicationKeyId.
-	 */ 
-	public function setApplicationKeyId(string $applicationKeyId): Key
-	{
-		$this->applicationKeyId = $applicationKeyId;
-
-		return $this;
-	}
-
-	/**
 	 * Get the value of capabilities.
 	 */ 
 	public function getCapabilities(): array
@@ -130,49 +102,19 @@ class Key implements B2ObjectInterface
 	}
 
 	/**
-	 * Set the value of capabilities.
-	 */ 
-	public function setCapabilities(array $capabilities): Key
-	{
-		$this->capabilities = $capabilities;
-
-		return $this;
-	}
-
-	/**
 	 * Get the value of expirationTimestamp.
 	 */ 
-	public function getExpirationTimestamp(): int
+	public function getExpirationTimestamp(): ?int
 	{
 		return $this->expirationTimestamp;
 	}
 
 	/**
-	 * Set the value of expirationTimestamp.
-	 */ 
-	public function setExpirationTimestamp(int $expirationTimestamp): Key
-	{
-		$this->expirationTimestamp = $expirationTimestamp;
-
-		return $this;
-	}
-
-	/**
 	 * Get the value of namePrefix.
 	 */ 
-	public function getNamePrefix(): string
+	public function getNamePrefix(): ?string
 	{
 		return $this->namePrefix;
-	}
-
-	/**
-	 * Set the value of namePrefix.
-	 */ 
-	public function setNamePrefix(string $namePrefix): Key
-	{
-		$this->namePrefix = $namePrefix;
-
-		return $this;
 	}
 
 	/**
@@ -183,27 +125,40 @@ class Key implements B2ObjectInterface
 		return $this->options;
 	}
 
-	/**
-	 * Set the value of options.
-	 */ 
-	public function setOptions(array $options): Key
-	{
-		$this->options = $options;
-
-		return $this;
+	public function __construct(
+		?string $name = null,
+		?string $applicationKeyId = null,
+		?string $applicationKey = null,
+		?array $capabilities = null,
+		?string $accountId = null,
+		?int $expirationTimestamp = null,
+		?string $bucketId = null,
+		?string $namePrefix = null,
+		?array $options = null
+	) {
+		$this->name = $name;
+		$this->applicationKeyId = $applicationKeyId;
+		$this->applicationKey = $applicationKey;
+		$this->capabilities = $capabilities ?? [];
+		$this->accountId = $accountId;
+		$this->expirationTimestamp = $expirationTimestamp;
+		$this->bucketId = $bucketId;
+		$this->namePrefix = $namePrefix;
+		$this->options = $options ?? [];
 	}
 
 	/**
 	 * @inheritdoc
 	 */
 	public static function fromArray(array $data): Key {
-		return new Key(
-			$data[static::ATTRIBUTE_ACCOUNT_ID] ?? null,
-			$data[static::ATTRIBUTE_BUCKET_ID] ?? null,
+		return new static(
 			$data[static::ATTRIBUTE_KEY_NAME] ?? null,
 			$data[static::ATTRIBUTE_APPLICATION_KEY_ID] ?? null,
+			$data[static::ATTRIBUTE_APPLICATION_KEY] ?? null,
 			$data[static::ATTRIBUTE_CAPABILITIES] ?? null,
+			$data[static::ATTRIBUTE_ACCOUNT_ID] ?? null,
 			$data[static::ATTRIBUTE_EXPIRATION_TIMESTAMP] ?? null,
+			$data[static::ATTRIBUTE_BUCKET_ID] ?? null,
 			$data[static::ATTRIBUTE_NAME_PREFIX] ?? null,
 			$data[static::ATTRIBUTE_OPTIONS] ?? null
 		);
@@ -215,12 +170,12 @@ class Key implements B2ObjectInterface
 	public function jsonSerialize(): array
 	{
 		return [
-			static::ATTRIBUTE_ACCOUNT_ID => $this->accountId,
-			static::ATTRIBUTE_BUCKET_ID => $this->bucketId,
-			static::ATTRIBUTE_KEY_NAME => $this->keyName,
+			static::ATTRIBUTE_KEY_NAME => $this->name,
 			static::ATTRIBUTE_APPLICATION_KEY_ID => $this->applicationKeyId,
 			static::ATTRIBUTE_CAPABILITIES => $this->capabilities,
+			static::ATTRIBUTE_ACCOUNT_ID => $this->accountId,
 			static::ATTRIBUTE_EXPIRATION_TIMESTAMP => $this->expirationTimestamp,
+			static::ATTRIBUTE_BUCKET_ID => $this->bucketId,
 			static::ATTRIBUTE_NAME_PREFIX => $this->namePrefix,
 			static::ATTRIBUTE_OPTIONS => $this->options,
 		];

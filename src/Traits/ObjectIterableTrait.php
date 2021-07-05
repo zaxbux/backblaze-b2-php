@@ -23,7 +23,7 @@ trait ObjectIterableTrait
 	public static function createObjectIterable(string $object, array $data): iterable
 	{
 		if (!method_exists($object, 'fromArray')) {
-			throw new RuntimeException('$object does not implement fromArray() method');
+			throw new RuntimeException($object .' does not implement fromArray() method');
 		}
 
 		foreach ($data as $init) {

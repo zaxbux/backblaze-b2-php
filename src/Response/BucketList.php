@@ -19,7 +19,7 @@ class BucketList extends AbstractListResponse {
 
 	public function __construct(array $buckets)
 	{
-		$this->buckets  = $this->createObjectIterable(Bucket::class, $buckets);
+		$this->buckets  = static::createObjectIterable(Bucket::class, $buckets);
 	}
 
 	/**

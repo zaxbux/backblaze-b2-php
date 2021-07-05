@@ -20,7 +20,7 @@ class FilePartList extends AbstractListResponse {
 		array $parts,
 		?string $nextPartNumber = null
 	) {
-			$this->files      = $this->createObjectIterable(File::class, $parts);
+			$this->files      = static::createObjectIterable(File::class, $parts);
 			$this->nextPartNumber = $nextPartNumber;
 	}
 

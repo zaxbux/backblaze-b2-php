@@ -25,7 +25,7 @@ class FileList extends AbstractListResponse {
 		?string $nextFileId = null,
 		?string $nextFileName = null
 	) {
-			$this->files        = $this->createObjectIterable(File::class, $files);
+			$this->files        = static::createObjectIterable(File::class, $files);
 			$this->nextFileId   = $nextFileId;
 			$this->nextFileName = $nextFileName;
 	}
