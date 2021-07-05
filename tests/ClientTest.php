@@ -1,10 +1,8 @@
 <?php
 
-namespace Zaxbux\BackblazeB2\Tests;
+namespace tests;
 
 use BlastCloud\Guzzler\UsesGuzzler;
-
-use InvalidArgumentException;
 use GuzzleHttp\Psr7\Stream;
 use PHPUnit\Framework\TestCase;
 use Zaxbux\BackblazeB2\Client;
@@ -21,19 +19,13 @@ use Zaxbux\BackblazeB2\Client\Exception\NotFoundException;
 
 class ClientTest extends TestCase
 {
-	use TestHelper;
 	use UsesGuzzler;
 
 	public function testCreatePublicBucket()
 	{
-		/*handler = $this->buildGuzzleHandlerFromResponses([
-			$this->buildResponseFromStub(200, [], 'authorize_account.json'),
-			$this->buildResponseFromStub(200, [], 'create_bucket_public.json')
-		]);*/
-
 		$this->guzzler->queueResponse(
-			$this->buildResponseFromStub(200, [], 'authorize_account.json'),
-			$this->buildResponseFromStub(200, [], 'create_bucket_public.json')
+			MockResponse::fromFile('authorize_account.json'),
+			MockResponse::fromFile('create_bucket_public.json'),
 		);
 
 		$client = new Client('testId', 'testKey', null, [
@@ -54,8 +46,8 @@ class ClientTest extends TestCase
 	public function testCreatePrivateBucket()
 	{
 		$this->guzzler->queueResponse(
-			$this->buildResponseFromStub(200, [], 'authorize_account.json'),
-			$this->buildResponseFromStub(200, [], 'create_bucket_private.json')
+			MockResponse::fromFile('authorize_account.json'),
+			MockResponse::fromFile('create_bucket_private.json'),
 		);
 
 		$client = new Client('testId', 'testKey', null, [
@@ -77,8 +69,8 @@ class ClientTest extends TestCase
 		$this->expectException(DuplicateBucketNameException::class);
 
 		$this->guzzler->queueResponse(
-			$this->buildResponseFromStub(200, [], 'authorize_account.json'),
-			$this->buildResponseFromStub(400, [], 'create_bucket_exists.json')
+			MockResponse::fromFile('authorize_account.json'),
+			MockResponse::fromFile('create_bucket_exists.json', 400),
 		);
 
 		$client = new Client('testId', 'testKey', null, [
@@ -95,8 +87,8 @@ class ClientTest extends TestCase
 		$this->expectException(BadRequestException::class);
 
 		$this->guzzler->queueResponse(
-			$this->buildResponseFromStub(200, [], 'authorize_account.json'),
-			$this->buildResponseFromStub(400, [], 'create_bucket_invalid_type.json'),
+			MockResponse::fromFile('authorize_account.json'),
+			MockResponse::fromFile('create_bucket_invalid_type.json', 400),
 		);
 
 		$client = new Client('testId', 'testKey', null, [
@@ -111,8 +103,8 @@ class ClientTest extends TestCase
 	public function testUpdateBucketToPrivate()
 	{
 		$this->guzzler->queueResponse(
-			$this->buildResponseFromStub(200, [], 'authorize_account.json'),
-			$this->buildResponseFromStub(200, [], 'update_bucket_to_private.json')
+			MockResponse::fromFile('authorize_account.json'),
+			MockResponse::fromFile('update_bucket_to_private.json'),
 		);
 
 		$client = new Client('testId', 'testKey', null, [
@@ -132,8 +124,8 @@ class ClientTest extends TestCase
 	public function testUpdateBucketToPublic()
 	{
 		$this->guzzler->queueResponse(
-			$this->buildResponseFromStub(200, [], 'authorize_account.json'),
-			$this->buildResponseFromStub(200, [], 'update_bucket_to_public.json')
+			MockResponse::fromFile('authorize_account.json'),
+			MockResponse::fromFile('update_bucket_to_public.json'),
 		);
 
 		$client = new Client('testId', 'testKey', null, [
@@ -153,8 +145,8 @@ class ClientTest extends TestCase
 	public function testList3Buckets()
 	{
 		$this->guzzler->queueResponse(
-			$this->buildResponseFromStub(200, [], 'authorize_account.json'),
-			$this->buildResponseFromStub(200, [], 'list_buckets_3.json')
+			MockResponse::fromFile('authorize_account.json'),
+			MockResponse::fromFile('list_buckets_3.json'),
 		);
 
 		$client = new Client('testId', 'testKey', null, [
@@ -170,8 +162,8 @@ class ClientTest extends TestCase
 	public function testEmptyArrayWithNoBuckets()
 	{
 		$this->guzzler->queueResponse(
-			$this->buildResponseFromStub(200, [], 'authorize_account.json'),
-			$this->buildResponseFromStub(200, [], 'list_buckets_0.json')
+			MockResponse::fromFile('authorize_account.json'),
+			MockResponse::fromFile('list_buckets_0.json'),
 		);
 
 		$client = new Client('testId', 'testKey', null, [
@@ -186,8 +178,8 @@ class ClientTest extends TestCase
 	public function testDeleteBucket()
 	{
 		$this->guzzler->queueResponse(
-			$this->buildResponseFromStub(200, [], 'authorize_account.json'),
-			$this->buildResponseFromStub(200, [], 'delete_bucket.json')
+			MockResponse::fromFile('authorize_account.json'),
+			MockResponse::fromFile('delete_bucket.json'),
 		);
 
 		$client = new Client('testId', 'testKey', null, [
@@ -204,8 +196,8 @@ class ClientTest extends TestCase
 		$this->expectException(BadRequestException::class);
 
 		$this->guzzler->queueResponse(
-			$this->buildResponseFromStub(200, [], 'authorize_account.json'),
-			$this->buildResponseFromStub(400, [], 'delete_bucket_non_existent.json')
+			MockResponse::fromFile('authorize_account.json'),
+			MockResponse::fromFile('delete_bucket_non_existent.json', 400),
 		);
 
 		$client = new Client('testId', 'testKey', null, [
@@ -220,8 +212,8 @@ class ClientTest extends TestCase
 		$this->expectException(B2APIException::class);
 
 		$this->guzzler->queueResponse(
-			$this->buildResponseFromStub(200, [], 'authorize_account.json'),
-			$this->buildResponseFromStub(400, [], 'bucket_not_empty.json')
+			MockResponse::fromFile('authorize_account.json'),
+			MockResponse::fromFile('bucket_not_empty.json', 400),
 		);
 
 		$client = new Client('testId', 'testKey', null, [
@@ -231,12 +223,16 @@ class ClientTest extends TestCase
 		$client->deleteBucket('bucketId');
 	}
 
+	/*public function testUploadingFile() {
+		
+	}*/
+
 	public function testUploadingResource()
 	{
 		$this->guzzler->queueResponse(
-			$this->buildResponseFromStub(200, [], 'authorize_account.json'),
-			$this->buildResponseFromStub(200, [], 'get_upload_url.json'),
-			$this->buildResponseFromStub(200, [], 'upload.json')
+			MockResponse::fromFile('authorize_account.json'),
+			MockResponse::fromFile('get_upload_url.json'),
+			MockResponse::fromFile('upload.json'),
 		);
 
 		$client = new Client('testId', 'testKey', null, [
@@ -246,38 +242,32 @@ class ClientTest extends TestCase
 		// Set up the resource being uploaded.
 		$content = 'The quick brown box jumps over the lazy dog';
 		$resource = fopen('php://memory', 'r+');
+		$mtime = time() * 1000;
 		fwrite($resource, $content);
 		rewind($resource);
 
-		$file = $client->uploadFile(
-			$resource,
-			'bucketId',
-			'test.txt',
-			null,
-			[
-				FileInfo::B2_FILE_INFO_MTIME => time() * 1000,
-			]
-		);
+		$file = $client->uploadFile('bucketId', 'test.txt', $resource, null, [
+			FileInfo::B2_FILE_INFO_MTIME => $mtime,
+		]);
 
 		$this->assertInstanceOf(File::class, $file);
 
-		// We'll also check the Guzzle history to make sure the upload request got created correctly.
-		$uploadRequest = $this->guzzler->getHistory(2, 'request');
-		$this->assertEquals('uploadUrl', $uploadRequest->getRequestTarget());
-		$this->assertEquals('authToken', $uploadRequest->getHeader('Authorization')[0]);
-		$this->assertEquals(strlen($content), $uploadRequest->getHeader('Content-Length')[0]);
-		$this->assertEquals('test.txt', $uploadRequest->getHeader('X-Bz-File-Name')[0]);
-		$this->assertEquals(sha1($content), $uploadRequest->getHeader('X-Bz-Content-Sha1')[0]);
-		$this->assertEqualsWithDelta((int) round(microtime(true) * 1000), (int) $uploadRequest->getHeader('X-Bz-Info-src_last_modified_millis')[0], 1000);
-		$this->assertInstanceOf(Stream::class, $uploadRequest->getBody());
+		$this->guzzler->expects($this->once())
+			->withEndpoint('uploadUrl', 'POST')
+			->withHeader('Authorization', 'authToken')
+			->withHeader('Content-Length', strlen($content))
+			->withHeader(File::HEADER_X_BZ_FILE_NAME, 'test.txt')
+			->withHeader(File::HEADER_X_BZ_CONTENT_SHA1, sha1($content))
+			->withHeader(FileInfo::HEADER_PREFIX.FileInfo::B2_FILE_INFO_MTIME, $mtime)
+			->withBody($content);
 	}
 
 	public function testUploadingString()
 	{
 		$this->guzzler->queueResponse(
-			$this->buildResponseFromStub(200, [], 'authorize_account.json'),
-			$this->buildResponseFromStub(200, [], 'get_upload_url.json'),
-			$this->buildResponseFromStub(200, [], 'upload.json')
+			MockResponse::fromFile('authorize_account.json'),
+			MockResponse::fromFile('get_upload_url.json'),
+			MockResponse::fromFile('upload.json'),
 		);
 
 		$client = new Client('testId', 'testKey', null, [
@@ -285,36 +275,36 @@ class ClientTest extends TestCase
 		]);
 
 		$content = 'The quick brown box jumps over the lazy dog';
+		$mtime = time() * 1000;
 
 		$file = $client->uploadFile(
-			$content,
 			'bucketId',
 			'test.txt',
+			$content,
 			null,
 			[
-				FileInfo::B2_FILE_INFO_MTIME => time() * 1000,
+				FileInfo::B2_FILE_INFO_MTIME => $mtime,
 			]
 		);
 
 		$this->assertInstanceOf(File::class, $file);
 
-		// We'll also check the Guzzle history to make sure the upload request got created correctly.
-		$uploadRequest = $this->guzzler->getHistory(2, 'request');
-		$this->assertEquals('uploadUrl', $uploadRequest->getRequestTarget());
-		$this->assertEquals('authToken', $uploadRequest->getHeader('Authorization')[0]);
-		$this->assertEquals(strlen($content), $uploadRequest->getHeader('Content-Length')[0]);
-		$this->assertEquals('test.txt', $uploadRequest->getHeader('X-Bz-File-Name')[0]);
-		$this->assertEquals(sha1($content), $uploadRequest->getHeader('X-Bz-Content-Sha1')[0]);
-		$this->assertEqualsWithDelta((int) round(microtime(true) * 1000), (int) $uploadRequest->getHeader('X-Bz-Info-src_last_modified_millis')[0], 1000);
-		$this->assertInstanceOf(Stream::class, $uploadRequest->getBody());
+		$this->guzzler->expects($this->once())
+			->withEndpoint('uploadUrl', 'POST')
+			->withHeader('Authorization', 'authToken')
+			->withHeader('Content-Length', strlen($content))
+			->withHeader(File::HEADER_X_BZ_FILE_NAME, 'test.txt')
+			->withHeader(File::HEADER_X_BZ_CONTENT_SHA1, sha1($content))
+			->withHeader(FileInfo::HEADER_PREFIX.FileInfo::B2_FILE_INFO_MTIME, $mtime)
+			->withBody($content);
 	}
 
 	public function testUploadingWithCustomContentTypeAndLastModified()
 	{
 		$this->guzzler->queueResponse(
-			$this->buildResponseFromStub(200, [], 'authorize_account.json'),
-			$this->buildResponseFromStub(200, [], 'get_upload_url.json'),
-			$this->buildResponseFromStub(200, [], 'upload.json')
+			MockResponse::fromFile('authorize_account.json'),
+			MockResponse::fromFile('get_upload_url.json'),
+			MockResponse::fromFile('upload.json'),
 		);
 
 		$client = new Client('testId', 'testKey', null, [
@@ -346,8 +336,8 @@ class ClientTest extends TestCase
 	public function testDownloadByIdWithoutSavePath()
 	{
 		$this->guzzler->queueResponse(
-			$this->buildResponseFromStub(200, [], 'authorize_account.json'),
-			$this->buildResponseFromStub(200, [], 'download_content')
+			MockResponse::fromFile('authorize_account.json'),
+			MockResponse::fromFile('download_content'),
 		);
 
 		$client = new Client('testId', 'testKey', null, [
@@ -362,8 +352,8 @@ class ClientTest extends TestCase
 	public function testDownloadByIdWithSavePath()
 	{
 		$this->guzzler->queueResponse(
-			$this->buildResponseFromStub(200, [], 'authorize_account.json'),
-			$this->buildResponseFromStub(200, [], 'download_content')
+			MockResponse::fromFile('authorize_account.json'),
+			MockResponse::fromFile('download_content'),
 		);
 
 		$client = new Client('testId', 'testKey', null, [
@@ -383,8 +373,8 @@ class ClientTest extends TestCase
 		$this->expectException(B2APIException::class);
 
 		$this->guzzler->queueResponse(
-			$this->buildResponseFromStub(200, [], 'authorize_account.json'),
-			$this->buildResponseFromStub(400, [], 'download_by_incorrect_id.json')
+			MockResponse::fromFile('authorize_account.json'),
+			MockResponse::fromFile('download_by_incorrect_id.json', 400),
 		);
 
 		$client = new Client('testId', 'testKey', null, [
@@ -397,8 +387,8 @@ class ClientTest extends TestCase
 	public function testDownloadByPathWithoutSavePath()
 	{
 		$this->guzzler->queueResponse(
-			$this->buildResponseFromStub(200, [], 'authorize_account.json'),
-			$this->buildResponseFromStub(200, [], 'download_content')
+			MockResponse::fromFile('authorize_account.json'),
+			MockResponse::fromFile('download_content'),
 		);
 
 		$client = new Client('testId', 'testKey', null, [
@@ -413,8 +403,8 @@ class ClientTest extends TestCase
 	public function testDownloadByPathWithSavePath()
 	{
 		$this->guzzler->queueResponse(
-			$this->buildResponseFromStub(200, [], 'authorize_account.json'),
-			$this->buildResponseFromStub(200, [], 'download_content')
+			MockResponse::fromFile('authorize_account.json'),
+			MockResponse::fromFile('download_content'),
 		);
 
 		$client = new Client('testId', 'testKey', null, [
@@ -434,8 +424,8 @@ class ClientTest extends TestCase
 		$this->expectException(NotFoundException::class);
 
 		$this->guzzler->queueResponse(
-			$this->buildResponseFromStub(200, [], 'authorize_account.json'),
-			$this->buildResponseFromStub(400, [], 'download_by_incorrect_path.json')
+			MockResponse::fromFile('authorize_account.json'),
+			MockResponse::fromFile('download_by_incorrect_path.json', 400),
 		);
 
 		$client = new Client('testId', 'testKey', null, [
@@ -448,9 +438,9 @@ class ClientTest extends TestCase
 	public function testListFilesHandlesMultiplePages()
 	{
 		$this->guzzler->queueResponse(
-			$this->buildResponseFromStub(200, [], 'authorize_account.json'),
-			$this->buildResponseFromStub(200, [], 'list_files_page1.json'),
-			$this->buildResponseFromStub(200, [], 'list_files_page2.json')
+			MockResponse::fromFile('authorize_account.json'),
+			MockResponse::fromFile('list_files_page1.json'),
+			MockResponse::fromFile('list_files_page2.json'),
 		);
 
 		$client = new Client('testId', 'testKey', null, [
@@ -467,8 +457,8 @@ class ClientTest extends TestCase
 	public function testListFilesReturnsEmptyArrayWithNoFiles()
 	{
 		$this->guzzler->queueResponse(
-			$this->buildResponseFromStub(200, [], 'authorize_account.json'),
-			$this->buildResponseFromStub(200, [], 'list_files_empty.json')
+			MockResponse::fromFile('authorize_account.json'),
+			MockResponse::fromFile('list_files_empty.json'),
 		);
 
 		$client = new Client('testId', 'testKey', null, [
@@ -484,8 +474,8 @@ class ClientTest extends TestCase
 	public function testGetFile()
 	{
 		$this->guzzler->queueResponse(
-			$this->buildResponseFromStub(200, [], 'authorize_account.json'),
-			$this->buildResponseFromStub(200, [], 'get_file.json')
+			MockResponse::fromFile('authorize_account.json'),
+			MockResponse::fromFile('get_file.json'),
 		);
 
 		$client = new Client('testId', 'testKey', null, [
@@ -502,8 +492,8 @@ class ClientTest extends TestCase
 		$this->expectException(BadRequestException::class);
 
 		$this->guzzler->queueResponse(
-			$this->buildResponseFromStub(200, [], 'authorize_account.json'),
-			$this->buildResponseFromStub(400, [], 'get_file_non_existent.json')
+			MockResponse::fromFile('authorize_account.json'),
+			MockResponse::fromFile('get_file_non_existent.json', 400),
 		);
 
 		$client = new Client('testId', 'testKey', null, [
@@ -516,9 +506,9 @@ class ClientTest extends TestCase
 	public function testDeleteFile()
 	{
 		$this->guzzler->queueResponse(
-			$this->buildResponseFromStub(200, [], 'authorize_account.json'),
-			$this->buildResponseFromStub(200, [], 'get_file.json'),
-			$this->buildResponseFromStub(200, [], 'delete_file.json')
+			MockResponse::fromFile('authorize_account.json'),
+			MockResponse::fromFile('get_file.json'),
+			MockResponse::fromFile('delete_file.json'),
 		);
 
 		$client = new Client('testId', 'testKey', null, [
@@ -533,9 +523,9 @@ class ClientTest extends TestCase
 	public function testDeleteFileRetrievesFileNameWhenNotProvided()
 	{
 		$this->guzzler->queueResponse(
-			$this->buildResponseFromStub(200, [], 'authorize_account.json'),
-			$this->buildResponseFromStub(200, [], 'get_file.json'),
-			$this->buildResponseFromStub(200, [], 'delete_file.json')
+			MockResponse::fromFile('authorize_account.json'),
+			MockResponse::fromFile('get_file.json'),
+			MockResponse::fromFile('delete_file.json'),
 		);
 
 		$client = new Client('testId', 'testKey', null, [
@@ -550,8 +540,8 @@ class ClientTest extends TestCase
 		$this->expectException(BadRequestException::class);
 
 		$this->guzzler->queueResponse(
-			$this->buildResponseFromStub(200, [], 'authorize_account.json'),
-			$this->buildResponseFromStub(400, [], 'delete_file_non_existent.json')
+			MockResponse::fromFile('authorize_account.json'),
+			MockResponse::fromFile('delete_file_non_existent.json', 400),
 		);
 
 		$client = new Client('testId', 'testKey', null, [
@@ -564,8 +554,8 @@ class ClientTest extends TestCase
 	public function testCopyFile()
 	{
 		$this->guzzler->queueResponse(
-			$this->buildResponseFromStub(200, [], 'authorize_account.json'),
-			$this->buildResponseFromStub(200, [], 'copy_file.json')
+			MockResponse::fromFile('authorize_account.json'),
+			MockResponse::fromFile('copy_file.json'),
 		);
 
 		$client = new Client('testId', 'testKey', null, [
@@ -585,8 +575,8 @@ class ClientTest extends TestCase
 	public function testCopyPart()
 	{
 		$this->guzzler->queueResponse(
-			$this->buildResponseFromStub(200, [], 'authorize_account.json'),
-			$this->buildResponseFromStub(200, [], 'copy_part.json')
+			MockResponse::fromFile('authorize_account.json'),
+			MockResponse::fromFile('copy_part.json'),
 		);
 
 		$client = new Client('testId', 'testKey', null, [
@@ -607,8 +597,8 @@ class ClientTest extends TestCase
 	public function testCancelLargeFile()
 	{
 		$this->guzzler->queueResponse(
-			$this->buildResponseFromStub(200, [], 'authorize_account.json'),
-			$this->buildResponseFromStub(200, [], 'cancel_large_file.json')
+			MockResponse::fromFile('authorize_account.json'),
+			MockResponse::fromFile('cancel_large_file.json'),
 		);
 
 		$client = new Client('testId', 'testKey', null, [
@@ -626,8 +616,8 @@ class ClientTest extends TestCase
 	public function testListUnfinishedLargeFiles()
 	{
 		$this->guzzler->queueResponse(
-			$this->buildResponseFromStub(200, [], 'authorize_account.json'),
-			$this->buildResponseFromStub(200, [], 'list_unfinished_large_files.json')
+			MockResponse::fromFile('authorize_account.json'),
+			MockResponse::fromFile('list_unfinished_large_files.json'),
 		);
 
 		$client = new Client('testId', 'testKey', null, [
@@ -644,8 +634,8 @@ class ClientTest extends TestCase
 	public function testHideFile()
 	{
 		$this->guzzler->queueResponse(
-			$this->buildResponseFromStub(200, [], 'authorize_account.json'),
-			$this->buildResponseFromStub(200, [], 'hide_file.json')
+			MockResponse::fromFile('authorize_account.json'),
+			MockResponse::fromFile('hide_file.json'),
 		);
 
 		$client = new Client('testId', 'testKey', null, [
@@ -658,8 +648,8 @@ class ClientTest extends TestCase
 	public function testGetDownloadAuthorization()
 	{
 		$this->guzzler->queueResponse(
-			$this->buildResponseFromStub(200, [], 'authorize_account.json'),
-			$this->buildResponseFromStub(200, [], 'get_download_authorization.json')
+			MockResponse::fromFile('authorize_account.json'),
+			MockResponse::fromFile('get_download_authorization.json'),
 		);
 
 		$client = new Client('testId', 'testKey', null, [

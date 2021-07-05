@@ -84,4 +84,14 @@ final class FileUploadMetadata {
 	{
 		return $this->mtime;
 	}
+
+	/**
+	 * 
+	 * @param resource $stream 
+	 * @return int 
+	 */
+	public static function resourceLength($stream): int
+	{
+		return fstat($stream)['size'];
+	}
 }

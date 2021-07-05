@@ -51,6 +51,7 @@ class ClientFactory {
 		$stack->push(new ExceptionMiddleware());
 		$stack->push(new RefreshAuthorizationMiddleware($config, $client));
 
+		// TODO: Use `Retry-After` header
 		/*$stack->push(Middleware::retry(function ($retries, $request, $response = null) use ($config) {
 			return $retries <= $config->maxRetries; //&& $this->isRetryable($request);
 		}, function ($retries, $response) {

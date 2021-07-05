@@ -325,7 +325,7 @@ trait FileService
 	}
 
 	/**
-	 * Gets a URL to use for uploading files.
+	 * Gets a URL and authorization token to use for uploading files.
 	 * 
 	 * @link https://www.backblaze.com/b2/docs/b2_get_upload_url.html
 	 * 
@@ -524,7 +524,10 @@ trait FileService
 		string $bucketId,
 		string $fileName,
 		?string $contentType = null,
-		 $fileInfo = null
+		$fileInfo = null,
+		?array $fileRetention = null,
+		?array $legalHold = null,
+		?array $serverSideEncryption = null
 	): File {
 		if (!$fileInfo instanceof FileInfo) {
 			$fileInfo = FileInfo::fromArray($fileInfo);
@@ -537,6 +540,9 @@ trait FileService
 				File::ATTRIBUTE_CONTENT_TYPE => $contentType ?? File::CONTENT_TYPE_AUTO,
 			], [
 				File::ATTRIBUTE_FILE_INFO => $fileInfo->get(),
+				File::ATTRIBUTE_FILE_RETENTION => $fileRetention,
+				File::ATTRIBUTE_LEGAL_HOLD => $legalHold,
+				File::ATTRIBUTE_SSE => $serverSideEncryption,
 			])
 		]);
 
@@ -602,17 +608,18 @@ trait FileService
 	 * 
 	 * @link https://www.backblaze.com/b2/docs/b2_upload_file.html
 	 *
-	 * @param string|resource            $body                 The file to be uploaded. String or stream resource.
 	 * @param string                     $bucketId             The ID of the bucket to upload the file to.
 	 * @param string                     $fileName             The name of the file.
+	 * @param string|resource            $body                 The file to be uploaded. String or stream resource.
 	 * @param string                     $contentType          The MIME type of the content of the file.
 	 * @param FileInfo|array             $fileInfo             The custom file info to add to the uploaded file.
 	 * @param ServerSideEncryption|array $serverSideEncryption The parameters for B2 to encrypt the uploaded file.
+	 * @param UploadUrl                  $uploadUrl            The upload authorization data.
 	 */
 	public function uploadFile(
-		$body,
 		string $bucketId,
 		string $fileName,
+		$body,
 		?string $contentType = null,
 		$fileInfo = null,
 		$serverSideEncryption = null,
@@ -668,25 +675,26 @@ trait FileService
 		$body,
 		string $fileId,
 		?int $partNumber = 1,
-		 $serverSideEncryption = null,
-		?UploadPartUrl $uploadPartUrl = null
+		$serverSideEncryption = null,
+		?UploadPartUrl $uploadPartUrl = null,
+		?FileUploadMetadata $metadata = null
 	): File {
 		if (!$uploadPartUrl instanceof UploadPartUrl) {
 			$uploadPartUrl = $this->getUploadPartUrl($fileId);
 		}
 
-		$uploadMetadata = FileUploadMetadata::fromResource($body);
+		if (!$metadata instanceof FileUploadMetadata) {
+			$metadata = FileUploadMetadata::fromResource($body);
+		}
 
 		$response = $this->guzzle->request('POST', $uploadPartUrl->getUploadUrl(), [
 			'body' => $body,
 			'headers' => self::filterRequestOptions([
 				'Authorization'                => $uploadPartUrl->getAuthorizationToken(),
-				'Content-Length'               => $uploadMetadata->getLength(),
-				File::HEADER_X_BZ_CONTENT_SHA1 => $uploadMetadata->getSha1(),
+				'Content-Length'               => $metadata->getLength(),
+				File::HEADER_X_BZ_CONTENT_SHA1 => $metadata->getSha1(),
 				File::HEADER_X_BZ_PART_NUMBER  => $partNumber,
-			], [
-				...($serverSideEncryption->getHeaders() ?? []),
-			]),
+			], $serverSideEncryption->getHeaders() ?? []),
 		]);
 
 		return File::fromArray(json_decode((string) $response->getBody(), true));

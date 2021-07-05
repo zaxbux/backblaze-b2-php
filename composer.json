@@ -32,7 +32,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Zaxbux\\BackblazeB2\\Tests\\": "tests/"
+            "tests\\": "tests/"
         }
     }
 }

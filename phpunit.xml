@@ -10,8 +10,8 @@
          stopOnFailure="false"
 >
     <testsuites>
-        <testsuite name="b2-sdk-php tests">
-            <directory>./tests/</directory>
+        <testsuite name="backblaze-b2-php tests">
+            <directory suffix="Test.php">./tests</directory>
         </testsuite>
     </testsuites>
 </phpunit>

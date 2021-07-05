@@ -57,7 +57,7 @@ final class FileActionType
 	 * @throws InvalidArgumentException 
 	 */
 	public static function fromString(string $action) {
-		$actions = [static::UPLOAD, static::START, static::COPY, static::HIDE, static::FOLDER];
+		//$actions = [static::UPLOAD, static::START, static::COPY, static::HIDE, static::FOLDER];
 
 		/*if (!\in_array($action, $actions)) {
 			throw new InvalidArgumentException('Argument $action must be one of: ' . implode(', ', $actions));

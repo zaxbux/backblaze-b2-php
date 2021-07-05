@@ -10,12 +10,18 @@ use AppendIterator;
 use Iterator;
 use NoRewindIterator;
 use Psr\Http\Message\StreamInterface;
+use RuntimeException;
 use Zaxbux\BackblazeB2\Client;
 use Zaxbux\BackblazeB2\B2\Object\File;
+use Zaxbux\BackblazeB2\B2\Object\FileInfo;
+use Zaxbux\BackblazeB2\B2\Object\ServerSideEncryption;
+use Zaxbux\BackblazeB2\B2\Object\UploadUrl;
 use Zaxbux\BackblazeB2\B2\Response\DownloadResponse;
 use Zaxbux\BackblazeB2\B2\Response\FileListResponse;
 use Zaxbux\BackblazeB2\B2\Response\FilePartListResponse;
 use Zaxbux\BackblazeB2\Classes\DownloadOptions;
+use Zaxbux\BackblazeB2\Classes\FileUploadMetadata;
+use Zaxbux\BackblazeB2\Classes\LargeFileUpload;
 use Zaxbux\BackblazeB2\Client\Exception\NotFoundException;
 use Zaxbux\BackblazeB2\Client\Exception\ValidationException;
 
@@ -235,7 +241,7 @@ trait FileServiceHelpersTrait
 		$sink = null,
 		?bool $headersOnly = false
 	): DownloadResponse {
-		if (! $options instanceof DownloadOptions) {
+		if (!$options instanceof DownloadOptions) {
 			/** @var DownloadOptions */
 			$options = DownloadOptions::fromArray($options ?? []);
 		}
@@ -243,14 +249,190 @@ trait FileServiceHelpersTrait
 		// Build query string from query parameters and download options.
 		$queryString = join('&', [http_build_query($query ?? []), $options->toQueryString() ?? []]);
 
-		$response = $this->guzzle->request($headersOnly ? 'HEAD' :'GET', $downloadUrl, [
+		$response = $this->guzzle->request($headersOnly ? 'HEAD' : 'GET', $downloadUrl, [
 			'query'   => $queryString,
 			'headers' => $options->getHeaders(),
-			'sink'    => $sink ?: null,
+			'sink'    => $sink ?? null,
 			'stream'  => static::isStream($sink),
 		]);
 
 		return DownloadResponse::create($response, !is_string($sink) ? null : $sink);
+	}
+
+	/**
+	 * Upload a file. Automatically decides the upload method (regular or large file).
+	 *
+	 * @param string|UploadUrl          $bucketIdOrUploadUrl  Must be a bucket ID for large files.
+	 * @param string                    $fileName             
+	 * @param string|resource           $stream               
+	 * @param null|string               $contentType          
+	 * @param null|FileInfo             $fileInfo             
+	 * @param null|ServerSideEncryption $serverSideEncryption 
+	 * @return File 
+	 */
+	public function uploadStream(
+		$bucketIdOrUploadUrl,
+		string $fileName,
+		$stream,
+		?string $contentType = null,
+		?FileInfo $fileInfo = null,
+		?array $fileRetention,
+		?bool $legalHold,
+		?ServerSideEncryption $serverSideEncryption = null
+	): File {
+		$bucketId = $bucketIdOrUploadUrl;
+
+		if ($bucketIdOrUploadUrl instanceof UploadUrl) {
+			// Get bucket ID from Upload URL object.
+			$bucketId = $bucketIdOrUploadUrl->getBucketId();
+		} else {
+			// Set null to force fetching an Upload URL.
+			$bucketIdOrUploadUrl = null;
+		}
+
+		$metadata = FileUploadMetadata::fromResource($stream);
+
+		if ($metadata->getLength() < File::SINGLE_FILE_MIN_SIZE || $metadata->getLength() > File::LARGE_FILE_MAX_SIZE) {
+			throw new RuntimeException(sprintf(
+				'Upload size is not between %d bytes and %d bytes.',
+				File::SINGLE_FILE_MIN_SIZE,
+				File::LARGE_FILE_MAX_SIZE
+			));
+		}
+
+		// Upload as large file if greater than single file size or configured size,
+		// and greater than the minimum part size for the account.
+		if (($metadata->getLength() > File::SINGLE_FILE_MAX_SIZE ||
+			$metadata->getLength() > 200 * 1024 * 1024) &&
+			$metadata->getLength() > $this->accountAuthorization->getAbsoluteMinimumPartSize()
+		) {
+			// Upload large file
+			return $this->uploadLargeFile(
+				$bucketId,
+				$fileName,
+				$stream,
+				$contentType,
+				$fileInfo,
+				$legalHold,
+				$fileRetention,
+				$serverSideEncryption,
+				$metadata
+			);
+		}
+
+		// Upload as regular file
+		return $this->uploadFile(
+			$bucketId,
+			$fileName,
+			$stream,
+			$contentType,
+			$fileInfo,
+			$fileRetention,
+			$legalHold,
+			$serverSideEncryption,
+			$bucketIdOrUploadUrl
+		);
+	}
+
+	/**
+	 * @see FileServiceHelpersTrait::uploadStream()
+	 * 
+	 * @param string|UploadUrl          $bucketIdOrUploadUrl  
+	 * @param string                    $fileName             
+	 * @param string|resource           $filePath             The path to the file.
+	 * @param null|string               $contentType          
+	 * @param null|FileInfo             $fileInfo             
+	 * @param null|ServerSideEncryption $serverSideEncryption 
+	 * 
+	 * @throws RuntimeException
+	 */
+	public function upload(
+		$bucketIdOrUploadUrl,
+		string $fileName,
+		string $filePath,
+		?string $contentType = null,
+		?FileInfo $fileInfo = null,
+		?array $fileRetention,
+		?bool $legalHold,
+		?ServerSideEncryption $serverSideEncryption = null
+	): File {
+		if (!is_file($filePath)) {
+			throw new RuntimeException('File does not exist or is not a file.');
+		}
+
+		$handle = fopen($filePath, 'rb');
+
+		if (!$handle) {
+			throw new RuntimeException('Failure opening file pointer.');
+		}
+
+		$file = $this->uploadStream(
+			$bucketIdOrUploadUrl, 
+			$fileName, 
+			$handle, 
+			$contentType, 
+			$fileInfo, 
+			$fileRetention,
+			$legalHold,
+			$serverSideEncryption
+		);
+
+		fclose($handle);
+
+		return $file;
+	}
+
+	/**
+	 * Helper method that implements the entire large file upload process.
+	 * 
+	 * @param string                    $bucketId 
+	 * @param string                    $fileName             
+	 * @param string|resource           $stream               
+	 * @param null|string               $contentType          
+	 * @param null|FileInfo             $fileInfo             
+	 * @param null|ServerSideEncryption $serverSideEncryption 
+	 * @param null|UploadMetadata       $metadata             
+	 * 
+	 * @throws RuntimeException
+	 */
+	public function uploadLargeFile(
+		string $bucketId,
+		string $fileName,
+		$stream,
+		?string $contentType = null,
+		?FileInfo $fileInfo = null,
+		?array $fileRetention,
+		?bool $legalHold,
+		?ServerSideEncryption $serverSideEncryption = null,
+		?FileUploadMetadata $metadata = null
+	): File {
+		$largeFileUpload = LargeFileUpload::create($this)->withStream($stream, $fileName);
+
+		if ($contentType) {
+			$largeFileUpload->useContentType($contentType);
+		}
+
+		if ($fileInfo) {
+			$largeFileUpload->useFileInfo($fileInfo);
+		}
+
+		if ($fileRetention) {
+			$largeFileUpload->withFileRetention($fileRetention);
+		}
+
+		if ($legalHold) {
+			$largeFileUpload->legalHold($legalHold);
+		}
+
+		if ($serverSideEncryption) {
+			$largeFileUpload->withEncryption($serverSideEncryption);
+		}
+
+		if ($metadata) {
+			$largeFileUpload->useFileMetadata($metadata);
+		}
+
+		return $largeFileUpload->start($bucketId)->uploadParts()->finish()->getFile();
 	}
 
 	private static function isStream($var): bool

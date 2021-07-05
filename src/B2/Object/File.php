@@ -63,8 +63,17 @@ class File implements B2ObjectBase
 	public const HEADER_X_BZ_FILE_NAME    = 'X-Bz-File-Name';
 	public const HEADER_X_BZ_PART_NUMBER  = 'X-Bz-Part-Number';
 
-	public const LEGAL_HOLD_ENABLED  = 'on';
-	public const LEGAL_HOLD_DISABLED = 'off';
+	// 0 bytes
+	public const SINGLE_FILE_MIN_SIZE = 0;
+
+	// 5 GiB
+	public const SINGLE_FILE_MAX_SIZE = 5368709120;
+
+	// 100 MiB
+	public const LARGE_FILE_MIN_SIZE = 104857600;
+
+	// 10 TiB
+	public const LARGE_FILE_MAX_SIZE = 5368709120;
 
 	/** @var string */
 	private $accountId;
@@ -81,7 +90,7 @@ class File implements B2ObjectBase
 	/** @var FileActionType */
 	private $action;
 
-	/** @var array */
+	/** @var FileInfo */
 	private $info;
 
 	/** @var int */
@@ -105,7 +114,7 @@ class File implements B2ObjectBase
 	/** @var array */
 	private $legalHold;
 
-	/** @var array */
+	/** @var ServerSideEncryption */
 	private $serverSideEncryption;
 
 	/** @var int */
@@ -116,13 +125,13 @@ class File implements B2ObjectBase
 	 * @param string $name 
 	 * @param string $bucketId 
 	 * @param string $action 
-	 * @param array  $fileInfo 
+	 * @param array|FileInfo  $fileInfo 
 	 * @param int    $contentLength 
 	 * @param string $contentType 
 	 * @param string $contentMd5 
 	 * @param string $contentSha1 
-	 * @param string $accountId 
 	 * @param int    $uploadTimestamp 
+	 * @param string $accountId 
 	 * @param array  $retention 
 	 * @param array  $legalHold 
 	 * @param array  $serverSideEncryption 
@@ -133,7 +142,7 @@ class File implements B2ObjectBase
 		?string $name = null,
 		?string $bucketId = null,
 		?string $action = null,
-		?array $fileInfo = null,
+		$fileInfo = null,
 		?int $contentLength = null,
 		?string $contentType = null,
 		?string $contentMd5 = null,
@@ -148,8 +157,10 @@ class File implements B2ObjectBase
 		$this->id                   = $id;
 		$this->name                 = $name;
 		$this->bucketId             = $bucketId;
-		$this->action               = $action ? FileActionType::fromString($action) : null;
-		$this->fileInfo             = $fileInfo;
+		$this->action               = $action ?
+			FileActionType::fromString($action) : null;
+		$this->info             = $fileInfo instanceof FileInfo ?
+			$fileInfo : FileInfo::fromArray($fileInfo ?? []);
 		$this->contentLength        = $contentLength;
 		$this->contentType          = $contentType;
 		$this->contentMd5           = $contentMd5;
@@ -158,7 +169,8 @@ class File implements B2ObjectBase
 		$this->accountId            = $accountId;
 		$this->retention            = $retention;
 		$this->legalHold            = $legalHold;
-		$this->serverSideEncryption = $serverSideEncryption;
+		$this->serverSideEncryption = $serverSideEncryption instanceof ServerSideEncryption ?
+			$serverSideEncryption : ServerSideEncryption::fromArray($serverSideEncryption ?? []);
 		$this->partNumber           = $partNumber;
 	}
 
@@ -263,7 +275,7 @@ class File implements B2ObjectBase
 	/**
 	 * Get the file info.
 	 */
-	public function getInfo(): array
+	public function getInfo(): FileInfo
 	{
 		return $this->info;
 	}
@@ -271,9 +283,9 @@ class File implements B2ObjectBase
 	/**
 	 * Set the file info.
 	 * 
-	 * @param array $info
+	 * @param array|FileInfo $info
 	 */
-	public function setInfo(array $info): FIle
+	public function setInfo($info): File
 	{
 		$this->info = $info;
 
@@ -421,7 +433,7 @@ class File implements B2ObjectBase
 	/**
 	 * Get the value of serverSideEncryption.
 	 */
-	public function getServerSideEncryption(): array
+	public function getServerSideEncryption(): ?ServerSideEncryption
 	{
 		return $this->serverSideEncryption;
 	}
@@ -441,7 +453,7 @@ class File implements B2ObjectBase
 	/**
 	 * Get the value of partNumber.
 	 */
-	public function getPartNumber(): int
+	public function getPartNumber(): ?int
 	{
 		return $this->partNumber;
 	}
@@ -467,8 +479,8 @@ class File implements B2ObjectBase
 	public function getLastModifiedTimestamp(?bool $milliseconds = true): ?int
 	{
 		if ($this->info) {
-			$t = FileInfo::fromArray($this->info)->get(FileInfo::B2_FILE_INFO_MTIME, null);
-			return $milliseconds ? $t : $t * 1000;
+			$t = $this->info->get(FileInfo::B2_FILE_INFO_MTIME, null);
+			return $milliseconds ? $t : round($t / 1000);
 		}
 
 		return null;
@@ -513,7 +525,7 @@ class File implements B2ObjectBase
 			static::ATTRIBUTE_FILE_NAME        => $this->name,
 			static::ATTRIBUTE_BUCKET_ID        => $this->bucketId,
 			static::ATTRIBUTE_ACTION           => $this->action,
-			static::ATTRIBUTE_FILE_INFO        => $this->fileInfo,
+			static::ATTRIBUTE_FILE_INFO        => $this->info,
 			static::ATTRIBUTE_CONTENT_LENGTH   => $this->contentLength,
 			static::ATTRIBUTE_CONTENT_TYPE     => $this->contentType,
 			static::ATTRIBUTE_CONTENT_SHA1     => $this->contentSha1,
