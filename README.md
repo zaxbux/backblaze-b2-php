@@ -45,7 +45,7 @@ $buckets = $client->listBuckets();
 
 ## Authorization Cache
 
-If you want to cache the authorization token to reduce the number of API calls, create a class that implements `Zaxbux\BackblazeB2\AuthCacheInterface`.
+If you want to cache the authorization token to reduce the number of API calls, create a class that implements `Zaxbux\BackblazeB2\AuthorizationCacheInterface`.
 
 ```php
 <?php
@@ -62,11 +62,11 @@ $client = new Client($accountId, $applicationKey, $authCache);
 ```php
 <?php
 
-use Zaxbux\BackblazeB2\AuthCacheInterface;
+use Zaxbux\BackblazeB2\AuthorizationCacheInterface;
 
-class AuthorizationCacheExample implements AuthCacheInterface {
+class AuthorizationCacheExample implements AuthorizationCacheInterface {
 	public function cache($key, $value) {
-		$myCache->remember($key, $value, AuthCacheInterface::EXPIRES)
+		$myCache->remember($key, $value, AuthorizationCacheInterface::EXPIRES)
 	}
 
 	public function get($key) {
@@ -75,7 +75,7 @@ class AuthorizationCacheExample implements AuthCacheInterface {
 }
 ```
 
-The `AuthCacheInterface::EXPIRES` constant is how long the authorization token is valid for, in seconds. Currently, this is equivalent to 24 hours. Requests made after the token expires will result in an `ExpiredAuthTokenException` exception being thrown. You will need to get a new authorization token with `authorizeAccount()`.
+The `AuthorizationCacheInterface::EXPIRES` constant is how long the authorization token is valid for, in seconds. Currently, this is equivalent to 24 hours. Requests made after the token expires will result in an `ExpiredAuthTokenException` exception being thrown. You will need to get a new authorization token with `authorizeAccount()`.
 
 ## Tests
 
