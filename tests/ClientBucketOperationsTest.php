@@ -2,11 +2,12 @@
 
 namespace tests;
 
+use Zaxbux\BackblazeB2\Client;
 use Zaxbux\BackblazeB2\Object\Bucket;
 use Zaxbux\BackblazeB2\Object\Bucket\BucketType;
-use Zaxbux\BackblazeB2\Exceptions\B2APIException;
-use Zaxbux\BackblazeB2\Exceptions\BadRequestException;
-use Zaxbux\BackblazeB2\Exceptions\DuplicateBucketNameException;
+use Zaxbux\BackblazeB2\Exceptions\Request\B2APIException;
+use Zaxbux\BackblazeB2\Exceptions\Request\BadRequestException;
+use Zaxbux\BackblazeB2\Exceptions\Request\DuplicateBucketNameException;
 
 class ClientBucketOperationsTest extends ClientTestBase
 {
@@ -17,7 +18,7 @@ class ClientBucketOperationsTest extends ClientTestBase
 		);
 
 		$this->guzzler->expects($this->once())
-			->post(Endpoint::CREATE_BUCKET);
+			->post(static::getEndpointUri(Endpoint::CREATE_BUCKET));
 
 		$bucket = $this->client->createBucket(
 			'Test bucket',
@@ -36,7 +37,7 @@ class ClientBucketOperationsTest extends ClientTestBase
 		);
 
 		$this->guzzler->expects($this->once())
-			->post(Endpoint::CREATE_BUCKET);
+			->post(static::getEndpointUri(Endpoint::CREATE_BUCKET));
 
 		// Test that we get a public bucket back after creation
 		$bucket = $this->client->createBucket(
@@ -137,7 +138,7 @@ class ClientBucketOperationsTest extends ClientTestBase
 		);
 
 		$this->guzzler->expects($this->once())
-			->post('/b2_delete_bucket');
+			->post(static::getEndpointUri(Endpoint::DELETE_BUCKET));
 
 		$this->assertInstanceOf(Bucket::class, $this->client->deleteBucket(
 			'bucketId'

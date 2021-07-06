@@ -2,13 +2,9 @@
 
 namespace Zaxbux\BackblazeB2;
 
-use Exception;
-use GuzzleHttp\ClientInterface;
 use GuzzleHttp\HandlerStack;
 use Zaxbux\BackblazeB2\Classes\BuiltinAuthorizationCache;
-use Zaxbux\BackblazeB2\Http\ClientFactory;
 use Zaxbux\BackblazeB2\Interfaces\AuthorizationCacheInterface;
-use Zaxbux\BackblazeB2\Object\AccountAuthorization;
 
 /**
  * The main configuration object for the client.
@@ -66,7 +62,7 @@ class Config
 	/**
 	 * Maximum amount of time, in seconds, to wait before retrying a failed request.
 	 * Ignored for HTTP status codes: 429, 503.
-	 * Should be a power of 3.
+	 * Should be a power of 2.
 	 * 
 	 * @var int
 	 */
@@ -184,6 +180,7 @@ class Config
 
 	private function setOptions(array $options) {
 		$this->handler = $options['handler'] ?? null;
+		$this->maxRetries = $options['maxRetries'] ?? 4;
 		$this->authorizationCache = $options['authorizationCache'] ?? new BuiltinAuthorizationCache();
 	}
 }

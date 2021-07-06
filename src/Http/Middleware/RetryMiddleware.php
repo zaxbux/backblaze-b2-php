@@ -11,7 +11,10 @@ use Zaxbux\BackblazeB2\Http\Response;
 
 class RetryMiddleware
 {
-	public const RETRY_POWER = 2;
+	protected const RETRY_STATUS_CODES = [
+		Response::HTTP_TOO_MANY_REQUESTS,
+		Response::HTTP_SERVICE_UNAVAILABLE
+	];
 
 	/** @var \Zaxbux\BackblazeB2\Config */
 	protected $config;
@@ -39,18 +42,22 @@ class RetryMiddleware
 			ResponseInterface $response = null,
 			$exception = null
 		) use ($config): bool {
-			// Do not retry `b2_authorize_account` requests.
-			/*if (preg_match('/b2_authorize_account$/', rtrim($request->getUri()->getPath(), '/'))) {
+			// Only retry allowed status codes.
+			if (!in_array($response->getStatusCode(), static::RETRY_STATUS_CODES)) {
 				return false;
-			}*/
+			}
 
-			$overRetryLimit = ($retries > $config->maxRetries());
-			$statusCode = $response->getStatusCode() ?? null;
+			// Do not retry more than the configured maximum.
+			if ($retries >= $config->maxRetries()) {
+				return false;
+			}
 
-			return !$overRetryLimit && (
-				$statusCode === Response::HTTP_TOO_MANY_REQUESTS ||
-				$statusCode === Response::HTTP_SERVICE_UNAVAILABLE
-			);
+			// Do not retry `b2_authorize_account` requests.
+			if (preg_match('/b2_authorize_account$/', rtrim($request->getUri()->getPath(), '/'))) {
+				return false;
+			}
+
+			return true;
 		};
 	}
 
@@ -63,21 +70,13 @@ class RetryMiddleware
 	 */
 	private static function retryDelay(Config $config): callable {
 		return static function(int $retries, ResponseInterface $response) use ($config): int {
-			// Set a default delay
-			$delay = $config->maxRetryDelay(); //$config->maxRetries() ** static::RETRY_POWER;
-
 			// Use the value of the `Retry-After` header
 			if ($response->getStatusCode() === Response::HTTP_TOO_MANY_REQUESTS) {
-				$delay = (int) $response->getHeader('Retry-After')[0] ?? $delay;
+				$delay = (int) $response->getHeader('Retry-After')[0] ?? $config->maxRetryDelay();
+				return $delay * 1000;
 			}
 
-			// Exponential back-off
-			if ($response->getStatusCode() === Response::HTTP_SERVICE_UNAVAILABLE) {
-				$delay = $retries ** static::RETRY_POWER;
-			}
-
-			// Convert to milliseconds
-			return $delay * 1000;
+			return \GuzzleHttp\RetryMiddleware::exponentialDelay($retries);
 		};
 	}
 }

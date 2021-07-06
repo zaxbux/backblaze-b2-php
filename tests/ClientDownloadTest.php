@@ -2,8 +2,9 @@
 
 namespace tests;
 
-use Zaxbux\BackblazeB2\Exceptions\B2APIException;
-use Zaxbux\BackblazeB2\Exceptions\NotFoundException;
+use Zaxbux\BackblazeB2\Exceptions\Request\B2APIException;
+use Zaxbux\BackblazeB2\Exceptions\Request\BadRequestException;
+use Zaxbux\BackblazeB2\Exceptions\Request\NotFoundException;
 
 class ClientDownloadTest extends ClientTestBase
 {
@@ -14,8 +15,8 @@ class ClientDownloadTest extends ClientTestBase
 		);
 
 		$authorization = $this->client->getDownloadAuthorization(
-			'bucketId',
 			'public',
+			'bucketId',
 			60
 		);
 
@@ -49,7 +50,7 @@ class ClientDownloadTest extends ClientTestBase
 
 	public function testDownloadingByIncorrectIdThrowsException()
 	{
-		$this->expectException(B2APIException::class);
+		$this->expectException(BadRequestException::class);
 
 		$this->guzzler->queueResponse(
 			MockResponse::fromFile('download_by_incorrect_id.json', 400),
@@ -88,7 +89,7 @@ class ClientDownloadTest extends ClientTestBase
 		$this->expectException(NotFoundException::class);
 
 		$this->guzzler->queueResponse(
-			MockResponse::fromFile('download_by_incorrect_path.json', 400),
+			MockResponse::fromFile('download_by_incorrect_path.json', 404),
 		);
 
 		$this->client->downloadFileByName('path/to/incorrect/file.txt', 'test-bucket');

@@ -2,7 +2,7 @@
 
 namespace tests;
 
-use Zaxbux\BackblazeB2\Utils;
+use Zaxbux\BackblazeB2\Utils as ClientUtils;
 use Zaxbux\BackblazeB2\Helpers\UploadHelper;
 use Zaxbux\BackblazeB2\Object\File;
 use Zaxbux\BackblazeB2\Object\File\FileInfo;
@@ -15,11 +15,11 @@ class ClientUploadTest extends ClientTestBase
 			MockResponse::fromFile('upload.json'),
 		);
 
-		$filePath = Utils::joinFilePaths(__DIR__, 'responses', 'download_content');
+		$filePath = ClientUtils::joinFilePaths(__DIR__, 'responses', 'download_content');
 
 		$file = UploadHelper::instance($this->client)->uploadFile(
-			'bucketId',
 			'/file/name.txt',
+			'bucketId',
 			$filePath,
 			'text/plain'
 		);
@@ -48,14 +48,14 @@ class ClientUploadTest extends ClientTestBase
 		rewind($resource);
 
 		$file = $this->client->uploadFile(
-			'bucketId',
 			'test.txt',
+			'bucketId',
 			$resource
 		);
 
 		$this->assertInstanceOf(File::class, $file);
 
-		$this->guzzler->expects($this->once())->post(Endpoint::GET_UPLOAD_URL);
+		$this->guzzler->expects($this->once())->post(static::getEndpointUri(Endpoint::GET_UPLOAD_URL));
 		$this->guzzler->expects($this->once())
 			->post('https://pod-000-1005-03.backblaze.com/b2api/v2/b2_upload_file?cvt=c001_v0001005_t0027&bucket=4a48fe8875c6214145260818')
 			->withHeader('Authorization', 'authToken')
@@ -75,8 +75,8 @@ class ClientUploadTest extends ClientTestBase
 		$content = 'The quick brown box jumps over the lazy dog';
 
 		$file = $this->client->uploadFile(
-			'bucketId',
 			'test.txt',
+			'bucketId',
 			$content
 		);
 
@@ -103,8 +103,8 @@ class ClientUploadTest extends ClientTestBase
 		$contentType = 'text/plain';
 
 		$file = $this->client->uploadFile(
-			'bucketId',
 			'test.txt',
+			'bucketId',
 			$content,
 			$contentType,
 			[

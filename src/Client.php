@@ -26,8 +26,8 @@ class Client
 {
 	public const VERSION  = '2.0.0';
 	public const USER_AGENT_PREFIX = 'backblaze-b2-php/';
-	public const BASE_URI = 'https://api.backblazeb2.com';
-	public const B2_API_VERSION = '/b2api/v2';
+	public const BASE_URI = 'https://api.backblazeb2.com/';
+	public const B2_API_VERSION = 'b2api/v2/';
 
 	use FileOperationsTrait;
 	use BucketOperationsTrait;
@@ -92,7 +92,7 @@ class Client
 	 * @param ClientInterface $client 
 	 */
 	public function authorizeAccount(): AccountAuthorization {
-		$response = $this->http->request('GET', Client::BASE_URI . Client::B2_API_VERSION . '/b2_authorize_account', [
+		$response = $this->http->request('GET', Client::BASE_URI . Client::B2_API_VERSION . 'b2_authorize_account', [
 			'headers' => [
 				'Authorization' => Utils::basicAuthorization($this->config->applicationKeyId(), $this->config->applicationKey()),
 			],
@@ -149,6 +149,16 @@ class Client
 		]);
 
 		return $client;
+	}
+
+	public function getAllowedBucketId(): ?string
+	{
+		return $this->accountAuthorization->getAllowed('bucketId') ?? null;
+	}
+
+	public function getAllowedBucketName(): ?string
+	{
+		return $this->accountAuthorization->getAllowed('bucketName') ?? null;
 	}
 
 	/**

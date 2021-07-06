@@ -3,9 +3,10 @@
 namespace Zaxbux\BackblazeB2\Http\Middleware;
 
 use GuzzleHttp\Psr7\Uri;
-use GuzzleHttp\Psr7\Utils;
+use GuzzleHttp\Psr7\Utils as Psr7Utils;
 use Psr\Http\Message\RequestInterface;
 use Zaxbux\BackblazeB2\Client;
+use Zaxbux\BackblazeB2\Utils;
 
 class ApplyAuthorizationMiddleware
 {
@@ -43,8 +44,8 @@ class ApplyAuthorizationMiddleware
 	 */
 	protected function applyToken(RequestInterface $request): RequestInterface
 	{
-		$request = Utils::modifyRequest($request, [
-			'uri' => new Uri($this->client->accountAuthorization()->getApiUrl() . $request->getUri()),
+		$request = Psr7Utils::modifyRequest($request, [
+			'uri' => new Uri(Utils::joinPaths($this->client->accountAuthorization()->getApiUrl(), (string)$request->getUri())),
 			'set_headers' => [
 				'Authorization' => $this->client->accountAuthorization()->getAuthorizationToken(),
 			],

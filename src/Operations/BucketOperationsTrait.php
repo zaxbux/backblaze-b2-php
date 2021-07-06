@@ -40,7 +40,7 @@ trait BucketOperationsTrait
 		?array $corsRules = null,
 		?array $lifecycleRules = null
 	): Bucket {
-		$response = $this->http->request('POST', '/b2_create_bucket', [
+		$response = $this->http->request('POST', 'b2_create_bucket', [
 			'json' => Utils::filterRequestOptions([
 				Bucket::ATTRIBUTE_ACCOUNT_ID  => $this->accountAuthorization()->getAccountId(),
 				Bucket::ATTRIBUTE_BUCKET_NAME => $bucketName,
@@ -70,7 +70,7 @@ trait BucketOperationsTrait
 			$this->deleteAllFileVersions($bucketId);
 		}
 
-		$response = $this->http->request('POST', '/b2_delete_bucket', [
+		$response = $this->http->request('POST', 'b2_delete_bucket', [
 			'json' => [
 				Bucket::ATTRIBUTE_ACCOUNT_ID => $this->accountAuthorization()->getAccountId(),
 				Bucket::ATTRIBUTE_BUCKET_ID  => $bucketId
@@ -99,7 +99,7 @@ trait BucketOperationsTrait
 		?string $bucketName = null,
 		?array $bucketTypes = null
 	): BucketList {
-		$response = $this->http->request('POST', '/b2_list_buckets', [
+		$response = $this->http->request('POST', 'b2_list_buckets', [
 			'json' => Utils::filterRequestOptions([
 				Bucket::ATTRIBUTE_ACCOUNT_ID => $this->accountAuthorization()->getAccountId(),
 			], [
@@ -128,17 +128,17 @@ trait BucketOperationsTrait
 	 *                                         the B2 service matches the one passed in.
 	 */
 	public function updateBucket(
-		string $bucketId,
+		?string $bucketId = null,
 		?string $bucketType = null,
 		?array $bucketInfo = null,
 		?array $corsRules = null,
 		?array $lifecycleRules = null,
 		?int $ifRevisionIs = null
 	): Bucket {
-		$response = $this->http->request('POST', '/b2_update_bucket', [
+		$response = $this->http->request('POST', 'b2_update_bucket', [
 			'json' => Utils::filterRequestOptions([
 				Bucket::ATTRIBUTE_ACCOUNT_ID => $this->accountAuthorization()->getAccountId(),
-				Bucket::ATTRIBUTE_BUCKET_ID  => $bucketId,
+				Bucket::ATTRIBUTE_BUCKET_ID  => $bucketId ?? $this->getAllowedBucketId(),
 			], [
 				Bucket::ATTRIBUTE_BUCKET_TYPE     => $bucketType,
 				Bucket::ATTRIBUTE_BUCKET_INFO     => $bucketInfo,
@@ -154,13 +154,15 @@ trait BucketOperationsTrait
 	/**
 	 * Get a bucket by ID.
 	 * 
-	 * @param string $bucketId        The ID of the bucket to fetch.
+	 * @param string $bucketId        The ID of the bucket to fetch. Defaults to the authorized bucket, if any.
 	 * @param array|null $bucketTypes Filter for bucket types returned in the list buckets response.
 	 * 
 	 * @throws NotFoundException 
 	 */
-	public function getBucketById(string $bucketId, array $bucketTypes = null): Bucket
-	{
+	public function getBucketById(
+		?string $bucketId = null,
+		?array $bucketTypes = null
+	): Bucket {
 		$response = $this->listBuckets($bucketId, null, $bucketTypes);
 
 		if (iterator_count($response->getBuckets()) !== 1) {

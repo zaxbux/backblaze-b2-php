@@ -39,7 +39,7 @@ trait ApplicationKeyOperationsTrait
 		?string $bucketId = null,
 		?string $namePrefix = null
 	): Key {
-		$response = $this->http->request('POST', '/b2_create_key', [
+		$response = $this->http->request('POST', 'b2_create_key', [
 			'json' => Utils::filterRequestOptions([
 				Key::ATTRIBUTE_ACCOUNT_ID    => $this->accountAuthorization()->getAccountId(),
 				Key::ATTRIBUTE_CAPABILITIES  => $capabilities,
@@ -63,7 +63,7 @@ trait ApplicationKeyOperationsTrait
 	 */
 	public function deleteKey(string $applicationKeyId): Key
 	{
-		$response = $this->http->request('POST', '/b2_delete_key', [
+		$response = $this->http->request('POST', 'b2_delete_key', [
 			'json' => [
 				Key::ATTRIBUTE_APPLICATION_KEY_ID => $applicationKeyId,
 			]
@@ -86,7 +86,7 @@ trait ApplicationKeyOperationsTrait
 		?string $startApplicationKeyId = null,
 		?int $maxKeyCount = 1000
 	): KeyList {
-		$response = $this->http->request('POST', '/b2_list_keys', [
+		$response = $this->http->request('POST', 'b2_list_keys', [
 			'json' => Utils::filterRequestOptions([
 				Key::ATTRIBUTE_ACCOUNT_ID => $this->accountAuthorization()->getAccountId(),
 			], [

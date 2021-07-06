@@ -6,7 +6,6 @@ namespace Zaxbux\BackblazeB2\Operations;
 
 use AppendIterator;
 use ArrayIterator;
-use GuzzleHttp\Psr7\Stream;
 use Iterator;
 use NoRewindIterator;
 use Zaxbux\BackblazeB2\Client;
@@ -43,7 +42,7 @@ trait FileOperationsTrait
 	 */
 	public function cancelLargeFile(string $fileId)
 	{
-		$response = $this->http->request('POST', '/b2_cancel_large_file', [
+		$response = $this->http->request('POST', 'b2_cancel_large_file', [
 			'json' => [
 				File::ATTRIBUTE_FILE_ID => $fileId,
 			],
@@ -112,7 +111,7 @@ trait FileOperationsTrait
 		}
 		*/
 
-		$response = $this->http->request('POST', '/b2_copy_file', [
+		$response = $this->http->request('POST', 'b2_copy_file', [
 			'json' => Utils::filterRequestOptions([
 				File::ATTRIBUTE_SOURCE_FILE_ID => $sourceFileId,
 				File::ATTRIBUTE_FILE_NAME      => $fileName,
@@ -157,7 +156,7 @@ trait FileOperationsTrait
 		?ServerSideEncryption $sourceSSE = null,
 		?ServerSideEncryption $destinationSSE = null
 	): File {
-		$response = $this->http->request('POST', '/b2_copy_part', [
+		$response = $this->http->request('POST', 'b2_copy_part', [
 			'json' => Utils::filterRequestOptions([
 				File::ATTRIBUTE_SOURCE_FILE_ID => $sourceFileId,
 				File::ATTRIBUTE_LARGE_FILE_ID  => $largeFileId,
@@ -182,9 +181,9 @@ trait FileOperationsTrait
 	 * @param bool   $bypassGovernance Must be specified and set to true if deleting a file version protected by
 	 *                                 File Lock governance mode retention settings.
 	 */
-	public function deleteFileVersion(string $fileName, string $fileId, ?bool $bypassGovernance = false): File
+	public function deleteFileVersion(string $fileId, string $fileName, ?bool $bypassGovernance = false): File
 	{
-		$response = $this->http->request('POST', '/b2_delete_file_version', [
+		$response = $this->http->request('POST', 'b2_delete_file_version', [
 			'json' => Utils::filterRequestOptions([
 				File::ATTRIBUTE_FILE_NAME => $fileName,
 				File::ATTRIBUTE_FILE_ID   => $fileId,
@@ -242,7 +241,7 @@ trait FileOperationsTrait
 	 */
 	public function downloadFileByName(
 		string $fileName,
-		string $bucketName,
+		?string $bucketName =  null,
 		$options = null,
 		$sink = null,
 		?bool $headersOnly = false
@@ -251,7 +250,7 @@ trait FileOperationsTrait
 			Utils::joinPaths(
 				$this->accountAuthorization()->getApiUrl(),
 				'file',
-				$bucketName,
+				$bucketName ?? $this->getAllowedBucketName(),
 				$fileName
 			),
 			null,
@@ -273,7 +272,7 @@ trait FileOperationsTrait
 	 */
 	public function finishLargeFile(string $fileId, array $hashes)
 	{
-		$response = $this->http->request('POST', '/b2_finish_large_file', [
+		$response = $this->http->request('POST', 'b2_finish_large_file', [
 			'json' => [
 				File::ATTRIBUTE_FILE_ID         => $fileId,
 				File::ATTRIBUTE_PART_SHA1_ARRAY => $hashes,
@@ -296,8 +295,8 @@ trait FileOperationsTrait
 	 * @param DownloadOptions|array  $options        Additional options to pass to the API.
 	 */
 	public function getDownloadAuthorization(
-		string $bucketId,
 		string $fileNamePrefix,
+		?string $bucketId = null,
 		?int $validDuration = DownloadAuthorization::VALID_DURATION_MAX,
 		$options = null
 	): DownloadAuthorization {
@@ -305,9 +304,9 @@ trait FileOperationsTrait
 			$options = DownloadOptions::fromArray($options ?? []);
 		}
 
-		$response = $this->http->request('POST', '/b2_get_download_authorization', [
+		$response = $this->http->request('POST', 'b2_get_download_authorization', [
 			'json' => Utils::filterRequestOptions([
-				File::ATTRIBUTE_BUCKET_ID        => $bucketId,
+				File::ATTRIBUTE_BUCKET_ID        => $bucketId ?? $this->getAllowedBucketId(),
 				File::ATTRIBUTE_FILE_NAME_PREFIX => $fileNamePrefix,
 				File::ATTRIBUTE_VALID_DURATION   => $validDuration,
 			], $options->getAuthorizationOptions()),
@@ -325,7 +324,7 @@ trait FileOperationsTrait
 	 */
 	public function getFileInfo(string $fileId): File
 	{
-		$response = $this->http->request('POST', '/b2_get_file_info', [
+		$response = $this->http->request('POST', 'b2_get_file_info', [
 			'json' => [
 				File::ATTRIBUTE_FILE_ID => $fileId
 			]
@@ -343,7 +342,7 @@ trait FileOperationsTrait
 	 */
 	public function getUploadPartUrl(string $fileId): UploadPartUrl
 	{
-		$response = $this->http->request('POST', '/b2_get_upload_part_url', [
+		$response = $this->http->request('POST', 'b2_get_upload_part_url', [
 			'json' => [
 				File::ATTRIBUTE_FILE_ID => $fileId
 			]
@@ -361,11 +360,11 @@ trait FileOperationsTrait
 	 * 
 	 * @return UploadUrl
 	 */
-	public function getUploadUrl(string $bucketId): UploadUrl
+	public function getUploadUrl(?string $bucketId): UploadUrl
 	{
-		$response = $this->http->request('POST', '/b2_get_upload_url', [
+		$response = $this->http->request('POST', 'b2_get_upload_url', [
 			'json' => [
-				File::ATTRIBUTE_BUCKET_ID => $bucketId
+				File::ATTRIBUTE_BUCKET_ID => $bucketId ?? $this->getAllowedBucketId()
 			]
 		]);
 
@@ -381,12 +380,12 @@ trait FileOperationsTrait
 	 * @param string $bucketId
 	 * @param string $fileName
 	 */
-	public function hideFile(string $bucketId, string $fileName): File
+	public function hideFile(string $fileName, ?string $bucketId = null): File
 	{
 
-		$response = $this->http->request('POST', '/b2_hide_file', [
+		$response = $this->http->request('POST', 'b2_hide_file', [
 			'json' => [
-				File::ATTRIBUTE_BUCKET_ID => $bucketId,
+				File::ATTRIBUTE_BUCKET_ID => $bucketId ?? $this->getAllowedBucketId(),
 				File::ATTRIBUTE_FILE_NAME => $fileName,
 			]
 		]);
@@ -412,15 +411,15 @@ trait FileOperationsTrait
 	 *                              the maximum is 10000.
 	 */
 	public function listFileNames(
-		string $bucketId,
+		?string $bucketId = null,
 		?string $prefix = null,
 		?string $delimiter = null,
 		?string $startFileName = null,
 		?int $maxFileCount = 1000
 	): FileList {
-		$response = $this->http->request('POST', '/b2_list_file_names', [
+		$response = $this->http->request('POST', 'b2_list_file_names', [
 			'json' => Utils::filterRequestOptions([
-				File::ATTRIBUTE_BUCKET_ID      => $bucketId,
+				File::ATTRIBUTE_BUCKET_ID      => $bucketId ?? $this->getAllowedBucketId(),
 				File::ATTRIBUTE_MAX_FILE_COUNT => $maxFileCount,
 			], [
 				File::ATTRIBUTE_PREFIX => $prefix,
@@ -453,16 +452,16 @@ trait FileOperationsTrait
 	 *                              If more than 1000 are returned, the call will be billed as multiple transactions.
 	 */
 	public function listFileVersions(
-		string $bucketId,
+		?string $bucketId = null,
 		?string $prefix = '',
 		?string $delimiter = null,
 		?string $startFileName = null,
 		?string $startFileId = null,
 		?int $maxFileCount = 1000
 	): FileList {
-		$response = $this->http->request('POST', '/b2_list_file_versions', [
+		$response = $this->http->request('POST', 'b2_list_file_versions', [
 			'json' => Utils::filterRequestOptions([
-				File::ATTRIBUTE_BUCKET_ID      => $bucketId,
+				File::ATTRIBUTE_BUCKET_ID      => $bucketId ?? $this->getAllowedBucketId(),
 			], [
 				File::ATTRIBUTE_START_FILE_NAME => $startFileName,
 				File::ATTRIBUTE_START_FILE_ID   => $startFileId,
@@ -495,7 +494,7 @@ trait FileOperationsTrait
 		?int $startPartNumber = null,
 		?int $maxPartCount = 1000
 	): FilePartList {
-		$response = $this->http->request('POST', '/b2_list_parts', [
+		$response = $this->http->request('POST', 'b2_list_parts', [
 			'json' => Utils::filterRequestOptions([
 				File::ATTRIBUTE_FILE_ID => $fileId
 			], [
@@ -520,18 +519,18 @@ trait FileOperationsTrait
 	 *                             the maximum allowed is 100.
 	 */
 	public function listUnfinishedLargeFiles(
-		string $bucketId,
+		?string $bucketId = null,
 		?string $namePrefix = null,
 		?string $startFileId = null,
 		?int $maxFileCount = 100
 	): FileList {
-		$response = $this->http->request('POST', '/b2_list_unfinished_large_files', [
+		$response = $this->http->request('POST', 'b2_list_unfinished_large_files', [
 			'json' => Utils::filterRequestOptions([
-				File::ATTRIBUTE_BUCKET_ID      => $bucketId,
-				File::ATTRIBUTE_MAX_FILE_COUNT => $maxFileCount,
+				File::ATTRIBUTE_BUCKET_ID      => $bucketId ?? $this->getAllowedBucketId(),
 			], [
 				File::ATTRIBUTE_NAME_PREFIX   => $namePrefix,
 				File::ATTRIBUTE_START_FILE_ID => $startFileId,
+				File::ATTRIBUTE_MAX_FILE_COUNT => $maxFileCount,
 			]),
 		]);
 
@@ -549,8 +548,8 @@ trait FileOperationsTrait
 	 * @param FileInfo|array $fileInfo    A JSON object holding the name/value pairs for the custom file info.
 	 */
 	public function startLargeFile(
-		string $bucketId,
 		string $fileName,
+		?string $bucketId = null,
 		?string $contentType = null,
 		$fileInfo = null,
 		?array $fileRetention = null,
@@ -561,9 +560,9 @@ trait FileOperationsTrait
 			$fileInfo = FileInfo::fromArray($fileInfo);
 		}
 
-		$response = $this->http->request('POST', '/b2_start_large_file', [
+		$response = $this->http->request('POST', 'b2_start_large_file', [
 			'json' => Utils::filterRequestOptions([
-				File::ATTRIBUTE_BUCKET_ID    => $bucketId,
+				File::ATTRIBUTE_BUCKET_ID    => $bucketId ?? $this->getAllowedBucketId(),
 				File::ATTRIBUTE_FILE_NAME    => $fileName,
 				File::ATTRIBUTE_CONTENT_TYPE => $contentType ?? File::CONTENT_TYPE_AUTO,
 			], [
@@ -591,7 +590,7 @@ trait FileOperationsTrait
 		string $fileId,
 		string $legalHold
 	): File {
-		$response = $this->http->request('POST', '/b2_update_file_legal_hold', [
+		$response = $this->http->request('POST', 'b2_update_file_legal_hold', [
 			'json' => Utils::filterRequestOptions([
 				File::ATTRIBUTE_FILE_NAME  => $fileName,
 				File::ATTRIBUTE_FILE_ID    => $fileId,
@@ -619,7 +618,7 @@ trait FileOperationsTrait
 		string $fileRetention,
 		?bool $bypassGovernance = false
 	): File {
-		$response = $this->http->request('POST', '/b2_update_file_retention', [
+		$response = $this->http->request('POST', 'b2_update_file_retention', [
 			'json' => Utils::filterRequestOptions([
 				File::ATTRIBUTE_FILE_NAME         => $fileName,
 				File::ATTRIBUTE_FILE_ID           => $fileId,
@@ -645,8 +644,8 @@ trait FileOperationsTrait
 	 * @param UploadUrl                  $uploadUrl            The upload authorization data.
 	 */
 	public function uploadFile(
-		string $bucketId,
 		string $fileName,
+		?string $bucketId = null,
 		$body,
 		?string $contentType = null,
 		$fileInfo = null,
@@ -737,7 +736,7 @@ trait FileOperationsTrait
 	 * @return iterable<File>
 	 */
 	public function listAllFileNames(
-		string $bucketId,
+		?string $bucketId = null,
 		string $prefix = '',
 		string $delimiter = null,
 		string $startFileName = null,
@@ -756,10 +755,10 @@ trait FileOperationsTrait
 		return $allFiles;
 	}
 
-	public function getFileByName(string $bucketId, string $fileName): File
+	public function getFileByName(string $fileName, ?string $bucketId = null): File
 	{
 		if (!$file = $this->listFileNames($bucketId, '', null, $fileName, 1)->first()) {
-			throw new NotFoundException(sprintf('No results returned for file name "%s"'));
+			throw new NotFoundException(sprintf('No results returned for file name "%s"', $fileName));
 		}
 
 		return $file;
@@ -773,7 +772,7 @@ trait FileOperationsTrait
 	 * @return iterable<File>
 	 */
 	public function listAllFileVersions(
-		string $bucketId,
+		?string $bucketId = null,
 		?string $prefix = '',
 		?string $delimiter = null,
 		?string $startFileName = null,
@@ -794,10 +793,10 @@ trait FileOperationsTrait
 		return $allFiles;
 	}
 
-	public function getFileById(string $bucketId, string $fileId): File
+	public function getFileById(string $fileId, ?string $bucketId = null): File
 	{
 		if (!$file = $this->listFileVersions($bucketId, '', null, null, $fileId, 1)->first()) {
-			throw new NotFoundException(sprintf('No results returned for file id "%s"'));
+			throw new NotFoundException(sprintf('No results returned for file id "%s"', $fileId));
 		}
 
 		return $file;
@@ -836,10 +835,10 @@ trait FileOperationsTrait
 	 * @return iterable<File>
 	 */
 	public function listAllUnfinishedLargeFiles(
-		string $bucketId,
-		string $namePrefix = null,
-		string $startFileId = null,
-		int $maxFileCount = 100
+		?string $bucketId = null,
+		?string $namePrefix = null,
+		?string $startFileId = null,
+		?int $maxFileCount = 100
 	): iterable {
 
 		$allFiles = new AppendIterator();
@@ -868,11 +867,11 @@ trait FileOperationsTrait
 	 * @param null|bool   $bypassGovernance 
 	 */
 	public function deleteAllFileVersions(
-		string $bucketId,
+		?string $startFileId = null,
+		?string $startFileName = null,
 		?string $prefix = '',
 		?string $delimiter = null,
-		?string $startFileName = null,
-		?string $startFileId = null,
+		?string $bucketId = null,
 		?bool $bypassGovernance = false
 	): FileList {
 		$fileVersions = $this->listAllFileVersions($bucketId, $prefix, $delimiter, $startFileName, $startFileId);

@@ -104,8 +104,12 @@ class AccountAuthorization implements B2ObjectInterface
 	/**
 	 * Get the capabilities, bucket restrictions, and prefix restrictions.
 	 */
-	public function getAllowed(): ?array
+	public function getAllowed(?string $key = null): ?array
 	{
+		if ($key) {
+			return $this->allowed[$key] ?? null;
+		}
+
 		return $this->allowed;
 	}
 
@@ -164,6 +168,11 @@ class AccountAuthorization implements B2ObjectInterface
 	public function expired(): bool
 	{
 		return time() - AuthorizationCacheInterface::EXPIRES >= $this->created;
+	}
+
+	public function hasCapability(string $capability): bool
+	{
+		return in_array($capability, $this->allowed['capabilities'] ?? []);
 	}
 
 	public static function fromResponse(ResponseInterface $response): AccountAuthorization

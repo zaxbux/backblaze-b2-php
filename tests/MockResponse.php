@@ -33,4 +33,12 @@ final class MockResponse {
 
 		return new static($statusCode, $headers, $body);
 	}
+
+	public static function json(
+		array $data,
+		int $statusCode = 200,
+		array $headers = []
+	): MockResponse {
+		return new static($statusCode, $headers, json_encode($data));
+	}
 }

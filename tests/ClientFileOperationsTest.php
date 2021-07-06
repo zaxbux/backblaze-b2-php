@@ -4,7 +4,7 @@ namespace tests;
 
 use Zaxbux\BackblazeB2\Response\FileList;
 use Zaxbux\BackblazeB2\Object\File;
-use Zaxbux\BackblazeB2\Exceptions\BadRequestException;
+use Zaxbux\BackblazeB2\Exceptions\Request\BadRequestException;
 
 class ClientFileOperationsTest extends ClientTestBase
 {
@@ -40,7 +40,7 @@ class ClientFileOperationsTest extends ClientTestBase
 			MockResponse::fromFile('get_file.json'),
 		);
 
-		$file = $this->client->getFileById('bucketId', 'fileId');
+		$file = $this->client->getFileById('fileId', 'bucketId');
 
 		$this->assertInstanceOf(File::class, $file);
 	}
@@ -53,7 +53,7 @@ class ClientFileOperationsTest extends ClientTestBase
 			MockResponse::fromFile('get_file_non_existent.json', 400),
 		);
 
-		$this->client->getFileById('bucketId', 'fileId');
+		$this->client->getFileById('fileId', 'bucketId');
 	}
 
 	public function testDeleteFile()
@@ -63,7 +63,7 @@ class ClientFileOperationsTest extends ClientTestBase
 			MockResponse::fromFile('delete_file.json'),
 		);
 
-		$fileId = $this->client->getFileByName('bucketId', 'Test file.bin')->getId();
+		$fileId = $this->client->getFileByName('Test file.bin', 'bucketId')->getId();
 
 		$this->assertInstanceOf(File::class, $this->client->deleteFileVersion('Test file.bin', $fileId));
 	}
@@ -76,10 +76,10 @@ class ClientFileOperationsTest extends ClientTestBase
 		);
 		$this->guzzler->queueMany(MockResponse::fromFile('delete_file.json'), 3);
 
-		$this->guzzler->expects($this->once())->post(Endpoint::LIST_FILE_VERSIONS);
-		$this->guzzler->expects($this->exactly(3))->post(Endpoint::DELETE_FILE_VERSION);
+		$this->guzzler->expects($this->once())->post(static::getEndpointUri(Endpoint::LIST_FILE_VERSIONS));
+		$this->guzzler->expects($this->exactly(3))->post(static::getEndpointUri(Endpoint::DELETE_FILE_VERSION));
 
-		$response = $this->client->deleteAllFileVersions('bucketId', null, null, 'fileId');
+		$response = $this->client->deleteAllFileVersions('fileId', null, null, null, 'bucketId');
 
 		$this->assertInstanceOf(FileList::class, $response);
 
@@ -122,10 +122,10 @@ class ClientFileOperationsTest extends ClientTestBase
 		);
 
 		$this->guzzler->expects($this->once())
-			->post(Endpoint::AUTHORIZE_ACCOUNT)
-			->post(Endpoint::HIDE_FILE);
+			->post(static::getEndpointUri(Endpoint::AUTHORIZE_ACCOUNT))
+			->post(static::getEndpointUri(Endpoint::HIDE_FILE));
 
-		$file = $this->client->hideFile('bucketId', 'testfile.bin');
+		$file = $this->client->hideFile('testfile.bin', 'bucketId');
 
 		$this->assertInstanceOf(File::class, $file);
 	}
