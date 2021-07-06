@@ -12,6 +12,9 @@ trait ApplicationKeyService
 {
 	//use ApplicationKeyServiceHelpersTrait;
 
+	/** @var \Zaxbux\BackblazeB2\Config */
+	private $config;
+
 	/**
 	 * Creates a new application key.
 	 * 
@@ -32,9 +35,9 @@ trait ApplicationKeyService
 		?string $bucketId = null,
 		?string $namePrefix = null
 	): Key {
-		$response = $this->guzzle->request('POST', '/b2_create_key', [
+		$response = $this->config->client()->request('POST', '/b2_create_key', [
 			'json' => AbstractService::filterRequestOptions([
-				Key::ATTRIBUTE_ACCOUNT_ID    => $this->getAccountAuthorization()->getAccountId(),
+				Key::ATTRIBUTE_ACCOUNT_ID    => $this->config->accountAuthorization()->getAccountId(),
 				Key::ATTRIBUTE_CAPABILITIES  => $capabilities,
 				Key::ATTRIBUTE_KEY_NAME      => $keyName,
 			], [
@@ -56,7 +59,7 @@ trait ApplicationKeyService
 	 */
 	public function deleteKey(string $applicationKeyId): Key
 	{
-		$response = $this->guzzle->request('POST', '/b2_delete_key', [
+		$response = $this->config->client()->request('POST', '/b2_delete_key', [
 			'json' => [
 				Key::ATTRIBUTE_APPLICATION_KEY_ID => $applicationKeyId,
 			]
@@ -79,9 +82,9 @@ trait ApplicationKeyService
 		?string $startApplicationKeyId = null,
 		?int $maxKeyCount = 1000
 	): KeyList {
-		$response = $this->guzzle->request('POST', '/b2_list_keys', [
+		$response = $this->config->client()->request('POST', '/b2_list_keys', [
 			'json' => AbstractService::filterRequestOptions([
-				Key::ATTRIBUTE_ACCOUNT_ID => $this->getAccountAuthorization()->getAccountId(),
+				Key::ATTRIBUTE_ACCOUNT_ID => $this->config->accountAuthorization()->getAccountId(),
 			], [
 				Key::ATTRIBUTE_MAX_KEY_COUNT => $maxKeyCount,
 				Key::ATTRIBUTE_START_APPLICATION_KEY_ID => $startApplicationKeyId

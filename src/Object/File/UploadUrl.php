@@ -23,8 +23,8 @@ class UploadUrl {
 		string $uploadUrl,
 		string $authorizationToken
 	) {
-		$this->bucketId = $bucketId;
-		$this->uploadUrl = $uploadUrl;
+		$this->bucketId           = $bucketId;
+		$this->uploadUrl          = $uploadUrl;
 		$this->authorizationToken = $authorizationToken;
 	}
 

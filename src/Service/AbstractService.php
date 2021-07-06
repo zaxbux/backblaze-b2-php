@@ -6,29 +6,12 @@ namespace Zaxbux\BackblazeB2\Service;
 
 use function sprintf;
 
-use GuzzleHttp\ClientInterface;
 use InvalidArgumentException;
-use Zaxbux\BackblazeB2\Object\AccountAuthorization;
-use Zaxbux\BackblazeB2\Client;
 
 abstract class AbstractService
 {
-	/** @var Client */
-	protected $client;
-
-	/** @var ClientInterface */
-	public $guzzle;
-
-	public function __construct(Client $client, ClientInterface $guzzle)
-	{
-		$this->client = $client;
-		$this->guzzle = $guzzle;
-	}
-	
-	public function getAccountAuthorization(): ?AccountAuthorization
-	{
-		return $this->client->getAccountAuthorization();
-	}
+	/** @var \Zaxbux\BackblazeB2\Config */
+	private $config;
 	
 	/**
 	 * Throw an exception if required keys are missing and remove optional keys if the value is NULL.

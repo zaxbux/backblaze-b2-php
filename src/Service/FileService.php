@@ -20,7 +20,9 @@ use Zaxbux\BackblazeB2\Traits\FileServiceHelpersTrait;
 
 trait FileService
 {
-	use FileServiceHelpersTrait;
+
+	/** @var \Zaxbux\BackblazeB2\Config */
+	private $config;
 
 	/**
 	 * Cancel the upload of a large file, and deletes all of the parts that have been uploaded.
@@ -31,7 +33,7 @@ trait FileService
 	 */
 	public function cancelLargeFile(string $fileId)
 	{
-		$response = $this->guzzle->request('POST', '/b2_cancel_large_file', [
+		$response = $this->config->client()->request('POST', '/b2_cancel_large_file', [
 			'json' => [
 				File::ATTRIBUTE_FILE_ID => $fileId,
 			],
@@ -100,7 +102,7 @@ trait FileService
 		}
 		*/
 
-		$response = $this->guzzle->request('POST', '/b2_copy_file', [
+		$response = $this->config->client()->request('POST', '/b2_copy_file', [
 			'json' => AbstractService::filterRequestOptions([
 				File::ATTRIBUTE_SOURCE_FILE_ID => $sourceFileId,
 				File::ATTRIBUTE_FILE_NAME      => $fileName,
@@ -145,7 +147,7 @@ trait FileService
 		?ServerSideEncryption $sourceSSE = null,
 		?ServerSideEncryption $destinationSSE = null
 	): File {
-		$response = $this->guzzle->request('POST', '/b2_copy_part', [
+		$response = $this->config->client()->request('POST', '/b2_copy_part', [
 			'json' => AbstractService::filterRequestOptions([
 				File::ATTRIBUTE_SOURCE_FILE_ID => $sourceFileId,
 				File::ATTRIBUTE_LARGE_FILE_ID  => $largeFileId,
@@ -172,7 +174,7 @@ trait FileService
 	 */
 	public function deleteFileVersion(string $fileName, string $fileId, ?bool $bypassGovernance = false): File
 	{
-		$response = $this->guzzle->request('POST', '/b2_delete_file_version', [
+		$response = $this->config->client()->request('POST', '/b2_delete_file_version', [
 			'json' => AbstractService::filterRequestOptions([
 				File::ATTRIBUTE_FILE_NAME => $fileName,
 				File::ATTRIBUTE_FILE_ID   => $fileId,
@@ -202,9 +204,13 @@ trait FileService
 		$sink = null,
 		?bool $headersOnly = false
 	): FileDownload {
-		$downloadUrl = sprintf('%s/b2_download_file_by_id', $this->accountAuthorization->getDownloadUrl() . Client::B2_API_V2);
-
-		return $this->download($downloadUrl, [File::ATTRIBUTE_FILE_ID => $fileId], $options, $sink, $headersOnly);
+		return $this->download(
+			static::joinUriPaths($this->config->accountAuthorization()->getDownloadUrl(), Client::B2_API_V2, 'b2_download_file_by_id'),
+			[ File::ATTRIBUTE_FILE_ID => $fileId ],
+			$options,
+			$sink,
+			$headersOnly
+		);
 	}
 
 	/**
@@ -227,9 +233,13 @@ trait FileService
 		$sink = null,
 		?bool $headersOnly = false
 	): FileDownload {
-		$downloadUrl = sprintf('%s/file/%s/%s', $this->accountAuthorization->getApiUrl(), $bucketName, $fileName);
-
-		return $this->download($downloadUrl, null, $options, $sink, $headersOnly);
+		return $this->download(
+			static::joinUriPaths($this->config->accountAuthorization()->getApiUrl(), 'file', $bucketName, $fileName),
+			null,
+			$options,
+			$sink,
+			$headersOnly
+		);
 	}
 
 	/**
@@ -244,7 +254,7 @@ trait FileService
 	 */
 	public function finishLargeFile(string $fileId, array $hashes)
 	{
-		$response = $this->guzzle->request('POST', '/b2_finish_large_file', [
+		$response = $this->config->client()->request('POST', '/b2_finish_large_file', [
 			'json' => [
 				File::ATTRIBUTE_FILE_ID         => $fileId,
 				File::ATTRIBUTE_PART_SHA1_ARRAY => $hashes,
@@ -276,7 +286,7 @@ trait FileService
 			$options = DownloadOptions::fromArray($options ?? []);
 		}
 
-		$response = $this->guzzle->request('POST', '/b2_get_download_authorization', [
+		$response = $this->config->client()->request('POST', '/b2_get_download_authorization', [
 			'json' => AbstractService::filterRequestOptions([
 				File::ATTRIBUTE_BUCKET_ID        => $bucketId,
 				File::ATTRIBUTE_FILE_NAME_PREFIX => $fileNamePrefix,
@@ -296,7 +306,7 @@ trait FileService
 	 */
 	public function getFileInfo(string $fileId): File
 	{
-		$response = $this->guzzle->request('POST', '/b2_get_file_info', [
+		$response = $this->config->client()->request('POST', '/b2_get_file_info', [
 			'json' => [
 				File::ATTRIBUTE_FILE_ID => $fileId
 			]
@@ -314,7 +324,7 @@ trait FileService
 	 */
 	public function getUploadPartUrl(string $fileId): UploadPartUrl
 	{
-		$response = $this->guzzle->request('POST', '/b2_get_upload_part_url', [
+		$response = $this->config->client()->request('POST', '/b2_get_upload_part_url', [
 			'json' => [
 				File::ATTRIBUTE_FILE_ID => $fileId
 			]
@@ -334,7 +344,7 @@ trait FileService
 	 */
 	public function getUploadUrl(string $bucketId): UploadUrl
 	{
-		$response = $this->guzzle->request('POST', '/b2_get_upload_url', [
+		$response = $this->config->client()->request('POST', '/b2_get_upload_url', [
 			'json' => [
 				File::ATTRIBUTE_BUCKET_ID => $bucketId
 			]
@@ -355,7 +365,7 @@ trait FileService
 	public function hideFile(string $bucketId, string $fileName): File
 	{
 
-		$response = $this->guzzle->request('POST', '/b2_hide_file', [
+		$response = $this->config->client()->request('POST', '/b2_hide_file', [
 			'json' => [
 				File::ATTRIBUTE_BUCKET_ID => $bucketId,
 				File::ATTRIBUTE_FILE_NAME => $fileName,
@@ -389,7 +399,7 @@ trait FileService
 		?string $startFileName = null,
 		?int $maxFileCount = 1000
 	): FileList {
-		$response = $this->guzzle->request('POST', '/b2_list_file_names', [
+		$response = $this->config->client()->request('POST', '/b2_list_file_names', [
 			'json' => AbstractService::filterRequestOptions([
 				File::ATTRIBUTE_BUCKET_ID      => $bucketId,
 				File::ATTRIBUTE_MAX_FILE_COUNT => $maxFileCount,
@@ -431,13 +441,13 @@ trait FileService
 		?string $startFileId = null,
 		?int $maxFileCount = 1000
 	): FileList {
-		$response = $this->guzzle->request('POST', '/b2_list_file_versions', [
+		$response = $this->config->client()->request('POST', '/b2_list_file_versions', [
 			'json' => AbstractService::filterRequestOptions([
 				File::ATTRIBUTE_BUCKET_ID      => $bucketId,
-				File::ATTRIBUTE_MAX_FILE_COUNT => $maxFileCount,
 			], [
 				File::ATTRIBUTE_START_FILE_NAME => $startFileName,
 				File::ATTRIBUTE_START_FILE_ID   => $startFileId,
+				File::ATTRIBUTE_MAX_FILE_COUNT => $maxFileCount,
 				File::ATTRIBUTE_PREFIX          => $prefix,
 				File::ATTRIBUTE_DELIMITER       => $delimiter,
 			]),
@@ -466,7 +476,7 @@ trait FileService
 		?int $startPartNumber = null,
 		?int $maxPartCount = 1000
 	): FilePartList {
-		$response = $this->guzzle->request('POST', '/b2_list_parts', [
+		$response = $this->config->client()->request('POST', '/b2_list_parts', [
 			'json' => AbstractService::filterRequestOptions([
 				File::ATTRIBUTE_FILE_ID => $fileId
 			], [
@@ -496,7 +506,7 @@ trait FileService
 		?string $startFileId = null,
 		?int $maxFileCount = 100
 	): FileList {
-		$response = $this->guzzle->request('POST', '/b2_list_unfinished_large_files', [
+		$response = $this->config->client()->request('POST', '/b2_list_unfinished_large_files', [
 			'json' => AbstractService::filterRequestOptions([
 				File::ATTRIBUTE_BUCKET_ID      => $bucketId,
 				File::ATTRIBUTE_MAX_FILE_COUNT => $maxFileCount,
@@ -532,7 +542,7 @@ trait FileService
 			$fileInfo = FileInfo::fromArray($fileInfo);
 		}
 
-		$response = $this->guzzle->request('POST', '/b2_start_large_file', [
+		$response = $this->config->client()->request('POST', '/b2_start_large_file', [
 			'json' => AbstractService::filterRequestOptions([
 				File::ATTRIBUTE_BUCKET_ID    => $bucketId,
 				File::ATTRIBUTE_FILE_NAME    => $fileName,
@@ -562,7 +572,7 @@ trait FileService
 		string $fileId,
 		string $legalHold
 	): File {
-		$response = $this->guzzle->request('POST', '/b2_update_file_legal_hold', [
+		$response = $this->config->client()->request('POST', '/b2_update_file_legal_hold', [
 			'json' => AbstractService::filterRequestOptions([
 				File::ATTRIBUTE_FILE_NAME  => $fileName,
 				File::ATTRIBUTE_FILE_ID    => $fileId,
@@ -590,7 +600,7 @@ trait FileService
 		string $fileRetention,
 		?bool $bypassGovernance = false
 	): File {
-		$response = $this->guzzle->request('POST', '/b2_update_file_retention', [
+		$response = $this->config->client()->request('POST', '/b2_update_file_retention', [
 			'json' => AbstractService::filterRequestOptions([
 				File::ATTRIBUTE_FILE_NAME         => $fileName,
 				File::ATTRIBUTE_FILE_ID           => $fileId,
@@ -642,7 +652,7 @@ trait FileService
 			$fileInfo->setLastModifiedTimestamp($mtime);
 		}
 
-		$response = $this->guzzle->request('POST', $uploadUrl->getUploadUrl(), [
+		$response = $this->config->client()->request('POST', $uploadUrl->getUploadUrl(), [
 			'body'    => $body,
 			'headers' => AbstractService::filterRequestOptions([
 				'Authorization'                => $uploadUrl->getAuthorizationToken(),
@@ -686,7 +696,7 @@ trait FileService
 			$metadata = FileUploadMetadata::fromResource($body);
 		}
 
-		$response = $this->guzzle->request('POST', $uploadPartUrl->getUploadUrl(), [
+		$response = $this->config->client()->request('POST', $uploadPartUrl->getUploadUrl(), [
 			'body' => $body,
 			'headers' => self::filterRequestOptions([
 				'Authorization'                => $uploadPartUrl->getAuthorizationToken(),
@@ -697,5 +707,18 @@ trait FileService
 		]);
 
 		return File::fromArray(json_decode((string) $response->getBody(), true));
+	}
+
+	/**
+	 * @param string[] $paths 
+	 * @return string 
+	 */
+	private static function joinUriPaths(...$paths)
+	{
+		$paths = array_filter(array_map(function ($path) {
+			return rtrim($path, '/');
+		}, $paths));
+
+		return join('/', $paths);
 	}
 }

@@ -169,12 +169,12 @@ class LargeFileUpload {
 
 	private function minimumPartSize(): int
 	{
-		return $this->client->getAccountAuthorization()->getAbsoluteMinimumPartSize();
+		return $this->config->accountAuthorization()->getAbsoluteMinimumPartSize();
 	}
 
 	private function recommendedPartSize(): int
 	{
-		return $this->client->getAccountAuthorization()->getRecommendedPartSize();
+		return $this->config->accountAuthorization()->getRecommendedPartSize();
 	}
 
 	private function remainingBytes(): int

@@ -5,29 +5,29 @@ declare(strict_types=1);
 namespace Zaxbux\BackblazeB2\Service;
 
 use Zaxbux\BackblazeB2\Object\Bucket;
-use Zaxbux\BackblazeB2\Object\BucketInfo;
+use Zaxbux\BackblazeB2\Object\Bucket\BucketInfo;
 use Zaxbux\BackblazeB2\Response\BucketList;
-use Zaxbux\BackblazeB2\B2\Type\BucketType;
-use Zaxbux\BackblazeB2\Traits\BucketServiceHelpersTrait;
+use Zaxbux\BackblazeB2\Object\Bucket\BucketType;
+use Zaxbux\BackblazeB2\Response\FileList;
+use Zaxbux\BackblazeB2\Traits\DeleteAllFilesTrait;
 use Zaxbux\BackblazeB2\Traits\FileServiceHelpersTrait;
 
 trait BucketService
 {
-	use BucketServiceHelpersTrait;
-	use FileServiceHelpersTrait {
-		FileServiceHelpersTrait::deleteAllFileVersions as deleteAllFileVersions;
-	}
+	use DeleteAllFilesTrait;
+	use FileServiceHelpersTrait;
 
-	abstract public function getAccountAuthorization();
+	/** @var \Zaxbux\BackblazeB2\Config */
+	private $config;
 
-	public abstract function deleteAllFileVersions(
+	/*public abstract function deleteAllFileVersions(
 		string $bucketId,
 		?string $prefix = '',
 		?string $delimiter = null,
 		?string $startFileName = null,
 		?string $startFileId = null,
 		?bool $bypassGovernance = false
-	): void;
+	): FileList;*/
 	
 	/**
 	 * Create a bucket with the given name and type.
@@ -49,9 +49,9 @@ trait BucketService
 		?array $corsRules = null,
 		?array $lifecycleRules = null
 	): Bucket {
-		$response = $this->guzzle->request('POST', '/b2_create_bucket', [
+		$response = $this->config->client()->request('POST', '/b2_create_bucket', [
 			'json' => AbstractService::filterRequestOptions([
-				Bucket::ATTRIBUTE_ACCOUNT_ID  => $this->getAccountAuthorization()->getAccountId(),
+				Bucket::ATTRIBUTE_ACCOUNT_ID  => $this->config->accountAuthorization()->getAccountId(),
 				Bucket::ATTRIBUTE_BUCKET_NAME => $bucketName,
 				Bucket::ATTRIBUTE_BUCKET_TYPE => $bucketType,
 			], [
@@ -79,9 +79,9 @@ trait BucketService
 			$this->deleteAllFileVersions($bucketId);
 		}
 
-		$response = $this->guzzle->request('POST', '/b2_delete_bucket', [
+		$response = $this->config->client()->request('POST', '/b2_delete_bucket', [
 			'json' => [
-				Bucket::ATTRIBUTE_ACCOUNT_ID => $this->getAccountAuthorization()->getAccountId(),
+				Bucket::ATTRIBUTE_ACCOUNT_ID => $this->config->accountAuthorization()->getAccountId(),
 				Bucket::ATTRIBUTE_BUCKET_ID  => $bucketId
 			]
 		]);
@@ -108,9 +108,9 @@ trait BucketService
 		?string $bucketName = null,
 		?array $bucketTypes = null
 	): BucketList {
-		$response = $this->guzzle->request('POST', '/b2_list_buckets', [
+		$response = $this->config->client()->request('POST', '/b2_list_buckets', [
 			'json' => AbstractService::filterRequestOptions([
-				Bucket::ATTRIBUTE_ACCOUNT_ID => $this->getAccountAuthorization()->getAccountId(),
+				Bucket::ATTRIBUTE_ACCOUNT_ID => $this->config->accountAuthorization()->getAccountId(),
 			], [
 				Bucket::ATTRIBUTE_BUCKET_ID    => $bucketId,
 				Bucket::ATTRIBUTE_BUCKET_NAME  => $bucketName,
@@ -144,9 +144,9 @@ trait BucketService
 		?array $lifecycleRules = null,
 		?int $ifRevisionIs = null
 	): Bucket {
-		$response = $this->guzzle->request('POST', '/b2_update_bucket', [
+		$response = $this->config->client()->request('POST', '/b2_update_bucket', [
 			'json' => AbstractService::filterRequestOptions([
-				Bucket::ATTRIBUTE_ACCOUNT_ID => $this->getAccountAuthorization()->getAccountId(),
+				Bucket::ATTRIBUTE_ACCOUNT_ID => $this->config->accountAuthorization()->getAccountId(),
 				Bucket::ATTRIBUTE_BUCKET_ID  => $bucketId,
 			], [
 				Bucket::ATTRIBUTE_BUCKET_TYPE     => $bucketType,

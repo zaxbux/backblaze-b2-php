@@ -16,6 +16,7 @@ class ExceptionMiddleware
 	{
 		return function (RequestInterface $request, array $options = []) use ($handler) {
 			$promise = $handler($request, $options);
+			
 			return $promise->then(function (ResponseInterface $response) {
 				if ($this->isSuccessful($response)) {
 					return $response;

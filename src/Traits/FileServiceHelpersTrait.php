@@ -7,6 +7,7 @@ namespace Zaxbux\BackblazeB2\Traits;
 use function sprintf, is_string;
 
 use AppendIterator;
+use ArrayIterator;
 use Iterator;
 use NoRewindIterator;
 use RuntimeException;
@@ -47,14 +48,14 @@ trait FileServiceHelpersTrait
 		?int $maxFileCount = 1000
 	): FileList;
 
-	public abstract function listFileVersions(
+	/*public abstract function listFileVersions(
 		string $bucketId,
 		?string $prefix = '',
 		?string $delimiter = null,
 		?string $startFileName = null,
 		?string $startFileId = null,
 		?int $maxFileCount = 1000
-	): FileList;
+	): FileList;*/
 
 	public abstract function listParts(
 		string $fileId,
@@ -69,34 +70,6 @@ trait FileServiceHelpersTrait
 	): FileList;
 
 	/* End abstract methods */
-
-	/**
-	 * Deletes all versions of a file(s) in a bucket.
-	 * 
-	 * @see FileService::deleteFileVersion()
-	 * 
-	 * @param string      $bucketId         The ID of the bucket containing file versions to delete.
-	 * @param null|string $prefix           
-	 * @param null|string $delimiter        
-	 * @param null|string $startFileName    
-	 * @param null|string $startFileId      
-	 * @param null|bool   $bypassGovernance 
-	 * @return void 
-	 */
-	public function deleteAllFileVersions(
-		string $bucketId,
-		?string $prefix = '',
-		?string $delimiter = null,
-		?string $startFileName = null,
-		?string $startFileId = null,
-		?bool $bypassGovernance = false
-	): void {
-		$fileVersions = $this->listAllFileVersions($bucketId, $prefix, $delimiter, $startFileName, $startFileId);
-
-		foreach ($fileVersions as $version) {
-			$this->deleteFileVersion($version->getName(), $version->getId(), $bypassGovernance);
-		}
-	}
 
 	/**
 	 * Fetch details of all files in a bucket, with optional filters.
@@ -147,10 +120,10 @@ trait FileServiceHelpersTrait
 		?string $delimiter = null,
 		?string $startFileName = null,
 		?string $startFileId = null
-	): iterable {
+	): Iterator {
 		$allFiles = new AppendIterator();
-		$nextFileId = $startFileId;
-		$nextFileName = $startFileName;
+		$nextFileId = $startFileId ?? '';
+		$nextFileName = $startFileName ?? '';
 
 		while ($nextFileId !== null && $nextFileName !== null) {
 			$files        = $this->listFileVersions($bucketId, $prefix, $delimiter, $startFileName, $startFileId);
@@ -246,9 +219,9 @@ trait FileServiceHelpersTrait
 		}
 
 		// Build query string from query parameters and download options.
-		$queryString = join('&', [http_build_query($query ?? []), $options->toQueryString() ?? []]);
+		$queryString = implode('&', [http_build_query($query ?? []), $options->toQueryString() ?? []]);
 
-		$response = $this->guzzle->request($headersOnly ? 'HEAD' : 'GET', $downloadUrl, [
+		$response = $this->config->client()->request($headersOnly ? 'HEAD' : 'GET', $downloadUrl, [
 			'query'   => $queryString,
 			'headers' => $options->getHeaders(),
 			'sink'    => $sink ?? null,
