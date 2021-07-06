@@ -8,7 +8,7 @@ use Iterator;
 use Psr\Http\Message\ResponseInterface;
 use Zaxbux\BackblazeB2\Object\File;
 
-/** @package Zaxbux\BackblazeB2\Response */
+
 class FileList extends AbstractListResponse {
 	
 	/** @var Iterator<File> */

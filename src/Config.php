@@ -5,11 +5,18 @@ namespace Zaxbux\BackblazeB2;
 use Exception;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\HandlerStack;
+use Zaxbux\BackblazeB2\Classes\BuiltinAuthorizationCache;
 use Zaxbux\BackblazeB2\Http\ClientFactory;
 use Zaxbux\BackblazeB2\Interfaces\AuthorizationCacheInterface;
 use Zaxbux\BackblazeB2\Object\AccountAuthorization;
 
-class Config {
+/**
+ * The main configuration object for the client.
+ * 
+ * @package Zaxbux\BackblazeB2
+ */
+class Config
+{
 
 	/**
 	 * The identifier for the key. The account ID can also be used.
@@ -24,6 +31,12 @@ class Config {
 	private $applicationKey;
 
 	/**
+	 * Application name, included in the User-Agent HTTP header.
+	 * @var string
+	 */
+	private $applicationName = '';
+
+	/**
 	 * Custom Guzzle handler or handler stack.
 	 * @var callable|\GuzzleHttp\HandlerStack
 	 */
@@ -33,7 +46,7 @@ class Config {
 	 * Custom Guzzle client instance.
 	 * @var \GuzzleHttp\ClientInterface
 	 */
-	private $client;
+	//private $http;
 
 	/**
 	 * Optional middleware to add to the GuzzleHttp handler stack.
@@ -83,7 +96,7 @@ class Config {
 	 */
 	public $largeFileUploadCustomMinimum = null; //200 * 1024 * 1024;
 
-		/**
+	/**
 	 * An object that implements `AuthorizationCacheInterface` for caching
 	 * account authorization between instances.
 	 * 
@@ -92,7 +105,7 @@ class Config {
 	private $authorizationCache;
 
 	/** @var \Zaxbux\BackblazeB2\Object\AccountAuthorization */
-	private $accountAuthorization;
+	//private $accountAuthorization;
 
 	public function applicationKeyId(): string
 	{
@@ -102,6 +115,16 @@ class Config {
 	public function applicationKey(): string
 	{
 		return $this->applicationKey;
+	}
+
+	public function applicationName(): string
+	{
+		return $this->applicationName;
+	}
+
+	public function authorizationCache(): AuthorizationCacheInterface
+	{
+		return $this->authorizationCache;
 	}
 
 	public function __construct(
@@ -114,13 +137,9 @@ class Config {
 		$this->setOptions($options ?? []);
 	}
 
-	public function client(): ClientInterface
+	public function middleware(): array
 	{
-		if (!$this->client) {
-			$this->client = ClientFactory::create($this);
-		}
-
-		return $this->client;
+		return $this->middleware ?? [];
 	}
 
 	public function handler(): HandlerStack
@@ -148,40 +167,6 @@ class Config {
 
 	/**
 	 * 
-	 * @return AccountAuthorization 
-	 * @throws Exception 
-	 */
-	public function accountAuthorization(): AccountAuthorization
-	{
-		// Check cache for account authorization if account is not already authorized.
-		if (!$this->accountAuthorization && $this->authorizationCache instanceof AuthorizationCacheInterface) {
-			$this->accountAuthorization = $this->authorizationCache->get($this->applicationKeyId);
-		}
-
-		// Refresh the token if it wasn't cached, or if it has expired.
-		if (!$this->accountAuthorization || $this->accountAuthorization->expired()) {
-			$this->accountAuthorization = Client::authorizeAccount(
-				$this->applicationKeyId,
-				$this->applicationKey,
-				$this->client()
-			);
-
-			// Cache the new key
-			if ($this->authorizationCache instanceof AuthorizationCacheInterface) {
-				$this->authorizationCache->put($this->applicationKeyId, $this->accountAuthorization);
-			}
-		}
-
-		// If account authorization still doesn't exist, there is an issue.
-		if (!$this->accountAuthorization) {
-			throw new Exception('Failed to get account authorization.');
-		}
-
-		return $this->accountAuthorization;
-	}
-
-	/**
-	 * 
 	 * @param mixed $data 
 	 * @return Config 
 	 */
@@ -199,5 +184,6 @@ class Config {
 
 	private function setOptions(array $options) {
 		$this->handler = $options['handler'] ?? null;
+		$this->authorizationCache = $options['authorizationCache'] ?? new BuiltinAuthorizationCache();
 	}
 }

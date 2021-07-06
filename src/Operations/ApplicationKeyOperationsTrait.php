@@ -2,18 +2,22 @@
 
 declare(strict_types=1);
 
-namespace Zaxbux\BackblazeB2\Service;
+namespace Zaxbux\BackblazeB2\Operations;
 
+use AppendIterator;
+use NoRewindIterator;
+use Zaxbux\BackblazeB2\Object\AccountAuthorization;
 use Zaxbux\BackblazeB2\Object\Key;
 use Zaxbux\BackblazeB2\Response\KeyList;
-//use Zaxbux\BackblazeB2\Traits\ApplicationKeyServiceHelpersTrait;
+use Zaxbux\BackblazeB2\Utils;
 
-trait ApplicationKeyService
+trait ApplicationKeyOperationsTrait
 {
-	//use ApplicationKeyServiceHelpersTrait;
 
-	/** @var \Zaxbux\BackblazeB2\Config */
-	private $config;
+	/** @var \GuzzleHttp\ClientInterface */
+	protected $http;
+
+	abstract protected function accountAuthorization(): AccountAuthorization;
 
 	/**
 	 * Creates a new application key.
@@ -35,9 +39,9 @@ trait ApplicationKeyService
 		?string $bucketId = null,
 		?string $namePrefix = null
 	): Key {
-		$response = $this->config->client()->request('POST', '/b2_create_key', [
-			'json' => AbstractService::filterRequestOptions([
-				Key::ATTRIBUTE_ACCOUNT_ID    => $this->config->accountAuthorization()->getAccountId(),
+		$response = $this->http->request('POST', '/b2_create_key', [
+			'json' => Utils::filterRequestOptions([
+				Key::ATTRIBUTE_ACCOUNT_ID    => $this->accountAuthorization()->getAccountId(),
 				Key::ATTRIBUTE_CAPABILITIES  => $capabilities,
 				Key::ATTRIBUTE_KEY_NAME      => $keyName,
 			], [
@@ -59,7 +63,7 @@ trait ApplicationKeyService
 	 */
 	public function deleteKey(string $applicationKeyId): Key
 	{
-		$response = $this->config->client()->request('POST', '/b2_delete_key', [
+		$response = $this->http->request('POST', '/b2_delete_key', [
 			'json' => [
 				Key::ATTRIBUTE_APPLICATION_KEY_ID => $applicationKeyId,
 			]
@@ -82,9 +86,9 @@ trait ApplicationKeyService
 		?string $startApplicationKeyId = null,
 		?int $maxKeyCount = 1000
 	): KeyList {
-		$response = $this->config->client()->request('POST', '/b2_list_keys', [
-			'json' => AbstractService::filterRequestOptions([
-				Key::ATTRIBUTE_ACCOUNT_ID => $this->config->accountAuthorization()->getAccountId(),
+		$response = $this->http->request('POST', '/b2_list_keys', [
+			'json' => Utils::filterRequestOptions([
+				Key::ATTRIBUTE_ACCOUNT_ID => $this->accountAuthorization()->getAccountId(),
 			], [
 				Key::ATTRIBUTE_MAX_KEY_COUNT => $maxKeyCount,
 				Key::ATTRIBUTE_START_APPLICATION_KEY_ID => $startApplicationKeyId
@@ -92,5 +96,26 @@ trait ApplicationKeyService
 		]);
 
 		return KeyList::create($response);
+	}
+
+	/**
+	 * Lists *all* application keys associated with an account.
+	 * 
+	 * @see Client::listKeys()
+	 */
+	public function listAllKeys(string $startApplicationKeyId = null, int $maxKeyCount = 1000, bool $loop = true): iterable
+	{
+		$allKeys = new AppendIterator();
+
+		$nextApplicationKeyId = $startApplicationKeyId ?? '';
+
+		while ($nextApplicationKeyId !== null) {
+			$keys = $this->listKeys($startApplicationKeyId, $maxKeyCount);
+			$nextApplicationKeyId = $keys->getNextApplicationKeyId();
+
+			$allKeys->append(new NoRewindIterator($keys->getKeys()));
+		}
+
+		return $allKeys;
 	}
 }

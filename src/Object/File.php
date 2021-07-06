@@ -11,7 +11,7 @@ use Zaxbux\BackblazeB2\Object\File\FileInfo;
 use Zaxbux\BackblazeB2\Object\File\ServerSideEncryption;
 use Zaxbux\BackblazeB2\Traits\ProxyArrayAccessToPropertiesTrait;
 
-/** @package Zaxbux\BackblazeB2 */
+
 class File implements B2ObjectInterface
 {
 	use ProxyArrayAccessToPropertiesTrait;

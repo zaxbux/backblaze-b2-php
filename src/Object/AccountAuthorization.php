@@ -8,12 +8,15 @@ use function time;
 use function json_encode;
 
 use GuzzleHttp\ClientInterface;
+use GuzzleHttp\Utils;
 use Psr\Http\Message\ResponseInterface;
+use Zaxbux\BackblazeB2\Client;
+use Zaxbux\BackblazeB2\Config;
 use Zaxbux\BackblazeB2\Interfaces\B2ObjectInterface;
 use Zaxbux\BackblazeB2\Interfaces\AuthorizationCacheInterface;
 use Zaxbux\BackblazeB2\Traits\ProxyArrayAccessToPropertiesTrait;
 
-/** @package Zaxbux\BackblazeB2\Client */
+
 class AccountAuthorization implements B2ObjectInterface
 {
 	use ProxyArrayAccessToPropertiesTrait;
@@ -24,7 +27,7 @@ class AccountAuthorization implements B2ObjectInterface
 	public const ATTRIBUTE_API_URL                    = 'apiUrl';
 	public const ATTRIBUTE_APPLICATION_KEY            = 'applicationKey';
 	public const ATTRIBUTE_APPLICATION_KEY_ID         = 'applicationKeyId';
-	public const ATTRIBUTE_AUTHORIZATION_TIMESTAMP    = 'created';
+	public const ATTRIBUTE_CREATED                    = '_created';
 	public const ATTRIBUTE_AUTHORIZATION_TOKEN        = 'authorizationToken';
 	public const ATTRIBUTE_DOWNLOAD_URL               = 'downloadUrl';
 	public const ATTRIBUTE_RECOMMENDED_PART_SIZE      = 'recommendedPartSize';
@@ -160,12 +163,12 @@ class AccountAuthorization implements B2ObjectInterface
 	 */
 	public function expired(): bool
 	{
-		return time() - AuthorizationCacheInterface::EXPIRES >= $this->created; // ?? -1;
+		return time() - AuthorizationCacheInterface::EXPIRES >= $this->created;
 	}
 
 	public static function fromResponse(ResponseInterface $response): AccountAuthorization
 	{
-		return static::fromArray(json_decode((string) $response->getBody(), true));
+		return static::fromArray(Utils::jsonDecode((string) $response->getBody(), true));
 	}
 
 	public static function fromArray(array $data): AccountAuthorization
@@ -179,7 +182,7 @@ class AccountAuthorization implements B2ObjectInterface
 			$data[static::ATTRIBUTE_RECOMMENDED_PART_SIZE] ?? null,
 			$data[static::ATTRIBUTE_ABSOLUTE_MINIMUM_PART_SIZE] ?? null,
 			$data[static::ATTRIBUTE_S3_API_URL] ?? null,
-			$data[static::ATTRIBUTE_AUTHORIZATION_TIMESTAMP] ?? null
+			$data[static::ATTRIBUTE_CREATED] ?? null
 		);
 	}
 
@@ -194,7 +197,7 @@ class AccountAuthorization implements B2ObjectInterface
 			static::ATTRIBUTE_RECOMMENDED_PART_SIZE => $this->recommendedPartSize,
 			static::ATTRIBUTE_ABSOLUTE_MINIMUM_PART_SIZE => $this->absoluteMinimumPartSize,
 			static::ATTRIBUTE_S3_API_URL => $this->s3ApiUrl,
-			static::ATTRIBUTE_AUTHORIZATION_TIMESTAMP => $this->created,
+			static::ATTRIBUTE_CREATED => $this->created,
 		];
 	}
 

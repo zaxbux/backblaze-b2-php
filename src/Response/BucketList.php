@@ -11,7 +11,7 @@ use Zaxbux\BackblazeB2\Object\Bucket;
 
 use function iterator_to_array;
 
-/** @package Zaxbux\BackblazeB2\Response */
+
 class BucketList extends AbstractListResponse {
 	
 	/** @var iterable<Bucket> */

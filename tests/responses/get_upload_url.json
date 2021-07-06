@@ -1,5 +1,5 @@
 {
   "authorizationToken": "authToken",
   "bucketId": "bucketId",
-  "uploadUrl": "uploadUrl"
+  "uploadUrl": "https://pod-000-1005-03.backblaze.com/b2api/v2/b2_upload_file?cvt=c001_v0001005_t0027&bucket=4a48fe8875c6214145260818"
 }

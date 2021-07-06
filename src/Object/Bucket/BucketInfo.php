@@ -9,7 +9,7 @@ use Zaxbux\BackblazeB2\Classes\AbstractObjectInfo;
 /**
  * @link https://www.backblaze.com/b2/docs/buckets.html#bucketInfo
  * 
- * @package Zaxbux\BackblazeB2\Object
+
  */
 final class BucketInfo extends AbstractObjectInfo {
 	public static function fromArray(array $data): BucketInfo {

@@ -5,22 +5,31 @@ namespace Zaxbux\BackblazeB2\Http\Middleware;
 use GuzzleHttp\Psr7\Uri;
 use GuzzleHttp\Psr7\Utils;
 use Psr\Http\Message\RequestInterface;
-use Zaxbux\BackblazeB2\Config;
+use Zaxbux\BackblazeB2\Client;
 
 class ApplyAuthorizationMiddleware
 {
-	private $config;
+	private $client;
 
-	public function __construct(Config $config)
+	public function __construct(Client $client)
 	{
-		$this->config = $config;
+		$this->client = $client;
 	}
 
 	public function __invoke(callable $next): callable
 	{
 		return function (RequestInterface $request, array $options = []) use ($next) {
+			//fwrite(STDERR, print_r($request, true));
+
 			// Don't apply token to account authorization requests
-			if (!preg_match('/\/b2_authorize_account$/', rtrim($request->getUri()->getPath(), '/'))) {
+			//if (!preg_match('/\/b2_authorize_account$/', rtrim($request->getUri()->getPath(), '/'))) {
+
+			// Add token to requests without any authorization
+			if (empty($request->getHeader('Authorization'))) {
+				if (!$this->client->accountAuthorization() || $this->client->accountAuthorization()->expired()) {
+					$this->client->refreshAccountAuthorization();
+				}
+
 				$request = $this->applyToken($request);
 			}
 			
@@ -35,9 +44,9 @@ class ApplyAuthorizationMiddleware
 	protected function applyToken(RequestInterface $request): RequestInterface
 	{
 		$request = Utils::modifyRequest($request, [
-			'uri' => new Uri($this->config->accountAuthorization()->getApiUrl() . $request->getUri()->getPath()),
+			'uri' => new Uri($this->client->accountAuthorization()->getApiUrl() . $request->getUri()),
 			'set_headers' => [
-				'Authorization' => $this->config->accountAuthorization()->getAuthorizationToken(),
+				'Authorization' => $this->client->accountAuthorization()->getAuthorizationToken(),
 			],
 		]);
 

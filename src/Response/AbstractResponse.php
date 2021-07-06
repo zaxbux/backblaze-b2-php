@@ -6,7 +6,7 @@ namespace Zaxbux\BackblazeB2\Response;
 
 use Psr\Http\Message\ResponseInterface;
 
-/** @package Zaxbux\BackblazeB2\Classes */
+
 abstract class AbstractResponse {
 
 	/** @var ResponseInterface */

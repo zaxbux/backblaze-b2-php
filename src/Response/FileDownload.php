@@ -13,7 +13,7 @@ use RuntimeException;
 /** 
  * A response representing a file download.
  * 
- * @package Zaxbux\BackblazeB2\Response
+
  */
 class FileDownload extends AbstractResponse {
 

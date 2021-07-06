@@ -3,6 +3,7 @@
 namespace tests;
 
 use GuzzleHttp\Psr7\Response;
+use Zaxbux\BackblazeB2\Utils;
 
 final class MockResponse {
 	private const RESPONSE_FILE_DIRECTORY = 'responses';
@@ -28,21 +29,8 @@ final class MockResponse {
 		?int $statusCode = 200,
 		?array $headers = []
 	): MockResponse {
-		$body = file_get_contents(static::joinPaths(dirname(__FILE__), static::RESPONSE_FILE_DIRECTORY,  $filePath));
+		$body = file_get_contents(Utils::joinFilePaths(dirname(__FILE__), static::RESPONSE_FILE_DIRECTORY,  $filePath));
 
 		return new static($statusCode, $headers, $body);
-	}
-
-	/**
-	 * @param string[] $paths 
-	 * @return string 
-	 */
-	private static function joinPaths(...$paths)
-	{
-		$paths = array_filter(array_map(function ($path) {
-			return rtrim($path, DIRECTORY_SEPARATOR);
-		}, $paths));
-
-		return join(DIRECTORY_SEPARATOR, $paths);
 	}
 }

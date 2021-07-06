@@ -2,32 +2,23 @@
 
 declare(strict_types=1);
 
-namespace Zaxbux\BackblazeB2\Service;
+namespace Zaxbux\BackblazeB2\Operations;
 
+use Zaxbux\BackblazeB2\Exceptions\NotFoundException;
+use Zaxbux\BackblazeB2\Object\AccountAuthorization;
 use Zaxbux\BackblazeB2\Object\Bucket;
 use Zaxbux\BackblazeB2\Object\Bucket\BucketInfo;
 use Zaxbux\BackblazeB2\Response\BucketList;
 use Zaxbux\BackblazeB2\Object\Bucket\BucketType;
-use Zaxbux\BackblazeB2\Response\FileList;
-use Zaxbux\BackblazeB2\Traits\DeleteAllFilesTrait;
-use Zaxbux\BackblazeB2\Traits\FileServiceHelpersTrait;
+use Zaxbux\BackblazeB2\Utils;
 
-trait BucketService
+trait BucketOperationsTrait
 {
-	use DeleteAllFilesTrait;
-	use FileServiceHelpersTrait;
 
-	/** @var \Zaxbux\BackblazeB2\Config */
-	private $config;
+	/** @var \GuzzleHttp\ClientInterface */
+	protected $http;
 
-	/*public abstract function deleteAllFileVersions(
-		string $bucketId,
-		?string $prefix = '',
-		?string $delimiter = null,
-		?string $startFileName = null,
-		?string $startFileId = null,
-		?bool $bypassGovernance = false
-	): FileList;*/
+	abstract protected function accountAuthorization(): AccountAuthorization;
 	
 	/**
 	 * Create a bucket with the given name and type.
@@ -49,9 +40,9 @@ trait BucketService
 		?array $corsRules = null,
 		?array $lifecycleRules = null
 	): Bucket {
-		$response = $this->config->client()->request('POST', '/b2_create_bucket', [
-			'json' => AbstractService::filterRequestOptions([
-				Bucket::ATTRIBUTE_ACCOUNT_ID  => $this->config->accountAuthorization()->getAccountId(),
+		$response = $this->http->request('POST', '/b2_create_bucket', [
+			'json' => Utils::filterRequestOptions([
+				Bucket::ATTRIBUTE_ACCOUNT_ID  => $this->accountAuthorization()->getAccountId(),
 				Bucket::ATTRIBUTE_BUCKET_NAME => $bucketName,
 				Bucket::ATTRIBUTE_BUCKET_TYPE => $bucketType,
 			], [
@@ -79,9 +70,9 @@ trait BucketService
 			$this->deleteAllFileVersions($bucketId);
 		}
 
-		$response = $this->config->client()->request('POST', '/b2_delete_bucket', [
+		$response = $this->http->request('POST', '/b2_delete_bucket', [
 			'json' => [
-				Bucket::ATTRIBUTE_ACCOUNT_ID => $this->config->accountAuthorization()->getAccountId(),
+				Bucket::ATTRIBUTE_ACCOUNT_ID => $this->accountAuthorization()->getAccountId(),
 				Bucket::ATTRIBUTE_BUCKET_ID  => $bucketId
 			]
 		]);
@@ -108,9 +99,9 @@ trait BucketService
 		?string $bucketName = null,
 		?array $bucketTypes = null
 	): BucketList {
-		$response = $this->config->client()->request('POST', '/b2_list_buckets', [
-			'json' => AbstractService::filterRequestOptions([
-				Bucket::ATTRIBUTE_ACCOUNT_ID => $this->config->accountAuthorization()->getAccountId(),
+		$response = $this->http->request('POST', '/b2_list_buckets', [
+			'json' => Utils::filterRequestOptions([
+				Bucket::ATTRIBUTE_ACCOUNT_ID => $this->accountAuthorization()->getAccountId(),
 			], [
 				Bucket::ATTRIBUTE_BUCKET_ID    => $bucketId,
 				Bucket::ATTRIBUTE_BUCKET_NAME  => $bucketName,
@@ -144,9 +135,9 @@ trait BucketService
 		?array $lifecycleRules = null,
 		?int $ifRevisionIs = null
 	): Bucket {
-		$response = $this->config->client()->request('POST', '/b2_update_bucket', [
-			'json' => AbstractService::filterRequestOptions([
-				Bucket::ATTRIBUTE_ACCOUNT_ID => $this->config->accountAuthorization()->getAccountId(),
+		$response = $this->http->request('POST', '/b2_update_bucket', [
+			'json' => Utils::filterRequestOptions([
+				Bucket::ATTRIBUTE_ACCOUNT_ID => $this->accountAuthorization()->getAccountId(),
 				Bucket::ATTRIBUTE_BUCKET_ID  => $bucketId,
 			], [
 				Bucket::ATTRIBUTE_BUCKET_TYPE     => $bucketType,
@@ -158,5 +149,43 @@ trait BucketService
 		]);
 
 		return Bucket::fromArray(json_decode((string) $response->getBody(), true));
+	}
+
+	/**
+	 * Get a bucket by ID.
+	 * 
+	 * @param string $bucketId        The ID of the bucket to fetch.
+	 * @param array|null $bucketTypes Filter for bucket types returned in the list buckets response.
+	 * 
+	 * @throws NotFoundException 
+	 */
+	public function getBucketById(string $bucketId, array $bucketTypes = null): Bucket
+	{
+		$response = $this->listBuckets($bucketId, null, $bucketTypes);
+
+		if (iterator_count($response->getBuckets()) !== 1) {
+			throw new NotFoundException(sprintf('Bucket "%s" not found.', $bucketId));
+		}
+
+		return $response->getBuckets()[0];
+	}
+
+	/**
+	 * Get a bucket by name.
+	 * 
+	 * @param string $bucketName      The name of the bucket to fetch.
+	 * @param array|null $bucketTypes Filter for bucket types returned in the list buckets response.
+	 * 
+	 * @throws NotFoundException 
+	 */
+	public function getBucketByName(string $bucketName, array $bucketTypes = null): Bucket
+	{
+		$response = $this->listBuckets(null, $bucketName, $bucketTypes);
+
+		if (iterator_count($response->getBuckets()) !== 1) {
+			throw new NotFoundException(sprintf('Bucket "%s" not found.', $bucketName));
+		}
+
+		return $response->getBuckets()[0];
 	}
 }

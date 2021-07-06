@@ -2,9 +2,17 @@
 
 declare(strict_types=1);
 
-namespace Zaxbux\BackblazeB2\Service;
+namespace Zaxbux\BackblazeB2\Operations;
 
+use AppendIterator;
+use ArrayIterator;
+use GuzzleHttp\Psr7\Stream;
+use Iterator;
+use NoRewindIterator;
 use Zaxbux\BackblazeB2\Client;
+use Zaxbux\BackblazeB2\Exceptions\NotFoundException;
+use Zaxbux\BackblazeB2\Helpers\DownloadHelper;
+use Zaxbux\BackblazeB2\Object\AccountAuthorization;
 use Zaxbux\BackblazeB2\Object\File;
 use Zaxbux\BackblazeB2\Object\DownloadAuthorization;
 use Zaxbux\BackblazeB2\Object\File\DownloadOptions;
@@ -16,13 +24,15 @@ use Zaxbux\BackblazeB2\Object\File\UploadUrl;
 use Zaxbux\BackblazeB2\Response\FileDownload;
 use Zaxbux\BackblazeB2\Response\FileList;
 use Zaxbux\BackblazeB2\Response\FilePartList;
-use Zaxbux\BackblazeB2\Traits\FileServiceHelpersTrait;
+use Zaxbux\BackblazeB2\Utils;
 
-trait FileService
+trait FileOperationsTrait
 {
 
-	/** @var \Zaxbux\BackblazeB2\Config */
-	private $config;
+	/** @var \GuzzleHttp\ClientInterface */
+	protected $http;
+
+	abstract protected function accountAuthorization(): AccountAuthorization;
 
 	/**
 	 * Cancel the upload of a large file, and deletes all of the parts that have been uploaded.
@@ -33,7 +43,7 @@ trait FileService
 	 */
 	public function cancelLargeFile(string $fileId)
 	{
-		$response = $this->config->client()->request('POST', '/b2_cancel_large_file', [
+		$response = $this->http->request('POST', '/b2_cancel_large_file', [
 			'json' => [
 				File::ATTRIBUTE_FILE_ID => $fileId,
 			],
@@ -102,8 +112,8 @@ trait FileService
 		}
 		*/
 
-		$response = $this->config->client()->request('POST', '/b2_copy_file', [
-			'json' => AbstractService::filterRequestOptions([
+		$response = $this->http->request('POST', '/b2_copy_file', [
+			'json' => Utils::filterRequestOptions([
 				File::ATTRIBUTE_SOURCE_FILE_ID => $sourceFileId,
 				File::ATTRIBUTE_FILE_NAME      => $fileName,
 			], [
@@ -147,8 +157,8 @@ trait FileService
 		?ServerSideEncryption $sourceSSE = null,
 		?ServerSideEncryption $destinationSSE = null
 	): File {
-		$response = $this->config->client()->request('POST', '/b2_copy_part', [
-			'json' => AbstractService::filterRequestOptions([
+		$response = $this->http->request('POST', '/b2_copy_part', [
+			'json' => Utils::filterRequestOptions([
 				File::ATTRIBUTE_SOURCE_FILE_ID => $sourceFileId,
 				File::ATTRIBUTE_LARGE_FILE_ID  => $largeFileId,
 				File::ATTRIBUTE_PART_NUMBER    => $partNumber,
@@ -174,8 +184,8 @@ trait FileService
 	 */
 	public function deleteFileVersion(string $fileName, string $fileId, ?bool $bypassGovernance = false): File
 	{
-		$response = $this->config->client()->request('POST', '/b2_delete_file_version', [
-			'json' => AbstractService::filterRequestOptions([
+		$response = $this->http->request('POST', '/b2_delete_file_version', [
+			'json' => Utils::filterRequestOptions([
 				File::ATTRIBUTE_FILE_NAME => $fileName,
 				File::ATTRIBUTE_FILE_ID   => $fileId,
 			], [
@@ -204,9 +214,13 @@ trait FileService
 		$sink = null,
 		?bool $headersOnly = false
 	): FileDownload {
-		return $this->download(
-			static::joinUriPaths($this->config->accountAuthorization()->getDownloadUrl(), Client::B2_API_V2, 'b2_download_file_by_id'),
-			[ File::ATTRIBUTE_FILE_ID => $fileId ],
+		return DownloadHelper::instance($this)->download(
+			Utils::joinPaths(
+				$this->accountAuthorization()->getDownloadUrl(),
+				Client::B2_API_VERSION,
+				'b2_download_file_by_id'
+			),
+			[File::ATTRIBUTE_FILE_ID => $fileId],
 			$options,
 			$sink,
 			$headersOnly
@@ -233,8 +247,13 @@ trait FileService
 		$sink = null,
 		?bool $headersOnly = false
 	): FileDownload {
-		return $this->download(
-			static::joinUriPaths($this->config->accountAuthorization()->getApiUrl(), 'file', $bucketName, $fileName),
+		return DownloadHelper::instance($this)->download(
+			Utils::joinPaths(
+				$this->accountAuthorization()->getApiUrl(),
+				'file',
+				$bucketName,
+				$fileName
+			),
 			null,
 			$options,
 			$sink,
@@ -254,7 +273,7 @@ trait FileService
 	 */
 	public function finishLargeFile(string $fileId, array $hashes)
 	{
-		$response = $this->config->client()->request('POST', '/b2_finish_large_file', [
+		$response = $this->http->request('POST', '/b2_finish_large_file', [
 			'json' => [
 				File::ATTRIBUTE_FILE_ID         => $fileId,
 				File::ATTRIBUTE_PART_SHA1_ARRAY => $hashes,
@@ -286,8 +305,8 @@ trait FileService
 			$options = DownloadOptions::fromArray($options ?? []);
 		}
 
-		$response = $this->config->client()->request('POST', '/b2_get_download_authorization', [
-			'json' => AbstractService::filterRequestOptions([
+		$response = $this->http->request('POST', '/b2_get_download_authorization', [
+			'json' => Utils::filterRequestOptions([
 				File::ATTRIBUTE_BUCKET_ID        => $bucketId,
 				File::ATTRIBUTE_FILE_NAME_PREFIX => $fileNamePrefix,
 				File::ATTRIBUTE_VALID_DURATION   => $validDuration,
@@ -306,7 +325,7 @@ trait FileService
 	 */
 	public function getFileInfo(string $fileId): File
 	{
-		$response = $this->config->client()->request('POST', '/b2_get_file_info', [
+		$response = $this->http->request('POST', '/b2_get_file_info', [
 			'json' => [
 				File::ATTRIBUTE_FILE_ID => $fileId
 			]
@@ -324,7 +343,7 @@ trait FileService
 	 */
 	public function getUploadPartUrl(string $fileId): UploadPartUrl
 	{
-		$response = $this->config->client()->request('POST', '/b2_get_upload_part_url', [
+		$response = $this->http->request('POST', '/b2_get_upload_part_url', [
 			'json' => [
 				File::ATTRIBUTE_FILE_ID => $fileId
 			]
@@ -344,7 +363,7 @@ trait FileService
 	 */
 	public function getUploadUrl(string $bucketId): UploadUrl
 	{
-		$response = $this->config->client()->request('POST', '/b2_get_upload_url', [
+		$response = $this->http->request('POST', '/b2_get_upload_url', [
 			'json' => [
 				File::ATTRIBUTE_BUCKET_ID => $bucketId
 			]
@@ -365,7 +384,7 @@ trait FileService
 	public function hideFile(string $bucketId, string $fileName): File
 	{
 
-		$response = $this->config->client()->request('POST', '/b2_hide_file', [
+		$response = $this->http->request('POST', '/b2_hide_file', [
 			'json' => [
 				File::ATTRIBUTE_BUCKET_ID => $bucketId,
 				File::ATTRIBUTE_FILE_NAME => $fileName,
@@ -399,8 +418,8 @@ trait FileService
 		?string $startFileName = null,
 		?int $maxFileCount = 1000
 	): FileList {
-		$response = $this->config->client()->request('POST', '/b2_list_file_names', [
-			'json' => AbstractService::filterRequestOptions([
+		$response = $this->http->request('POST', '/b2_list_file_names', [
+			'json' => Utils::filterRequestOptions([
 				File::ATTRIBUTE_BUCKET_ID      => $bucketId,
 				File::ATTRIBUTE_MAX_FILE_COUNT => $maxFileCount,
 			], [
@@ -441,8 +460,8 @@ trait FileService
 		?string $startFileId = null,
 		?int $maxFileCount = 1000
 	): FileList {
-		$response = $this->config->client()->request('POST', '/b2_list_file_versions', [
-			'json' => AbstractService::filterRequestOptions([
+		$response = $this->http->request('POST', '/b2_list_file_versions', [
+			'json' => Utils::filterRequestOptions([
 				File::ATTRIBUTE_BUCKET_ID      => $bucketId,
 			], [
 				File::ATTRIBUTE_START_FILE_NAME => $startFileName,
@@ -476,8 +495,8 @@ trait FileService
 		?int $startPartNumber = null,
 		?int $maxPartCount = 1000
 	): FilePartList {
-		$response = $this->config->client()->request('POST', '/b2_list_parts', [
-			'json' => AbstractService::filterRequestOptions([
+		$response = $this->http->request('POST', '/b2_list_parts', [
+			'json' => Utils::filterRequestOptions([
 				File::ATTRIBUTE_FILE_ID => $fileId
 			], [
 				File::ATTRIBUTE_START_PART_NUMBER => $startPartNumber,
@@ -506,8 +525,8 @@ trait FileService
 		?string $startFileId = null,
 		?int $maxFileCount = 100
 	): FileList {
-		$response = $this->config->client()->request('POST', '/b2_list_unfinished_large_files', [
-			'json' => AbstractService::filterRequestOptions([
+		$response = $this->http->request('POST', '/b2_list_unfinished_large_files', [
+			'json' => Utils::filterRequestOptions([
 				File::ATTRIBUTE_BUCKET_ID      => $bucketId,
 				File::ATTRIBUTE_MAX_FILE_COUNT => $maxFileCount,
 			], [
@@ -542,8 +561,8 @@ trait FileService
 			$fileInfo = FileInfo::fromArray($fileInfo);
 		}
 
-		$response = $this->config->client()->request('POST', '/b2_start_large_file', [
-			'json' => AbstractService::filterRequestOptions([
+		$response = $this->http->request('POST', '/b2_start_large_file', [
+			'json' => Utils::filterRequestOptions([
 				File::ATTRIBUTE_BUCKET_ID    => $bucketId,
 				File::ATTRIBUTE_FILE_NAME    => $fileName,
 				File::ATTRIBUTE_CONTENT_TYPE => $contentType ?? File::CONTENT_TYPE_AUTO,
@@ -572,8 +591,8 @@ trait FileService
 		string $fileId,
 		string $legalHold
 	): File {
-		$response = $this->config->client()->request('POST', '/b2_update_file_legal_hold', [
-			'json' => AbstractService::filterRequestOptions([
+		$response = $this->http->request('POST', '/b2_update_file_legal_hold', [
+			'json' => Utils::filterRequestOptions([
 				File::ATTRIBUTE_FILE_NAME  => $fileName,
 				File::ATTRIBUTE_FILE_ID    => $fileId,
 				File::ATTRIBUTE_LEGAL_HOLD => $legalHold,
@@ -600,8 +619,8 @@ trait FileService
 		string $fileRetention,
 		?bool $bypassGovernance = false
 	): File {
-		$response = $this->config->client()->request('POST', '/b2_update_file_retention', [
-			'json' => AbstractService::filterRequestOptions([
+		$response = $this->http->request('POST', '/b2_update_file_retention', [
+			'json' => Utils::filterRequestOptions([
 				File::ATTRIBUTE_FILE_NAME         => $fileName,
 				File::ATTRIBUTE_FILE_ID           => $fileId,
 				File::ATTRIBUTE_FILE_RETENTION    => $fileRetention,
@@ -648,20 +667,21 @@ trait FileService
 
 		$uploadMetadata = FileUploadMetadata::fromResource($body);
 		$mtime = $uploadMetadata->getLastModifiedTimestamp();
-		if ($mtime > 0){
+		if ($mtime > 0) {
 			$fileInfo->setLastModifiedTimestamp($mtime);
 		}
 
-		$response = $this->config->client()->request('POST', $uploadUrl->getUploadUrl(), [
+		$response = $this->http->request('POST', $uploadUrl->getUploadUrl(), [
 			'body'    => $body,
-			'headers' => AbstractService::filterRequestOptions([
-				'Authorization'                => $uploadUrl->getAuthorizationToken(),
-				'Content-Type'                 => $contentType ?? File::CONTENT_TYPE_AUTO,
-				'Content-Length'               => $uploadMetadata->getLength(),
-				File::HEADER_X_BZ_CONTENT_SHA1 => $uploadMetadata->getSha1(),
-				File::HEADER_X_BZ_FILE_NAME    => urlencode($fileName),
-			], 
-				($serverSideEncryption->getHeaders() ?? []) +
+			'headers' => Utils::filterRequestOptions(
+				[
+					'Authorization'                => $uploadUrl->getAuthorizationToken(),
+					'Content-Type'                 => $contentType ?? File::CONTENT_TYPE_AUTO,
+					'Content-Length'               => $uploadMetadata->getLength(),
+					File::HEADER_X_BZ_CONTENT_SHA1 => $uploadMetadata->getSha1(),
+					File::HEADER_X_BZ_FILE_NAME    => $fileName, //rawurlencode($fileName),// urlencode($fileName),
+				],
+				($serverSideEncryption->getHeaders() ?? []),
 				($fileInfo->getHeaders() ?? [])
 			),
 		]);
@@ -696,7 +716,7 @@ trait FileService
 			$metadata = FileUploadMetadata::fromResource($body);
 		}
 
-		$response = $this->config->client()->request('POST', $uploadPartUrl->getUploadUrl(), [
+		$response = $this->http->request('POST', $uploadPartUrl->getUploadUrl(), [
 			'body' => $body,
 			'headers' => self::filterRequestOptions([
 				'Authorization'                => $uploadPartUrl->getAuthorizationToken(),
@@ -710,15 +730,163 @@ trait FileService
 	}
 
 	/**
-	 * @param string[] $paths 
-	 * @return string 
+	 * Fetch details of all files in a bucket, with optional filters.
+	 * 
+	 * @see Client::listFileNames()
+	 * 
+	 * @return iterable<File>
 	 */
-	private static function joinUriPaths(...$paths)
-	{
-		$paths = array_filter(array_map(function ($path) {
-			return rtrim($path, '/');
-		}, $paths));
+	public function listAllFileNames(
+		string $bucketId,
+		string $prefix = '',
+		string $delimiter = null,
+		string $startFileName = null,
+		int $maxFileCount = 1000
+	): Iterator {
+		$allFiles = new AppendIterator();
+		$nextFileName = $startFileName ?? '';
 
-		return join('/', $paths);
+		while ($nextFileName !== null) {
+			$response     = $this->listFileNames($bucketId, $prefix, $delimiter, $startFileName, $maxFileCount);
+			$nextFileName = $response->getNextFileName();
+
+			$allFiles->append(new NoRewindIterator($response->getFiles()));
+		}
+
+		return $allFiles;
+	}
+
+	public function getFileByName(string $bucketId, string $fileName): File
+	{
+		if (!$file = $this->listFileNames($bucketId, '', null, $fileName, 1)->first()) {
+			throw new NotFoundException(sprintf('No results returned for file name "%s"'));
+		}
+
+		return $file;
+	}
+
+	/**
+	 * Fetch details of all versions of all files in a bucket, with optional filters.
+	 * 
+	 * @see Client::listFileVersions()
+	 * 
+	 * @return iterable<File>
+	 */
+	public function listAllFileVersions(
+		string $bucketId,
+		?string $prefix = '',
+		?string $delimiter = null,
+		?string $startFileName = null,
+		?string $startFileId = null
+	): Iterator {
+		$allFiles = new AppendIterator();
+		$nextFileId = $startFileId ?? '';
+		$nextFileName = $startFileName ?? '';
+
+		while ($nextFileId !== null && $nextFileName !== null) {
+			$files        = $this->listFileVersions($bucketId, $prefix, $delimiter, $startFileName, $startFileId);
+			$nextFileId   = $files->getNextFileId();
+			$nextFileName = $files->getNextFileName();
+
+			$allFiles->append(new NoRewindIterator($files->getFiles()));
+		}
+
+		return $allFiles;
+	}
+
+	public function getFileById(string $bucketId, string $fileId): File
+	{
+		if (!$file = $this->listFileVersions($bucketId, '', null, null, $fileId, 1)->first()) {
+			throw new NotFoundException(sprintf('No results returned for file id "%s"'));
+		}
+
+		return $file;
+	}
+
+	/**
+	 * Internal method to call the b2_list_parts API
+	 * 
+	 * @see Client::listParts()
+	 * 
+	 * @return iterable<File>
+	 */
+	public function listAllParts(
+		string $fileId,
+		int $startPartNumber = null
+	): iterable {
+		$allParts = new AppendIterator();
+		$nextPartNumber = $startPartNumber ?? 0;
+
+		while ($nextPartNumber !== null) {
+			$parts          = $this->listParts($fileId, $startPartNumber);
+			$nextPartNumber = $parts->getNextPartNumber();
+
+			$allParts->append(new NoRewindIterator($parts->getParts()));
+		}
+
+		return $allParts;
+	}
+
+	/**
+	 * Lists information about *all* large file uploads that have been started,
+	 * but that have not been finished or canceled.
+	 * 
+	 * @see Client::listUnfinishedLargeFiles()
+	 * 
+	 * @return iterable<File>
+	 */
+	public function listAllUnfinishedLargeFiles(
+		string $bucketId,
+		string $namePrefix = null,
+		string $startFileId = null,
+		int $maxFileCount = 100
+	): iterable {
+
+		$allFiles = new AppendIterator();
+		$nextFileId = $startFileId ?? '';
+
+		while ($nextFileId !== null) {
+			$files = $this->listUnfinishedLargeFiles($bucketId, $namePrefix, $startFileId, $maxFileCount);
+			$nextFileId = $files->getNextFileId();
+
+			$allFiles->append(new NoRewindIterator($files->getFiles()));
+		}
+
+		return $allFiles;
+	}
+
+	/**
+	 * Deletes all versions of a file(s) in a bucket.
+	 * 
+	 * @see FileService::deleteFileVersion()
+	 * 
+	 * @param string      $bucketId         The ID of the bucket containing file versions to delete.
+	 * @param null|string $prefix           
+	 * @param null|string $delimiter        
+	 * @param null|string $startFileName    
+	 * @param null|string $startFileId      
+	 * @param null|bool   $bypassGovernance 
+	 */
+	public function deleteAllFileVersions(
+		string $bucketId,
+		?string $prefix = '',
+		?string $delimiter = null,
+		?string $startFileName = null,
+		?string $startFileId = null,
+		?bool $bypassGovernance = false
+	): FileList {
+		$fileVersions = $this->listAllFileVersions($bucketId, $prefix, $delimiter, $startFileName, $startFileId);
+
+		$deleted = [];
+
+		while ($fileVersions->valid()) {
+			$version = $fileVersions->current();
+
+			$deleted[] = $this->deleteFileVersion($version->getName(), $version->getId(), $bypassGovernance);
+
+			$fileVersions->next();
+		}
+
+		return new FileList(new ArrayIterator($deleted));
 	}
 }
