@@ -7,7 +7,8 @@ namespace Zaxbux\BackblazeB2\Object\Bucket;
 use JsonSerializable;
 
 /**
- * A Lifecycle rule object for the Backblaze B2 API
+ * A Lifecycle rule object.
+ * @package Zaxbux\BackblazeB2\Object\Bucket
  */
 class LifecycleRule implements JsonSerializable
 {

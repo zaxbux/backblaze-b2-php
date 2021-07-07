@@ -8,14 +8,23 @@ use Exception;
 use GuzzleHttp\Client as GuzzleClient;
 use GuzzleHttp\ClientInterface;
 use Zaxbux\BackblazeB2\Config;
-use Zaxbux\BackblazeB2\Http\Middleware\ApplyAuthorizationMiddleware;
-use Zaxbux\BackblazeB2\Http\Middleware\ExceptionMiddleware;
-use Zaxbux\BackblazeB2\Http\Middleware\RetryMiddleware;
+use Zaxbux\BackblazeB2\Http\Endpoint;
+use Zaxbux\BackblazeB2\Http\Middleware\{
+	ApplyAuthorizationMiddleware,
+	ExceptionMiddleware,
+	RetryMiddleware,
+};
+use Zaxbux\BackblazeB2\Operations\{
+	ApplicationKeyOperationsTrait,
+	BucketOperationsTrait,
+    DownloadOperationsTrait,
+    FileOperationsTrait,
+	LargeFileOperationsTrait,
+    UploadOperationsTrait,
+};
 use Zaxbux\BackblazeB2\Interfaces\AuthorizationCacheInterface;
 use Zaxbux\BackblazeB2\Object\AccountAuthorization;
-use Zaxbux\BackblazeB2\Operations\ApplicationKeyOperationsTrait;
-use Zaxbux\BackblazeB2\Operations\BucketOperationsTrait;
-use Zaxbux\BackblazeB2\Operations\FileOperationsTrait;
+use Zaxbux\BackblazeB2\Traits\ApplyToAllFileVersionsTrait;
 
 /**
  * API Client for Backblaze B2.
@@ -30,8 +39,12 @@ class Client
 	public const B2_API_VERSION = 'b2api/v2/';
 
 	use FileOperationsTrait;
+	use LargeFileOperationsTrait;
 	use BucketOperationsTrait;
 	use ApplicationKeyOperationsTrait;
+	use UploadOperationsTrait;
+	use DownloadOperationsTrait;
+	use ApplyToAllFileVersionsTrait;
 
 	/** @var \Zaxbux\BackblazeB2\Config */
 	protected $config;
@@ -92,7 +105,7 @@ class Client
 	 * @param ClientInterface $client 
 	 */
 	public function authorizeAccount(): AccountAuthorization {
-		$response = $this->http->request('GET', Client::BASE_URI . Client::B2_API_VERSION . 'b2_authorize_account', [
+		$response = $this->http->request('GET', Client::BASE_URI . Client::B2_API_VERSION . Endpoint::AUTHORIZE_ACCOUNT, [
 			'headers' => [
 				'Authorization' => Utils::basicAuthorization($this->config->applicationKeyId(), $this->config->applicationKey()),
 			],
@@ -134,7 +147,7 @@ class Client
 		}*/
 
 		$stack->push(new ExceptionMiddleware(), 'exception_handler');
-		$stack->push(new ApplyAuthorizationMiddleware($this), 'b2_auth');
+		$stack->push(new ApplyAuthorizationMiddleware($this), 'b2_authorization');
 		$stack->push(new RetryMiddleware($this->config), 'retry');
 
 		$client = new GuzzleClient([
@@ -143,7 +156,6 @@ class Client
 			'allow_redirects' => false,
 			'handler' => $stack,
 			'headers' => [
-				//'Accept'       => 'application/json, */*;q=0.8',
 				'User-Agent'   => Utils::getUserAgent($this->config->applicationName()),
 			],
 		]);
@@ -164,7 +176,7 @@ class Client
 	/**
 	 * @see __construct()
 	 */
-	public static function instance($config): Client
+	public static function create($config): Client
 	{
 		return new static($config);
 	}

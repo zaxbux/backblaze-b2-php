@@ -5,18 +5,14 @@ declare(strict_types=1);
 namespace Zaxbux\BackblazeB2\Object;
 
 use function time;
-use function json_encode;
 
-use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Utils;
 use Psr\Http\Message\ResponseInterface;
-use Zaxbux\BackblazeB2\Client;
-use Zaxbux\BackblazeB2\Config;
 use Zaxbux\BackblazeB2\Interfaces\B2ObjectInterface;
 use Zaxbux\BackblazeB2\Interfaces\AuthorizationCacheInterface;
 use Zaxbux\BackblazeB2\Traits\ProxyArrayAccessToPropertiesTrait;
 
-
+/** @package Zaxbux\BackblazeB2\Object */
 class AccountAuthorization implements B2ObjectInterface
 {
 	use ProxyArrayAccessToPropertiesTrait;
@@ -33,7 +29,7 @@ class AccountAuthorization implements B2ObjectInterface
 	public const ATTRIBUTE_RECOMMENDED_PART_SIZE      = 'recommendedPartSize';
 	public const ATTRIBUTE_S3_API_URL                 = 's3ApiUrl';
 
-	/**  @deprecated */
+	/**  @deprecated Removed in B2 API v2 */
 	public const ATTRIBUTE_MINIMUM_PART_SIZE          = 'minimumPartSize';
 
 	/** @var string */
@@ -103,8 +99,10 @@ class AccountAuthorization implements B2ObjectInterface
 
 	/**
 	 * Get the capabilities, bucket restrictions, and prefix restrictions.
+	 * 
+	 * @return null|string|array
 	 */
-	public function getAllowed(?string $key = null): ?array
+	public function getAllowed(?string $key = null)
 	{
 		if ($key) {
 			return $this->allowed[$key] ?? null;

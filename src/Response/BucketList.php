@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Zaxbux\BackblazeB2\Response;
 
-use Generator;
-use GuzzleHttp\Utils;
+use Iterator;
 use Psr\Http\Message\ResponseInterface;
 use Zaxbux\BackblazeB2\Object\Bucket;
+use Zaxbux\BackblazeB2\Utils;
 
 use function iterator_to_array;
 
-
+/** @package Zaxbux\BackblazeB2\Response */
 class BucketList extends AbstractListResponse {
 	
 	/** @var iterable<Bucket> */
@@ -25,7 +25,7 @@ class BucketList extends AbstractListResponse {
 	/**
 	 * Get the value of buckets.
 	 */ 
-	public function getBuckets(): Generator
+	public function getBuckets(): Iterator
 	{
 		return $this->buckets;
 	}
@@ -35,7 +35,7 @@ class BucketList extends AbstractListResponse {
 	 * 
 	 * @return iterable<Bucket>
 	 */ 
-	public function getBucketsArray(): iterable
+	public function getBucketsArray(): array
 	{
 		return iterator_to_array($this->getBuckets());
 	}
@@ -45,10 +45,10 @@ class BucketList extends AbstractListResponse {
 	 * 
 	 * @return BucketList
 	 */
-	public static function create(ResponseInterface $response): BucketList
+	public static function fromResponse(ResponseInterface $response): BucketList
 	{
-		$responseData = Utils::jsonDecode((string) $response->getBody(), true);
+		$buckets = Utils::jsonDecode((string) $response->getBody())[Bucket::ATTRIBUTE_BUCKETS];
 
-		return new BucketList($responseData[Bucket::ATTRIBUTE_BUCKETS]);
+		return new BucketList($buckets);
 	}
 }

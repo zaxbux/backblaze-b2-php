@@ -31,7 +31,7 @@ class BucketObjectTest extends BucketObjectTestBase
 
 	public function testBucketListFromResponse()
 	{
-		$bucketList = BucketList::create(new Response(200, [], json_encode([
+		$bucketList = BucketList::fromResponse(new Response(200, [], json_encode([
 			Bucket::ATTRIBUTE_BUCKETS => static::createBuckets(100),
 		])));
 

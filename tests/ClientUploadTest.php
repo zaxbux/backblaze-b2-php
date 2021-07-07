@@ -4,6 +4,7 @@ namespace tests;
 
 use Zaxbux\BackblazeB2\Utils as ClientUtils;
 use Zaxbux\BackblazeB2\Helpers\UploadHelper;
+use Zaxbux\BackblazeB2\Http\Endpoint;
 use Zaxbux\BackblazeB2\Object\File;
 use Zaxbux\BackblazeB2\Object\File\FileInfo;
 

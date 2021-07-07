@@ -2,9 +2,6 @@
 
 namespace tests;
 
-use Zaxbux\BackblazeB2\Client;
-use Zaxbux\BackblazeB2\Utils as ClientUtils;
-
 class Utils {
 	public static function nowInMilliseconds(): int
 	{

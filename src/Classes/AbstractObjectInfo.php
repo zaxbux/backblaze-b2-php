@@ -7,21 +7,15 @@ namespace Zaxbux\BackblazeB2\Classes;
 use function sizeof;
 use function rawurlencode;
 
-//use ArrayAccess;
-//use JsonSerializable;
 use RuntimeException;
-
-//use Zaxbux\BackblazeB2\Traits\ProxyArrayAccessToPropertiesTrait;
 
 /**
  * @link https://www.backblaze.com/b2/docs/files.html#fileInfo
  * 
-
+ * @package Zaxbux\BackblazeB2\Classes
  */
 abstract class AbstractObjectInfo
 {
-//final class FileInfo implements ArrayAccess, JsonSerializable {
-	//use ProxyArrayAccessToPropertiesTrait;
 
 	public const HEADER_PREFIX = 'X-Bz-Info-';
 

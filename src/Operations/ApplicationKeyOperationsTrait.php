@@ -6,11 +6,13 @@ namespace Zaxbux\BackblazeB2\Operations;
 
 use AppendIterator;
 use NoRewindIterator;
+use Zaxbux\BackblazeB2\Http\Endpoint;
 use Zaxbux\BackblazeB2\Object\AccountAuthorization;
 use Zaxbux\BackblazeB2\Object\Key;
 use Zaxbux\BackblazeB2\Response\KeyList;
 use Zaxbux\BackblazeB2\Utils;
 
+/** @package Zaxbux\BackblazeB2\Operations */
 trait ApplicationKeyOperationsTrait
 {
 
@@ -23,6 +25,9 @@ trait ApplicationKeyOperationsTrait
 	 * Creates a new application key.
 	 * 
 	 * @link https://www.backblaze.com/b2/docs/b2_create_key.html
+	 * 
+	 * @b2-capability writeKeys
+	 * @b2-transaction Class C
 	 * 
 	 * @param string    $keyName       A name for this key. There is no requirement that the name be unique.
 	 *                                 The name cannot be used to look up the key.
@@ -39,7 +44,7 @@ trait ApplicationKeyOperationsTrait
 		?string $bucketId = null,
 		?string $namePrefix = null
 	): Key {
-		$response = $this->http->request('POST', 'b2_create_key', [
+		$response = $this->http->request('POST', Endpoint::CREATE_KEY, [
 			'json' => Utils::filterRequestOptions([
 				Key::ATTRIBUTE_ACCOUNT_ID    => $this->accountAuthorization()->getAccountId(),
 				Key::ATTRIBUTE_CAPABILITIES  => $capabilities,
@@ -51,31 +56,37 @@ trait ApplicationKeyOperationsTrait
 			]),
 		]);
 
-		return Key::fromArray(json_decode((string) $response->getBody(), true));
+		return Key::fromArray(Utils::jsonDecode($response));
 	}
 
 	/**
 	 * Deletes the application key specified.
 	 * 
 	 * @link https://www.backblaze.com/b2/docs/b2_delete_key.html
+	 * 
+	 * @b2-capability deleteKeys
+	 * @b2-transaction Class A
 	 *
 	 * @param string $applicationKeyId The key to delete.
 	 */
 	public function deleteKey(string $applicationKeyId): Key
 	{
-		$response = $this->http->request('POST', 'b2_delete_key', [
+		$response = $this->http->request('POST', Endpoint::DELETE_KEY, [
 			'json' => [
 				Key::ATTRIBUTE_APPLICATION_KEY_ID => $applicationKeyId,
 			]
 		]);
 
-		return Key::fromArray(json_decode((string) $response->getBody(), true));
+		return Key::fromArray(Utils::jsonDecode($response));
 	}
 
 	/**
 	 * Lists application keys associated with an account.
 	 * 
 	 * @link https://www.backblaze.com/b2/docs/b2_list_keys.html
+	 * 
+	 * @b2-capability listKeys
+	 * @b2-transaction Class C
 	 * 
 	 * @param string $startApplicationKeyId The first key to return.
 	 * @param int    $maxKeyCount           The maximum number of keys to return in the response. The default value is
@@ -86,7 +97,7 @@ trait ApplicationKeyOperationsTrait
 		?string $startApplicationKeyId = null,
 		?int $maxKeyCount = 1000
 	): KeyList {
-		$response = $this->http->request('POST', 'b2_list_keys', [
+		$response = $this->http->request('POST', Endpoint::LIST_KEYS, [
 			'json' => Utils::filterRequestOptions([
 				Key::ATTRIBUTE_ACCOUNT_ID => $this->accountAuthorization()->getAccountId(),
 			], [
@@ -95,7 +106,7 @@ trait ApplicationKeyOperationsTrait
 			]),
 		]);
 
-		return KeyList::create($response);
+		return KeyList::fromResponse($response);
 	}
 
 	/**

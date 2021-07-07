@@ -10,7 +10,7 @@ use Zaxbux\BackblazeB2\Classes\AbstractObjectInfo;
 /**
  * @link https://www.backblaze.com/b2/docs/files.html#fileInfo
  * 
-
+ * @package Zaxbux\BackblazeB2\Object\File
  */
 final class FileInfo extends AbstractObjectInfo {
 	public const B2_FILE_INFO_MTIME = 'src_last_modified_millis';

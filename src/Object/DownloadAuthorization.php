@@ -7,6 +7,7 @@ namespace Zaxbux\BackblazeB2\Object;
 use Zaxbux\BackblazeB2\Interfaces\B2ObjectInterface;
 use Zaxbux\BackblazeB2\Traits\ProxyArrayAccessToPropertiesTrait;
 
+/** @package Zaxbux\BackblazeB2\Object */
 class DownloadAuthorization implements B2ObjectInterface
 {
 	use ProxyArrayAccessToPropertiesTrait;

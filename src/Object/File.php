@@ -12,6 +12,7 @@ use Zaxbux\BackblazeB2\Object\File\ServerSideEncryption;
 use Zaxbux\BackblazeB2\Traits\ProxyArrayAccessToPropertiesTrait;
 
 
+/** @package Zaxbux\BackblazeB2\Object */
 class File implements B2ObjectInterface
 {
 	use ProxyArrayAccessToPropertiesTrait;
@@ -135,7 +136,7 @@ class File implements B2ObjectInterface
 	 * @param int    $uploadTimestamp 
 	 * @param string $accountId 
 	 * @param array  $retention 
-	 * @param array  $legalHold 
+	 * @param string|array  $legalHold 
 	 * @param array  $serverSideEncryption 
 	 * @param int    $partNumber 
 	 */
@@ -152,7 +153,7 @@ class File implements B2ObjectInterface
 		?int $uploadTimestamp = null,
 		?string $accountId = null,
 		?array $retention = null,
-		?array $legalHold = null,
+		$legalHold = null,
 		?array $serverSideEncryption = null,
 		?int $partNumber = null
 	) {
@@ -170,7 +171,7 @@ class File implements B2ObjectInterface
 		$this->uploadTimestamp      = $uploadTimestamp;
 		$this->accountId            = $accountId;
 		$this->retention            = $retention;
-		$this->legalHold            = $legalHold;
+		$this->legalHold            = is_array($legalHold) ? $legalHold : ['value' => $legalHold];
 		$this->serverSideEncryption = $serverSideEncryption instanceof ServerSideEncryption ?
 			$serverSideEncryption : ServerSideEncryption::fromArray($serverSideEncryption ?? []);
 		$this->partNumber           = $partNumber;

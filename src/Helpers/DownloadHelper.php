@@ -8,6 +8,7 @@ use Zaxbux\BackblazeB2\Object\File\DownloadOptions;
 use Zaxbux\BackblazeB2\Response\FileDownload;
 use Zaxbux\BackblazeB2\Utils;
 
+/** @package Zaxbux\BackblazeB2\Helpers */
 class DownloadHelper extends AbstractHelper {
 	/**
 	 * Internal method to save/stream files.
@@ -39,6 +40,6 @@ class DownloadHelper extends AbstractHelper {
 			'stream'  => Utils::isStream($sink),
 		]);
 
-		return FileDownload::create($response, !is_string($sink) ? null : $sink);
+		return FileDownload::fromResponse($response, !is_string($sink) ? null : $sink);
 	}
 }

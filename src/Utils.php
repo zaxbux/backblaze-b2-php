@@ -6,8 +6,10 @@ namespace Zaxbux\BackblazeB2;
 
 use InvalidArgumentException;
 use GuzzleHttp\Utils as GuzzleUtils;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 
+/** @package Zaxbux\BackblazeB2 */
 final class Utils
 {
 	/**
@@ -92,5 +94,14 @@ final class Utils
 	public static function getUserAgent(string $appName): string
 	{
 		return sprintf('%s %s+php/%s %s', $appName, Client::USER_AGENT_PREFIX . Client::VERSION, PHP_VERSION, GuzzleUtils::defaultUserAgent());
+	}
+
+	public static function jsonDecode($data): array
+	{
+		if ($data instanceof ResponseInterface) {
+			$data = (string) $data->getBody();
+		}
+
+		return json_decode($data, true, 512, JSON_THROW_ON_ERROR);
 	}
 }

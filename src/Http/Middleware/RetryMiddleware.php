@@ -7,13 +7,14 @@ namespace Zaxbux\BackblazeB2\Http\Middleware;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Zaxbux\BackblazeB2\Config;
-use Zaxbux\BackblazeB2\Http\Response;
+use Zaxbux\BackblazeB2\Http\StatusCode;
 
+/** @package Zaxbux\BackblazeB2\Http\Middleware */
 class RetryMiddleware
 {
 	protected const RETRY_STATUS_CODES = [
-		Response::HTTP_TOO_MANY_REQUESTS,
-		Response::HTTP_SERVICE_UNAVAILABLE
+		StatusCode::HTTP_TOO_MANY_REQUESTS,
+		StatusCode::HTTP_SERVICE_UNAVAILABLE
 	];
 
 	/** @var \Zaxbux\BackblazeB2\Config */
@@ -71,7 +72,7 @@ class RetryMiddleware
 	private static function retryDelay(Config $config): callable {
 		return static function(int $retries, ResponseInterface $response) use ($config): int {
 			// Use the value of the `Retry-After` header
-			if ($response->getStatusCode() === Response::HTTP_TOO_MANY_REQUESTS) {
+			if ($response->getStatusCode() === StatusCode::HTTP_TOO_MANY_REQUESTS) {
 				$delay = (int) $response->getHeader('Retry-After')[0] ?? $config->maxRetryDelay();
 				return $delay * 1000;
 			}

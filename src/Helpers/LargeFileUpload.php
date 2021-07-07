@@ -9,7 +9,7 @@ use Zaxbux\BackblazeB2\Object\File\FileInfo;
 use Zaxbux\BackblazeB2\Object\File\FileUploadMetadata;
 use Zaxbux\BackblazeB2\Object\File\ServerSideEncryption;
 
-
+/** @package Zaxbux\BackblazeB2\Helpers */
 class LargeFileUpload {
 	private $client;
 	private $stream;
@@ -169,12 +169,12 @@ class LargeFileUpload {
 
 	private function minimumPartSize(): int
 	{
-		return $this->accountAuthorization()->getAbsoluteMinimumPartSize();
+		return $this->client->accountAuthorization()->getAbsoluteMinimumPartSize();
 	}
 
 	private function recommendedPartSize(): int
 	{
-		return $this->accountAuthorization()->getRecommendedPartSize();
+		return $this->client->accountAuthorization()->getRecommendedPartSize();
 	}
 
 	private function remainingBytes(): int

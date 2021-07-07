@@ -7,6 +7,7 @@ namespace Zaxbux\BackblazeB2\Classes;
 use function pathinfo;
 
 
+/** @package Zaxbux\BackblazeB2\Classes */
 final class FilePathInfo
 {
 	

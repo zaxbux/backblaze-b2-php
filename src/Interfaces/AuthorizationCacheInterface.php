@@ -7,6 +7,7 @@ namespace Zaxbux\BackblazeB2\Interfaces;
 use Zaxbux\BackblazeB2\Object\AccountAuthorization;
 
 
+/** @package Zaxbux\BackblazeB2\Interfaces */
 interface AuthorizationCacheInterface
 {
 

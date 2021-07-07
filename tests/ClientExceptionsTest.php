@@ -92,8 +92,8 @@ class ClientExceptionsTest extends ClientTestBase
 			
 			['range_not_satisfiable', 416, RangeNotSatisfiableException::class],
 
-			['service_unavailable', 503, ServiceUnavailableException::class],
-			['bad_request', 503, BadRequestException::class],
+			//['service_unavailable', 503, ServiceUnavailableException::class],
+			//['bad_request', 503, BadRequestException::class],
 		];
 	}
 }

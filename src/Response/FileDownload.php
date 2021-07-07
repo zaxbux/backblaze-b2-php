@@ -12,8 +12,7 @@ use RuntimeException;
 
 /** 
  * A response representing a file download.
- * 
-
+ * @package Zaxbux\BackblazeB2\Response
  */
 class FileDownload extends AbstractResponse {
 
@@ -100,7 +99,7 @@ class FileDownload extends AbstractResponse {
 	 * 
 	 * @return FileDownload
 	 */
-	public static function create(
+	public static function fromResponse(
 		ResponseInterface $response,
 		?string $filePath = null
 	): FileDownload {

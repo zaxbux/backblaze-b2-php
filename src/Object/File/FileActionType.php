@@ -6,6 +6,7 @@ namespace Zaxbux\BackblazeB2\Object\File;
 
 use InvalidArgumentException;
 
+/** @package Zaxbux\BackblazeB2\Object\File */
 final class FileActionType
 {
 	/**

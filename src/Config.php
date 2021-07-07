@@ -13,6 +13,17 @@ use Zaxbux\BackblazeB2\Interfaces\AuthorizationCacheInterface;
  */
 class Config
 {
+	public const DEFAULTS = [
+		'applicationName' => '',
+		'handler' => null,
+		'middleware' => [],
+		'useHttpErrors' => null,
+		'maxRetries' => 4,
+		'maxRetryDelay' => 64,
+		'maxFileCount' => 1000,
+		'maxKeyCount' => 1000,
+		'useSSEHeaders' => false,
+	];
 
 	/**
 	 * The identifier for the key. The account ID can also be used.
@@ -30,7 +41,7 @@ class Config
 	 * Application name, included in the User-Agent HTTP header.
 	 * @var string
 	 */
-	private $applicationName = '';
+	private $applicationName;
 
 	/**
 	 * Custom Guzzle handler or handler stack.
@@ -48,16 +59,16 @@ class Config
 	 * Optional middleware to add to the GuzzleHttp handler stack.
 	 * @var array
 	 */
-	public $middleware = [];
+	public $middleware;
 
 	/** @var bool */
-	public $useHttpErrors = false;
+	public $useHttpErrors;
 
 	/**
 	 * Number of times to retry an API call before throwing an exception.
 	 * @var int
 	 */
-	public $maxRetries = 4;
+	public $maxRetries;
 
 	/**
 	 * Maximum amount of time, in seconds, to wait before retrying a failed request.
@@ -66,31 +77,31 @@ class Config
 	 * 
 	 * @var int
 	 */
-	public $maxRetryDelay = 64;
+	public $maxRetryDelay;
 
 	/**
 	 * Download files with Server-Side Encryption headers instead of using query parameters.
 	 * @var false
 	 */
-	public $useSSEHeaders = false;
+	public $useSSEHeaders;
 
 	/**
 	 * Maximum number of application keys to return per call.
 	 * @var int
 	 */
-	public $maxKeyCount  = 1000;
+	public $maxKeyCount;
 
 	/**
 	 * Maximum number of files to return per call.
 	 * @var int
 	 */
-	public $maxFileCount = 1000;
+	public $maxFileCount;
 
 	/**
 	 * Size limit to determine if the upload will use the large-file process.
 	 * @var int
 	 */
-	public $largeFileUploadCustomMinimum = null; //200 * 1024 * 1024;
+	public $largeFileUploadCustomMinimum; //200 * 1024 * 1024;
 
 	/**
 	 * An object that implements `AuthorizationCacheInterface` for caching
@@ -179,8 +190,11 @@ class Config
 	}
 
 	private function setOptions(array $options) {
-		$this->handler = $options['handler'] ?? null;
-		$this->maxRetries = $options['maxRetries'] ?? 4;
+		$options = array_merge(static::DEFAULTS, $options);
+
+		$this->handler = $options['handler'];
+		$this->maxRetries = $options['maxRetries'];
+		$this->applicationName = $options['applicationName'];
 		$this->authorizationCache = $options['authorizationCache'] ?? new BuiltinAuthorizationCache();
 	}
 }

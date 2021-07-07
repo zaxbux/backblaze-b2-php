@@ -2,7 +2,8 @@
 
 namespace Zaxbux\BackblazeB2\Http;
 
-final class Response
+/** @package Zaxbux\BackblazeB2\Http */
+final class StatusCode
 {
 	public const HTTP_CONTINUE = 100;
 	public const HTTP_SWITCHING_PROTOCOLS = 101;

@@ -5,10 +5,194 @@ namespace tests;
 use Zaxbux\BackblazeB2\Response\FileList;
 use Zaxbux\BackblazeB2\Object\File;
 use Zaxbux\BackblazeB2\Exceptions\Request\BadRequestException;
+use Zaxbux\BackblazeB2\Http\Endpoint;
+use Zaxbux\BackblazeB2\Object\File\FileLock;
 
 class ClientFileOperationsTest extends ClientTestBase
 {
-	public function testListFilesHandlesMultiplePages()
+	public function testCopyFile()
+	{
+		$this->guzzler->queueResponse(
+			MockResponse::fromFile('copy_file.json'),
+		);
+
+		$newFile = $this->client->copyFile(
+			'fileId',
+			'newFileName'
+		);
+
+		$this->assertInstanceOf(File::class, $newFile);
+		$this->assertEquals('newFileName', $newFile->getName());
+		$this->assertEquals('newFileId', $newFile->getId());
+	}
+
+	public function testDeleteFileVersion()
+	{
+		$this->guzzler->queueResponse(
+			MockResponse::fromFile('get_file.json'),
+			MockResponse::fromFile('delete_file.json'),
+		);
+
+		$fileId = $this->client->getFileByName('Test file.bin', 'bucketId')->getId();
+
+		$this->assertInstanceOf(File::class, $this->client->deleteFileVersion('Test file.bin', $fileId));
+	}
+	
+
+	public function testDeleteFileWithoutName()
+	{
+		$this->guzzler->queueResponse(
+			MockResponse::fromFile('list_file_versions.json'),
+			MockResponse::fromFile('delete_file.json'),
+		);
+
+		$this->guzzler->expects($this->once())
+			->post(static::getEndpointUri(Endpoint::LIST_FILE_VERSIONS))
+			->post(static::getEndpointUri(Endpoint::DELETE_FILE_VERSION));
+
+		$file = $this->client->deleteFileVersion('fileId');
+
+		$this->assertInstanceOf(File::class, $file);
+	}
+
+	public function testDeletingNonExistentFileThrowsException()
+	{
+		$this->expectException(BadRequestException::class);
+
+		$this->guzzler->queueResponse(
+			MockResponse::fromFile('delete_file_non_existent.json', 400),
+		);
+
+		$this->assertNull($this->client->deleteFileVersion('fileId', 'fileName'));
+	}
+
+	public function testGetFileInfo()
+	{
+		$this->guzzler->expects($this->once())
+			->post(static::getEndpointUri(Endpoint::GET_FILE_INFO))
+			->withJson(['fileId' => 'file_id']);
+		
+		$this->guzzler->queueResponse(MockResponse::fromFile('get_file_info.json'));
+
+		$file = $this->client->getFileInfo('file_id');
+
+		$this->assertInstanceOf(File::class, $file);
+	}
+
+	public function testHideFile()
+	{
+		$this->guzzler->queueResponse(
+			MockResponse::fromFile('hide_file.json'),
+		);
+
+		$this->guzzler->expects($this->once())
+			->post(static::getEndpointUri(Endpoint::HIDE_FILE));
+
+		$file = $this->client->hideFile('testfile.bin', 'bucketId');
+
+		$this->assertInstanceOf(File::class, $file);
+	}
+
+	public function testListFileNames()
+	{
+		$this->guzzler->queueResponse(
+			MockResponse::fromFile('list_file_versions.json'),
+		);
+
+		$this->guzzler->expects($this->once())
+			->post(static::getEndpointUri(Endpoint::LIST_FILE_NAMES));
+
+		$response = $this->client->listFileNames('bucketId');
+
+		$this->assertInstanceOf(FileList::class, $response);
+		$this->assertCount(3, $response->getFilesArray());
+		$this->assertEquals(null, $response->getNextFileId());
+		$this->assertEquals(null, $response->getNextFileName());
+	}
+
+	public function testListFileVersions()
+	{
+		$this->guzzler->queueResponse(
+			MockResponse::fromFile('list_file_versions.json'),
+		);
+
+		$this->guzzler->expects($this->once())
+			->post(static::getEndpointUri(Endpoint::LIST_FILE_VERSIONS));
+
+		$response = $this->client->listFileVersions('bucketId');
+
+		$this->assertInstanceOf(FileList::class, $response);
+		$this->assertCount(3, $response->getFilesArray());
+		$this->assertEquals(null, $response->getNextFileId());
+		$this->assertEquals(null, $response->getNextFileName());
+	}
+
+	public function testUpdateLegalFileHold()
+	{
+		$this->guzzler->queueResponse(
+			MockResponse::fromFile('update_file_legal_hold.json'),
+		);
+
+		$this->guzzler->expects($this->once())
+			->post(static::getEndpointUri(Endpoint::UPDATE_FILE_LEGAL_HOLD));
+
+		$file = $this->client->updateFileLegalHold('file_id', 'file_name', FileLock::LEGAL_HOLD_ENABLED);
+
+		$this->assertInstanceOf(File::class, $file);
+	}
+
+	public function testUpdateLegalFileHoldWithoutFileName()
+	{
+		$this->guzzler->queueResponse(
+			MockResponse::fromFile('list_file_versions.json'),
+			MockResponse::fromFile('update_file_legal_hold.json'),
+		);
+
+		$this->guzzler->expects($this->once())
+			->post(static::getEndpointUri(Endpoint::UPDATE_FILE_LEGAL_HOLD));
+
+		$file = $this->client->updateFileLegalHold('file_id', null, FileLock::LEGAL_HOLD_ENABLED);
+
+		$this->assertInstanceOf(File::class, $file);
+	}
+
+	public function testUpdateFileRetention()
+	{
+		$this->guzzler->queueResponse(
+			MockResponse::fromFile('update_file_retention.json'),
+		);
+
+		$this->guzzler->expects($this->once())
+			->post(static::getEndpointUri(Endpoint::UPDATE_FILE_RETENTION));
+
+		$file = $this->client->updateFileRetention('file_id', 'file_name', [
+			'mode' => '',
+			'remainUntilTimestamp' => 0
+		]);
+
+		$this->assertInstanceOf(File::class, $file);
+	}
+
+	public function testUpdateFileRetentionWithoutFileName()
+	{
+		$this->guzzler->queueResponse(
+			MockResponse::fromFile('list_file_versions.json'),
+			MockResponse::fromFile('update_file_retention.json'),
+		);
+
+		$this->guzzler->expects($this->once())
+			->post(static::getEndpointUri(Endpoint::UPDATE_FILE_RETENTION));
+
+		$file = $this->client->updateFileRetention('file_id', null, [
+			'mode' => '',
+			'remainUntilTimestamp' => 0
+		]);
+
+		$this->assertInstanceOf(File::class, $file);
+	}
+	
+
+	public function testListAllFileNames()
 	{
 		$this->guzzler->queueResponse(
 			MockResponse::fromFile('list_files_page1.json'),
@@ -22,7 +206,7 @@ class ClientFileOperationsTest extends ClientTestBase
 		$this->assertCount(1500, $files);
 	}
 
-	public function testListFilesReturnsEmptyArrayWithNoFiles()
+	public function testListFileNamesWithNoFiles()
 	{
 		$this->guzzler->queueResponse(
 			MockResponse::fromFile('list_files_empty.json'),
@@ -34,7 +218,12 @@ class ClientFileOperationsTest extends ClientTestBase
 		$this->assertCount(0, $files);
 	}
 
-	public function testGetFile()
+	public function testListAllFileVersions()
+	{
+
+	}
+
+	public function testGetFileById()
 	{
 		$this->guzzler->queueResponse(
 			MockResponse::fromFile('get_file.json'),
@@ -56,20 +245,7 @@ class ClientFileOperationsTest extends ClientTestBase
 		$this->client->getFileById('fileId', 'bucketId');
 	}
 
-	public function testDeleteFile()
-	{
-		$this->guzzler->queueResponse(
-			MockResponse::fromFile('get_file.json'),
-			MockResponse::fromFile('delete_file.json'),
-		);
-
-		$fileId = $this->client->getFileByName('Test file.bin', 'bucketId')->getId();
-
-		$this->assertInstanceOf(File::class, $this->client->deleteFileVersion('Test file.bin', $fileId));
-	}
-	
-
-	public function testDeleteFileRetrievesFileNameWhenNotProvided()
+	public function testDeleteAllFileVersions()
 	{
 		$this->guzzler->queueResponse(
 			MockResponse::fromFile('list_file_versions.json'),
@@ -86,48 +262,6 @@ class ClientFileOperationsTest extends ClientTestBase
 		$files = $response->getFilesArray();
 		$this->assertCount(3, $files);
 		$this->assertContainsOnlyInstancesOf(File::class, $files);
-	}
-
-	public function testDeletingNonExistentFileThrowsException()
-	{
-		$this->expectException(BadRequestException::class);
-
-		$this->guzzler->queueResponse(
-			MockResponse::fromFile('delete_file_non_existent.json', 400),
-		);
-
-		$this->assertNull($this->client->deleteFileVersion('fileId', 'fileName'));
-	}
-
-	public function testCopyFile()
-	{
-		$this->guzzler->queueResponse(
-			MockResponse::fromFile('copy_file.json'),
-		);
-
-		$newFile = $this->client->copyFile(
-			'fileId',
-			'newFileName'
-		);
-
-		$this->assertInstanceOf(File::class, $newFile);
-		$this->assertEquals('newFileName', $newFile->getName());
-		$this->assertEquals('newFileId', $newFile->getId());
-	}
-
-	public function testHideFile()
-	{
-		$this->guzzler->queueResponse(
-			MockResponse::fromFile('hide_file.json'),
-		);
-
-		$this->guzzler->expects($this->once())
-			->post(static::getEndpointUri(Endpoint::AUTHORIZE_ACCOUNT))
-			->post(static::getEndpointUri(Endpoint::HIDE_FILE));
-
-		$file = $this->client->hideFile('testfile.bin', 'bucketId');
-
-		$this->assertInstanceOf(File::class, $file);
 	}
 	
 }

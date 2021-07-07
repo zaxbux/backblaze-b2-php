@@ -8,6 +8,7 @@ use Psr\Http\Message\RequestInterface;
 use Zaxbux\BackblazeB2\Client;
 use Zaxbux\BackblazeB2\Utils;
 
+/** @package Zaxbux\BackblazeB2\Http\Middleware */
 class ApplyAuthorizationMiddleware
 {
 	private $client;

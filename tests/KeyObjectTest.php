@@ -31,7 +31,7 @@ class KeyObjectTest extends KeyObjectTestBase
 
 	public function testKeyListFromResponse()
 	{
-		$keyList = KeyList::create(new Response(200, [], json_encode([
+		$keyList = KeyList::fromResponse(new Response(200, [], json_encode([
 			Key::ATTRIBUTE_KEYS => static::createKeys(1000),
 			Key::ATTRIBUTE_NEXT_APPLICATION_KEY_ID => null,
 		])));

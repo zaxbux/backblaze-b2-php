@@ -2,6 +2,7 @@
 
 namespace Zaxbux\BackblazeB2\Object\Key;
 
+/** @package Zaxbux\BackblazeB2\Object\Key */
 final class CapabilityType {
 	public const BYPASS_GOVERNANCE       = 'bypassGovernance';
 	public const DELETE_BUCKETS          = 'deleteBuckets';

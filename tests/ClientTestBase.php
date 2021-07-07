@@ -9,6 +9,8 @@ use BlastCloud\Guzzler\UsesGuzzler;
 use PHPUnit\Framework\TestCase;
 use Zaxbux\BackblazeB2\Client;
 use tests\Traits\EndpointHelpersTrait;
+use Zaxbux\BackblazeB2\Http\Endpoint;
+use Zaxbux\BackblazeB2\Utils;
 
 abstract class ClientTestBase extends TestCase
 {
@@ -20,7 +22,10 @@ abstract class ClientTestBase extends TestCase
 	 */
 	protected const ACCOUNT_AUTHORIZATION = [
 		"accountId" => "000000000000bb8",
-		"allowed" => [],
+		"allowed" => [
+			'bucketId' => 'bucket_id',
+			'bucketName' => 'bucket_name'
+		],
 		"apiUrl" => "https://apiNNN.backblaze.com.test",
 		"authorizationToken" => "0_0000000000008f80000000000_zzzzzzzz_zzzzzz_acct_zzzzzzzzzzzzzzzzzzzzzzzzzzzz",
 		"downloadUrl" => "https://fNNN.backblaze.com.test",
@@ -59,11 +64,15 @@ abstract class ClientTestBase extends TestCase
 	}
 
 	protected function afterSetUp() {
-		$this->guzzler->expects($this->once())->get(Client::BASE_URI . Client::B2_API_VERSION . Endpoint::AUTHORIZE_ACCOUNT);
+		$this->guzzler->expects($this->atLeast(0))
+		->get(Client::BASE_URI . Client::B2_API_VERSION . Endpoint::AUTHORIZE_ACCOUNT)
+		->withHeader('Authorization', 'Basic MDAwMDAwMDAwMDAwYmI4MDAwMDAwMDAwMDphYmNkZWZnaGlqa2xtbm9wcXJzdHV2d3h5ejAxMjM0')
+		->withHeader('User-Agent', Utils::getUserAgent('app_name'));
 	}
 
 	protected function clientInit() {
 		return [
+			'applicationName'  => 'app_name',
 			'applicationKeyId' => '000000000000bb80000000000',
 			'applicationKey'   => 'abcdefghijklmnopqrstuvwxyz01234',
 			'handler'          => $this->guzzler->getHandlerStack()

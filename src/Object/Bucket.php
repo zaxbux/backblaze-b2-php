@@ -9,6 +9,7 @@ use Zaxbux\BackblazeB2\Object\Bucket\BucketInfo;
 //use Zaxbux\BackblazeB2\Traits\IterableFromArrayTrait;
 use Zaxbux\BackblazeB2\Traits\ProxyArrayAccessToPropertiesTrait;
 
+/** @package Zaxbux\BackblazeB2\Object */
 class Bucket implements B2ObjectInterface
 {
 	use ProxyArrayAccessToPropertiesTrait;

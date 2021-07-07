@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Zaxbux\BackblazeB2\Operations;
 
 use Zaxbux\BackblazeB2\Exceptions\NotFoundException;
+use Zaxbux\BackblazeB2\Http\Endpoint;
 use Zaxbux\BackblazeB2\Object\AccountAuthorization;
 use Zaxbux\BackblazeB2\Object\Bucket;
 use Zaxbux\BackblazeB2\Object\Bucket\BucketInfo;
@@ -12,6 +13,7 @@ use Zaxbux\BackblazeB2\Response\BucketList;
 use Zaxbux\BackblazeB2\Object\Bucket\BucketType;
 use Zaxbux\BackblazeB2\Utils;
 
+/** @package Zaxbux\BackblazeB2\Operations */
 trait BucketOperationsTrait
 {
 
@@ -24,6 +26,9 @@ trait BucketOperationsTrait
 	 * Create a bucket with the given name and type.
 	 * 
 	 * @link https://www.backblaze.com/b2/docs/b2_create_bucket.html
+	 * 
+	 * @b2-capability writeBuckets
+	 * @b2-transaction Class C
 	 *
 	 * @param string          $bucketName     The name to give the new bucket.
 	 * @param string          $bucketType     Either "allPublic", meaning that files in this bucket can be downloaded
@@ -36,11 +41,11 @@ trait BucketOperationsTrait
 	public function createBucket(
 		string $bucketName,
 		?string $bucketType = BucketType::PRIVATE,
-		 $bucketInfo = null,
+		$bucketInfo = null,
 		?array $corsRules = null,
 		?array $lifecycleRules = null
 	): Bucket {
-		$response = $this->http->request('POST', 'b2_create_bucket', [
+		$response = $this->http->request('POST', Endpoint::CREATE_BUCKET, [
 			'json' => Utils::filterRequestOptions([
 				Bucket::ATTRIBUTE_ACCOUNT_ID  => $this->accountAuthorization()->getAccountId(),
 				Bucket::ATTRIBUTE_BUCKET_NAME => $bucketName,
@@ -52,13 +57,16 @@ trait BucketOperationsTrait
 			]),
 		]);
 
-		return Bucket::fromArray(json_decode((string) $response->getBody(), true));
+		return Bucket::fromArray(Utils::jsonDecode($response));
 	}
 
 	/**
 	 * Deletes the bucket specified. Only buckets that contain no version of any files can be deleted.
 	 * 
-	 * @link https://www.backblaze.com/b2/docs/b2_delete_bucket.html 
+	 * @link https://www.backblaze.com/b2/docs/b2_delete_bucket.html
+	 * 
+	 * @b2-capability deleteBuckets
+	 * @b2-transaction Class A
 	 *
 	 * @param string $bucketId  The ID of the bucket to delete.
 	 * @param bool   $withFiles Delete all file versions first.
@@ -70,20 +78,23 @@ trait BucketOperationsTrait
 			$this->deleteAllFileVersions($bucketId);
 		}
 
-		$response = $this->http->request('POST', 'b2_delete_bucket', [
+		$response = $this->http->request('POST', Endpoint::DELETE_BUCKET, [
 			'json' => [
 				Bucket::ATTRIBUTE_ACCOUNT_ID => $this->accountAuthorization()->getAccountId(),
 				Bucket::ATTRIBUTE_BUCKET_ID  => $bucketId
 			]
 		]);
 
-		return Bucket::fromArray(json_decode((string) $response->getBody(), true));
+		return Bucket::fromArray(Utils::jsonDecode($response));
 	}
 
 	/**
 	 * Returns a list of bucket objects representing the buckets on the account.
 	 * 
 	 * @link https://www.backblaze.com/b2/docs/b2_list_buckets.html
+	 * 
+	 * @b2-capability listBuckets
+	 * @b2-transaction Class C
 	 *
 	 * @param string   $bucketId    When bucketId is specified, the result will be a list containing just this bucket,
 	 *                              if it's present in the account, or no buckets if the account does not have a
@@ -99,7 +110,7 @@ trait BucketOperationsTrait
 		?string $bucketName = null,
 		?array $bucketTypes = null
 	): BucketList {
-		$response = $this->http->request('POST', 'b2_list_buckets', [
+		$response = $this->http->request('POST', Endpoint::LIST_BUCKETS, [
 			'json' => Utils::filterRequestOptions([
 				Bucket::ATTRIBUTE_ACCOUNT_ID => $this->accountAuthorization()->getAccountId(),
 			], [
@@ -109,13 +120,16 @@ trait BucketOperationsTrait
 			]),
 		]);
 
-		return BucketList::create($response);
+		return BucketList::fromResponse($response);
 	}
 
 	/**
 	 * Updates the type attribute of a bucket by the given ID.
 	 * 
 	 * @link https://www.backblaze.com/b2/docs/b2_update_bucket.html
+	 * 
+	 * @b2-capability writeBuckets
+	 * @b2-transaction Class C
 	 *
 	 * @param string           $bucketId       The unique ID of the bucket.
 	 * @param string           $bucketType     Either "allPublic", meaning that files in this bucket can be downloaded
@@ -135,7 +149,7 @@ trait BucketOperationsTrait
 		?array $lifecycleRules = null,
 		?int $ifRevisionIs = null
 	): Bucket {
-		$response = $this->http->request('POST', 'b2_update_bucket', [
+		$response = $this->http->request('POST', Endpoint::UPDATE_BUCKET, [
 			'json' => Utils::filterRequestOptions([
 				Bucket::ATTRIBUTE_ACCOUNT_ID => $this->accountAuthorization()->getAccountId(),
 				Bucket::ATTRIBUTE_BUCKET_ID  => $bucketId ?? $this->getAllowedBucketId(),
@@ -148,7 +162,7 @@ trait BucketOperationsTrait
 			])
 		]);
 
-		return Bucket::fromArray(json_decode((string) $response->getBody(), true));
+		return Bucket::fromArray(Utils::jsonDecode($response));
 	}
 
 	/**
@@ -165,11 +179,13 @@ trait BucketOperationsTrait
 	): Bucket {
 		$response = $this->listBuckets($bucketId, null, $bucketTypes);
 
-		if (iterator_count($response->getBuckets()) !== 1) {
+		$buckets = $response->getBucketsArray();
+
+		if (count($buckets) !== 1) {
 			throw new NotFoundException(sprintf('Bucket "%s" not found.', $bucketId));
 		}
 
-		return $response->getBuckets()[0];
+		return $buckets[0];
 	}
 
 	/**
@@ -184,10 +200,12 @@ trait BucketOperationsTrait
 	{
 		$response = $this->listBuckets(null, $bucketName, $bucketTypes);
 
-		if (iterator_count($response->getBuckets()) !== 1) {
+		$buckets = $response->getBucketsArray();
+
+		if (count($buckets) !== 1) {
 			throw new NotFoundException(sprintf('Bucket "%s" not found.', $bucketName));
 		}
 
-		return $response->getBuckets()[0];
+		return $buckets[0];
 	}
 }

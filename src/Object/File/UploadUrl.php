@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Zaxbux\BackblazeB2\Object\File;
 
+/** @package Zaxbux\BackblazeB2\Object\File */
 class UploadUrl {
 	public const ATTRIBUTE_BUCKET_ID           = 'bucketId';
 	public const ATTRIBUTE_UPLOAD_URL          = 'uploadUrl';

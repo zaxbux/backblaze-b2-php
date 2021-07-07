@@ -2,12 +2,14 @@
 
 namespace tests;
 
+use BlastCloud\Guzzler\Expectation;
 use Zaxbux\BackblazeB2\Client;
 use Zaxbux\BackblazeB2\Object\Bucket;
 use Zaxbux\BackblazeB2\Object\Bucket\BucketType;
 use Zaxbux\BackblazeB2\Exceptions\Request\B2APIException;
 use Zaxbux\BackblazeB2\Exceptions\Request\BadRequestException;
 use Zaxbux\BackblazeB2\Exceptions\Request\DuplicateBucketNameException;
+use Zaxbux\BackblazeB2\Http\Endpoint;
 
 class ClientBucketOperationsTest extends ClientTestBase
 {
@@ -99,8 +101,8 @@ class ClientBucketOperationsTest extends ClientTestBase
 		);
 
 		$bucket = $this->client->updateBucket(
-			'bucketId',
-			BucketType::PUBLIC
+			BucketType::PUBLIC,
+			'bucketId'
 		);
 
 		$this->assertInstanceOf(Bucket::class, $bucket);
@@ -140,9 +142,33 @@ class ClientBucketOperationsTest extends ClientTestBase
 		$this->guzzler->expects($this->once())
 			->post(static::getEndpointUri(Endpoint::DELETE_BUCKET));
 
-		$this->assertInstanceOf(Bucket::class, $this->client->deleteBucket(
-			'bucketId'
-		));
+		$bucket = $this->client->deleteBucket('bucketId');
+
+		$this->assertInstanceOf(Bucket::class, $bucket);
+	}
+
+	public function testDeleteBucketWithFiles()
+	{
+		$this->guzzler->expects($this->once())
+			->post(self::getEndpointUri(Endpoint::LIST_FILE_VERSIONS));
+		$this->guzzler->expects($this->exactly(3))
+			->post(self::getEndpointUri(Endpoint::DELETE_FILE_VERSION));
+		$this->guzzler->expects($this->once())
+			->post(static::getEndpointUri(Endpoint::DELETE_BUCKET));
+
+		$this->guzzler->queueResponse(
+			MockResponse::fromFile('list_file_versions.json'),
+		);
+
+		$this->guzzler->queueMany(MockResponse::fromFile('delete_file.json'), 3);
+
+		$this->guzzler->queueResponse(
+			MockResponse::fromFile('delete_bucket.json'),
+		);
+
+		$bucket = $this->client->deleteBucket('bucketId', true);
+
+		$this->assertInstanceOf(Bucket::class, $bucket);
 	}
 
 	public function testBadJsonThrownDeletingNonExistentBucket()
@@ -158,12 +184,36 @@ class ClientBucketOperationsTest extends ClientTestBase
 
 	public function testBucketNotEmptyThrownDeletingNonEmptyBucket()
 	{
-		$this->expectException(B2APIException::class);
+		$this->expectException(BadRequestException::class);
 
 		$this->guzzler->queueResponse(
 			MockResponse::fromFile('bucket_not_empty.json', 400),
 		);
 
 		$this->client->deleteBucket('bucketId');
+	}
+
+	public function testGetBucketById()
+	{
+		$this->guzzler->expects($this->once())
+			->post(static::getEndpointUri(Endpoint::LIST_BUCKETS));
+		
+		$this->guzzler->queueResponse(MockResponse::fromFile('get_bucket.json'));
+
+		$bucket = $this->client->getBucketById('bucketId');
+
+		static::assertInstanceOf(Bucket::class, $bucket);
+	}
+
+	public function testGetBucketByName()
+	{
+		$this->guzzler->expects($this->once())
+			->post(static::getEndpointUri(Endpoint::LIST_BUCKETS));
+		
+		$this->guzzler->queueResponse(MockResponse::fromFile('get_bucket.json'));
+
+		$bucket = $this->client->getBucketByName('bucket_name');
+
+		static::assertInstanceOf(Bucket::class, $bucket);
 	}
 }
