@@ -1,5 +1,5 @@
 {
-    "name": "zaxbux/b2-sdk-php",
+    "name": "zaxbux/backblaze-b2-php",
     "description": "A SDK for working with B2 cloud storage.",
     "keywords": ["b2", "storage", "backblaze", "cloud", "filesystem", "backup"],
     "homepage": "https://github.com/zaxbux/backblaze-b2-php",
