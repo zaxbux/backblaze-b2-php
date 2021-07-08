@@ -61,10 +61,10 @@ abstract class BucketObjectTestBase extends TestCase
 	}
 
 	protected static function isBucketList($bucketList) {
-		static::assertIsIterable($bucketList->getBuckets());
+		static::assertIsIterable($bucketList);
 
 		// Get a copy of Buckets as an array to avoid generator issues
-		$buckets = $bucketList->getBucketsArray();
+		$buckets = $bucketList->getArrayCopy();
 
 		static::assertCount(100, $buckets);
 		static::assertContainsOnlyInstancesOf(Bucket::class, $buckets);

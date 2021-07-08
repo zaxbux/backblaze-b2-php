@@ -6,7 +6,7 @@ namespace Zaxbux\BackblazeB2\Traits;
 
 use Zaxbux\BackblazeB2\Helpers\FileBulkOperationsHelper;
 
-/** @package Zaxbux\BackblazeB2\Traits */
+/** @package BackblazeB2\Traits */
 trait ApplyToAllFileVersionsTrait
 {
 	/**

@@ -54,7 +54,7 @@ class ClientUploadTest extends ClientTestBase
 			$resource
 		);
 
-		$this->assertInstanceOf(File::class, $file);
+		static::assertInstanceOf(File::class, $file);
 
 		$this->guzzler->expects($this->once())->post(static::getEndpointUri(Endpoint::GET_UPLOAD_URL));
 		$this->guzzler->expects($this->once())
@@ -81,7 +81,7 @@ class ClientUploadTest extends ClientTestBase
 			$content
 		);
 
-		$this->assertInstanceOf(File::class, $file);
+		static::assertInstanceOf(File::class, $file);
 
 		$this->guzzler->expects($this->once())
 			->post('https://pod-000-1005-03.backblaze.com/b2api/v2/b2_upload_file?cvt=c001_v0001005_t0027&bucket=4a48fe8875c6214145260818')
@@ -113,7 +113,7 @@ class ClientUploadTest extends ClientTestBase
 			]
 		);
 
-		$this->assertInstanceOf(File::class, $file);
+		static::assertInstanceOf(File::class, $file);
 
 		// We'll also check the Guzzle history to make sure the upload request got created correctly.
 		$this->guzzler->expects($this->once())

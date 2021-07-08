@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Zaxbux\BackblazeB2\Object\Bucket;
 
-/** @package Zaxbux\BackblazeB2\Object\Bucket */
+/** @package BackblazeB2\Object\Bucket */
 final class BucketType
 {
 	public const ALL      = 'all';

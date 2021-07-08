@@ -4,10 +4,6 @@ declare(strict_types=1);
 
 namespace Zaxbux\BackblazeB2\Operations;
 
-use AppendIterator;
-use ArrayIterator;
-use Iterator;
-use NoRewindIterator;
 use Zaxbux\BackblazeB2\Exceptions\NotFoundException;
 use Zaxbux\BackblazeB2\Http\Endpoint;
 use Zaxbux\BackblazeB2\Object\AccountAuthorization;
@@ -16,7 +12,7 @@ use Zaxbux\BackblazeB2\Object\File\ServerSideEncryption;
 use Zaxbux\BackblazeB2\Response\FileList;
 use Zaxbux\BackblazeB2\Utils;
 
-/** @package Zaxbux\BackblazeB2\Operations */
+/** @package BackblazeB2\Operations */
 trait FileOperationsTrait
 {
 
@@ -79,7 +75,7 @@ trait FileOperationsTrait
 			])
 		]);
 
-		return File::fromArray(Utils::jsonDecode($response));
+		return File::fromResponse($response);
 	}
 
 	/**
@@ -109,7 +105,7 @@ trait FileOperationsTrait
 			]),
 		]);
 
-		return File::fromArray(Utils::jsonDecode($response));
+		return File::fromResponse($response);
 	}
 
 	/**
@@ -130,7 +126,7 @@ trait FileOperationsTrait
 			]
 		]);
 
-		return File::fromArray(Utils::jsonDecode($response));
+		return File::fromResponse($response);
 	}
 
 	/**
@@ -155,7 +151,7 @@ trait FileOperationsTrait
 			]
 		]);
 
-		return File::fromArray(Utils::jsonDecode($response));
+		return File::fromResponse($response);
 	}
 
 	/**
@@ -270,7 +266,7 @@ trait FileOperationsTrait
 			]),
 		]);
 
-		return File::fromArray(Utils::jsonDecode($response));
+		return File::fromResponse($response);
 	}
 
 	/**
@@ -302,7 +298,7 @@ trait FileOperationsTrait
 			]),
 		]);
 
-		return File::fromArray(Utils::jsonDecode($response));
+		return File::fromResponse($response);
 	}
 
 	/**
@@ -318,15 +314,15 @@ trait FileOperationsTrait
 		string $delimiter = null,
 		string $startFileName = null,
 		int $maxFileCount = 1000
-	): Iterator {
-		$allFiles = new AppendIterator();
+	): FileList {
+		$allFiles = new FileList();
 		$nextFileName = $startFileName ?? '';
 
 		while ($nextFileName !== null) {
 			$response     = $this->listFileNames($bucketId, $prefix, $delimiter, $startFileName, $maxFileCount);
 			$nextFileName = $response->getNextFileName();
 
-			$allFiles->append(new NoRewindIterator($response->getFiles()));
+			$allFiles->mergeList($response);
 		}
 
 		return $allFiles;
@@ -334,7 +330,7 @@ trait FileOperationsTrait
 
 	public function getFileByName(string $fileName, ?string $bucketId = null): File
 	{
-		if (!$file = $this->listFileNames($bucketId, '', null, $fileName, 1)->first()) {
+		if (!$file = $this->listFileNames($bucketId, '', null, $fileName, 1)->current()) {
 			throw new NotFoundException(sprintf('No results returned for file name "%s"', $fileName));
 		}
 
@@ -354,17 +350,17 @@ trait FileOperationsTrait
 		?string $delimiter = null,
 		?string $startFileName = null,
 		?string $startFileId = null
-	): Iterator {
-		$allFiles = new AppendIterator();
+	): FileList {
+		$allFiles = new FileList();
 		$nextFileId = $startFileId ?? '';
 		$nextFileName = $startFileName ?? '';
 
 		while ($nextFileId !== null && $nextFileName !== null) {
-			$files        = $this->listFileVersions($bucketId, $prefix, $delimiter, $startFileName, $startFileId);
-			$nextFileId   = $files->getNextFileId();
-			$nextFileName = $files->getNextFileName();
+			$response     = $this->listFileVersions($bucketId, $prefix, $delimiter, $startFileName, $startFileId);
+			$nextFileId   = $response->getNextFileId();
+			$nextFileName = $response->getNextFileName();
 
-			$allFiles->append(new NoRewindIterator($files->getFiles()));
+			$allFiles->mergeList($response);
 		}
 
 		return $allFiles;
@@ -372,7 +368,7 @@ trait FileOperationsTrait
 
 	public function getFileById(string $fileId, ?string $bucketId = null): File
 	{
-		if (!$file = $this->listFileVersions($bucketId, '', null, null, $fileId, 1)->first()) {
+		if (!$file = $this->listFileVersions($bucketId, '', null, null, $fileId, 1)->current()) {
 			throw new NotFoundException(sprintf('No results returned for file id "%s"', $fileId));
 		}
 
@@ -401,16 +397,19 @@ trait FileOperationsTrait
 	): FileList {
 		$fileVersions = $this->listAllFileVersions($bucketId, $prefix, $delimiter, $startFileName, $startFileId);
 
-		$deleted = [];
+		$deleted = new FileList();
 
 		while ($fileVersions->valid()) {
-			$version = $fileVersions->current();
 
-			$deleted[] = $this->deleteFileVersion($version->getName(), $version->getId(), $bypassGovernance);
+			$deleted->append($this->deleteFileVersion(
+				$fileVersions->current()->getName(),
+				$fileVersions->current()->getId(),
+				$bypassGovernance
+			));
 
 			$fileVersions->next();
 		}
 
-		return new FileList(new ArrayIterator($deleted));
+		return $deleted;
 	}
 }

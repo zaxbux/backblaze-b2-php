@@ -8,7 +8,7 @@ use Generator;
 use RuntimeException;
 use Zaxbux\BackblazeB2\Interfaces\B2ObjectInterface;
 
-/** @package Zaxbux\BackblazeB2\Traits */
+/** @package BackblazeB2\Traits */
 trait ObjectIterableTrait
 {
 	/**

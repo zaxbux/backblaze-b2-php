@@ -8,7 +8,7 @@ use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Throwable;
 
-/** @package Zaxbux\BackblazeB2\Exceptions\Request */
+/** @package BackblazeB2\Exceptions\Request */
 class B2APIException extends RequestException {
 
 	private $statusCode;

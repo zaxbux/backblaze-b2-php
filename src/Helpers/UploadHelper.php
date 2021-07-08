@@ -11,7 +11,7 @@ use Zaxbux\BackblazeB2\Object\File\FileUploadMetadata;
 use Zaxbux\BackblazeB2\Object\File\ServerSideEncryption;
 use Zaxbux\BackblazeB2\Object\File\UploadUrl;
 
-/** @package Zaxbux\BackblazeB2\Helpers */
+/** @package BackblazeB2\Helpers */
 class UploadHelper extends AbstractHelper {
 	/**
 	 * Upload a file. Automatically decides the upload method (regular or large file).

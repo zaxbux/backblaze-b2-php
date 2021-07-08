@@ -10,12 +10,14 @@ use GuzzleHttp\Utils;
 use Psr\Http\Message\ResponseInterface;
 use Zaxbux\BackblazeB2\Interfaces\B2ObjectInterface;
 use Zaxbux\BackblazeB2\Interfaces\AuthorizationCacheInterface;
+use Zaxbux\BackblazeB2\Traits\HydrateFromResponseTrait;
 use Zaxbux\BackblazeB2\Traits\ProxyArrayAccessToPropertiesTrait;
 
-/** @package Zaxbux\BackblazeB2\Object */
+/** @package BackblazeB2\Object */
 class AccountAuthorization implements B2ObjectInterface
 {
 	use ProxyArrayAccessToPropertiesTrait;
+	use HydrateFromResponseTrait;
 
 	public const ATTRIBUTE_ABSOLUTE_MINIMUM_PART_SIZE = 'absoluteMinimumPartSize';
 	public const ATTRIBUTE_ACCOUNT_ID                 = 'accountId';
@@ -171,11 +173,6 @@ class AccountAuthorization implements B2ObjectInterface
 	public function hasCapability(string $capability): bool
 	{
 		return in_array($capability, $this->allowed['capabilities'] ?? []);
-	}
-
-	public static function fromResponse(ResponseInterface $response): AccountAuthorization
-	{
-		return static::fromArray(Utils::jsonDecode((string) $response->getBody(), true));
 	}
 
 	public static function fromArray(array $data): AccountAuthorization

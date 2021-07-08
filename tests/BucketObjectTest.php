@@ -32,7 +32,7 @@ class BucketObjectTest extends BucketObjectTestBase
 	public function testBucketListFromResponse()
 	{
 		$bucketList = BucketList::fromResponse(new Response(200, [], json_encode([
-			Bucket::ATTRIBUTE_BUCKETS => static::createBuckets(100),
+			BucketList::ATTRIBUTE_BUCKETS => static::createBuckets(100),
 		])));
 
 		static::isBucketList($bucketList);

@@ -12,7 +12,7 @@ use RuntimeException;
 /**
  * @link https://www.backblaze.com/b2/docs/files.html#fileInfo
  * 
- * @package Zaxbux\BackblazeB2\Classes
+ * @package BackblazeB2\Classes
  */
 abstract class AbstractObjectInfo
 {

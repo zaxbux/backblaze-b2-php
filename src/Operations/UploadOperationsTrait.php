@@ -12,7 +12,7 @@ use Zaxbux\BackblazeB2\Object\File\ServerSideEncryption;
 use Zaxbux\BackblazeB2\Object\File\UploadUrl;
 use Zaxbux\BackblazeB2\Utils;
 
-/** @package Zaxbux\BackblazeB2\Operations */
+/** @package BackblazeB2\Operations */
 trait UploadOperationsTrait
 {
 	/**
@@ -35,7 +35,7 @@ trait UploadOperationsTrait
 			]
 		]);
 
-		return UploadUrl::fromArray(Utils::jsonDecode($response));
+		return UploadUrl::fromResponse($response);
 	}
 
 	/**
@@ -96,6 +96,6 @@ trait UploadOperationsTrait
 			),
 		]);
 
-		return File::fromArray(Utils::jsonDecode($response));
+		return File::fromResponse($response);
 	}
 }

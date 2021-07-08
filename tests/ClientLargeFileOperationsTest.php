@@ -19,9 +19,9 @@ class ClientLargeFileOperationsTest extends ClientTestBase
 			1
 		);
 
-		$this->assertInstanceOf(File::class, $newFilePart);
-		$this->assertEquals(1, $newFilePart->getPartNumber());
-		$this->assertEquals('largeFileId', $newFilePart->getId());
+		static::assertInstanceOf(File::class, $newFilePart);
+		static::assertEquals(1, $newFilePart->getPartNumber());
+		static::assertEquals('largeFileId', $newFilePart->getId());
 	}
 
 	public function testCancelLargeFile()
@@ -34,8 +34,8 @@ class ClientLargeFileOperationsTest extends ClientTestBase
 			'largeFileId'
 		);
 
-		$this->assertInstanceOf(File::class, $file);
-		$this->assertEquals('largeFileId', $file->getId());
+		static::assertInstanceOf(File::class, $file);
+		static::assertEquals('largeFileId', $file->getId());
 	}
 
 	public function testListUnfinishedLargeFiles()
@@ -45,10 +45,10 @@ class ClientLargeFileOperationsTest extends ClientTestBase
 		);
 
 		$response = $this->client->listUnfinishedLargeFiles('bucketId');
-		$this->assertInstanceOf(FileList::class, $response);
+		static::assertInstanceOf(FileList::class, $response);
 
-		$files = $response->getFilesArray();
-		$this->assertInstanceOf(File::class, $files[0]);
+		//$files = $response->getFilesArray();
+		static::assertInstanceOf(File::class, $response->current());
 	}
 
 }

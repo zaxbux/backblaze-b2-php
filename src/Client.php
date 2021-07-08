@@ -8,6 +8,9 @@ use Exception;
 use GuzzleHttp\Client as GuzzleClient;
 use GuzzleHttp\ClientInterface;
 use Zaxbux\BackblazeB2\Config;
+use Zaxbux\BackblazeB2\Helpers\ApplicationKeyOperationsHelper;
+use Zaxbux\BackblazeB2\Helpers\BucketOperationsHelper;
+use Zaxbux\BackblazeB2\Helpers\FileOperationsHelper;
 use Zaxbux\BackblazeB2\Http\Endpoint;
 use Zaxbux\BackblazeB2\Http\Middleware\{
 	ApplyAuthorizationMiddleware,
@@ -24,12 +27,15 @@ use Zaxbux\BackblazeB2\Operations\{
 };
 use Zaxbux\BackblazeB2\Interfaces\AuthorizationCacheInterface;
 use Zaxbux\BackblazeB2\Object\AccountAuthorization;
+use Zaxbux\BackblazeB2\Object\Bucket;
+use Zaxbux\BackblazeB2\Object\File;
+use Zaxbux\BackblazeB2\Object\Key;
 use Zaxbux\BackblazeB2\Traits\ApplyToAllFileVersionsTrait;
 
 /**
  * API Client for Backblaze B2.
  * 
- * @package Zaxbux\BackblazeB2
+ * @package BackblazeB2
  */
 class Client
 {
@@ -174,9 +180,39 @@ class Client
 	}
 
 	/**
+	 * Helper method for bucket operations.
+	 * 
+	 * @param null|Bucket $bucket The bucket to perform operations on.
+	 */
+	public function bucket(?Bucket $bucket = null): BucketOperationsHelper
+	{
+		return BucketOperationsHelper::instance($this)->withBucket($bucket);
+	}
+
+	/**
+	 * Helper method for file operations.
+	 * 
+	 * @param null|File $file The file to perform operations on.
+	 */
+	public function file(?File $file = null): FileOperationsHelper
+	{
+		return FileOperationsHelper::instance($this)->withFile($file);
+	}
+
+	/**
+	 * Helper method for application key operations.
+	 * 
+	 * @param null|Key $key The key to perform operations on.
+	 */
+	public function applicationKey(?Key $key = null): ApplicationKeyOperationsHelper
+	{
+		return ApplicationKeyOperationsHelper::instance($this)->withApplicationKey($key);
+	}
+
+	/**
 	 * @see __construct()
 	 */
-	public static function create($config): Client
+	public static function instance($config): Client
 	{
 		return new static($config);
 	}

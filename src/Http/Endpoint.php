@@ -2,7 +2,7 @@
 
 namespace Zaxbux\BackblazeB2\Http;
 
-/** @package Zaxbux\BackblazeB2\Http */
+/** @package BackblazeB2\Http */
 final class Endpoint
 {
 	public const AUTHORIZE_ACCOUNT = 'b2_authorize_account';

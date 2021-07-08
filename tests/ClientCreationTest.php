@@ -10,7 +10,7 @@ class ClientCreationTest extends TestCase
 {
 	public function testNewClient()
 	{
-		$this->assertInstanceOf(Client::class, new Client([
+		static::assertInstanceOf(Client::class, new Client([
 			'000000000000bb80000000000',
 			'abcdefghijklmnopqrstuvwxyz01234',
 		]));
@@ -24,8 +24,8 @@ class ClientCreationTest extends TestCase
 			'applicationKey'   => 'abcdefghijklmnopqrstuvwxyz01234',
 		]);
 
-		$this->assertInstanceOf(Client::class, $client);
-		$this->assertEquals('app_name', $client->getConfig()->applicationName());
+		static::assertInstanceOf(Client::class, $client);
+		static::assertEquals('app_name', $client->getConfig()->applicationName());
 	}
 
 	public function testNewClientWithConfig()
@@ -38,13 +38,13 @@ class ClientCreationTest extends TestCase
 			]
 		));
 
-		$this->assertInstanceOf(Client::class, $client);
-		$this->assertEquals('app_name', $client->getConfig()->applicationName());
+		static::assertInstanceOf(Client::class, $client);
+		static::assertEquals('app_name', $client->getConfig()->applicationName());
 	}
 
 	public function testCreateClient()
 	{
-		$this->assertInstanceOf(Client::class, Client::create([
+		static::assertInstanceOf(Client::class, Client::instance([
 			'applicationKeyId' => '000000000000bb80000000000',
 			'applicationKey'   => 'abcdefghijklmnopqrstuvwxyz01234',
 		]));

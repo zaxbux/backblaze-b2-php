@@ -13,7 +13,7 @@ use JsonSerializable;
 use Zaxbux\BackblazeB2\Object\File\ServerSideEncryption;
 use Zaxbux\BackblazeB2\Traits\ProxyArrayAccessToPropertiesTrait;
 
-/** @package Zaxbux\BackblazeB2\Object\File */
+/** @package BackblazeB2\Object\File */
 final class DownloadOptions implements ArrayAccess, JsonSerializable
 {
 	use ProxyArrayAccessToPropertiesTrait;

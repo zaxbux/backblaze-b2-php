@@ -13,12 +13,12 @@ class ClientTest extends ClientTestBase
 {
 	public function testClient()
 	{
-		$this->assertInstanceOf(Client::class, $this->client);
-		$this->assertInstanceOf(Config::class, $this->client->getConfig());
-		$this->assertInstanceOf(ClientInterface::class, $this->client->getHttpClient());
-		$this->assertInstanceOf(AccountAuthorization::class, $this->client->accountAuthorization());
-		$this->assertEquals('bucket_id', $this->client->getAllowedBucketId());
-		$this->assertEquals('bucket_name', $this->client->getAllowedBucketName());
+		static::assertInstanceOf(Client::class, $this->client);
+		static::assertInstanceOf(Config::class, $this->client->getConfig());
+		static::assertInstanceOf(ClientInterface::class, $this->client->getHttpClient());
+		static::assertInstanceOf(AccountAuthorization::class, $this->client->accountAuthorization());
+		static::assertEquals('bucket_id', $this->client->getAllowedBucketId());
+		static::assertEquals('bucket_name', $this->client->getAllowedBucketName());
 	}
 
 	/*

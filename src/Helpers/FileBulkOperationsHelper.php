@@ -4,13 +4,11 @@ declare(strict_types=1);
 
 namespace Zaxbux\BackblazeB2\Helpers;
 
-use ArrayIterator;
-use Iterator;
 use Zaxbux\BackblazeB2\Client;
 use Zaxbux\BackblazeB2\Response\FileList;
 use Zaxbux\BackblazeB2\Object\File;
 
-/** @package Zaxbux\BackblazeB2\Helpers */
+/** @package BackblazeB2\Helpers */
 class FileBulkOperationsHelper extends AbstractHelper
 {
 	private $fileName;
@@ -26,7 +24,7 @@ class FileBulkOperationsHelper extends AbstractHelper
 		return $this;
 	}
 
-	public function list(): Iterator
+	public function list(): FileList
 	{
 		return $this->client->listAllFileVersions(null, null, null, $this->fileName);
 	}
@@ -58,22 +56,22 @@ class FileBulkOperationsHelper extends AbstractHelper
 	/**
 	 * Applies a callback to each file version.
 	 * 
-	 * @param callable(File):FileList $operation
+	 * @param callable $operation `$operation(File $version): FileList`
 	 */
 	public function apply(callable $operation): FileList
 	{
 		$fileVersions = $this->list();
 
-		$array = [];
+		$changed = new FileList();
 
 		while ($fileVersions->valid()) {
 			$version = $fileVersions->current();
 
-			$array[] = $operation($version);
+			$changed->append($operation($version));
 
 			$fileVersions->next();
 		}
 
-		return new FileList(new ArrayIterator($array));
+		return $changed;
 	}
 }

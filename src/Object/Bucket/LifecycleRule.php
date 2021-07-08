@@ -8,7 +8,7 @@ use JsonSerializable;
 
 /**
  * A Lifecycle rule object.
- * @package Zaxbux\BackblazeB2\Object\Bucket
+ * @package BackblazeB2\Object\Bucket
  */
 class LifecycleRule implements JsonSerializable
 {

@@ -6,14 +6,14 @@ namespace Zaxbux\BackblazeB2\Object;
 
 use Zaxbux\BackblazeB2\Interfaces\B2ObjectInterface;
 use Zaxbux\BackblazeB2\Object\Bucket\BucketInfo;
-//use Zaxbux\BackblazeB2\Traits\IterableFromArrayTrait;
+use Zaxbux\BackblazeB2\Traits\HydrateFromResponseTrait;
 use Zaxbux\BackblazeB2\Traits\ProxyArrayAccessToPropertiesTrait;
 
-/** @package Zaxbux\BackblazeB2\Object */
+/** @package BackblazeB2\Object */
 class Bucket implements B2ObjectInterface
 {
 	use ProxyArrayAccessToPropertiesTrait;
-	//use IterableFromArrayTrait;
+	use HydrateFromResponseTrait;
 
 	public const ATTRIBUTE_ACCOUNT_ID       = 'accountId';
 	public const ATTRIBUTE_BUCKET_ID        = 'bucketId';
@@ -21,7 +21,6 @@ class Bucket implements B2ObjectInterface
 	public const ATTRIBUTE_BUCKET_NAME      = 'bucketName';
 	public const ATTRIBUTE_BUCKET_TYPE      = 'bucketType';
 	public const ATTRIBUTE_BUCKET_TYPES     = 'bucketTypes';
-	public const ATTRIBUTE_BUCKETS          = 'buckets';
 	public const ATTRIBUTE_CORS_RULES       = 'corsRules';
 	public const ATTRIBUTE_DEFAULT_SSE      = 'defaultServerSideEncryption';
 	public const ATTRIBUTE_FILE_LOCK_CONFIG = 'fileLockConfiguration';

@@ -7,7 +7,7 @@ namespace Zaxbux\BackblazeB2\Interfaces;
 use ArrayAccess;
 use JsonSerializable;
 
-/** @package Zaxbux\BackblazeB2\Interfaces */
+/** @package BackblazeB2\Interfaces */
 interface B2ObjectInterface extends JsonSerializable, ArrayAccess
 {
 	public static function fromArray(array $data): B2ObjectInterface;

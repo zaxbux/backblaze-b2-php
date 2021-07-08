@@ -6,7 +6,7 @@ namespace Zaxbux\BackblazeB2\Interfaces;
 
 use Zaxbux\BackblazeB2\Client;
 
-/** @package Zaxbux\BackblazeB2\Interfaces */
+/** @package BackblazeB2\Interfaces */
 interface HelperInterface
 {
 	public function __construct(Client $client);

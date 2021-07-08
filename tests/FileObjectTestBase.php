@@ -51,7 +51,7 @@ abstract class FileObjectTestBase extends TestCase
 		static::assertEquals($file->getContentMd5(), md5('backblaze'));
 		static::assertEquals($file->getContentSha1(), sha1('backblaze'));
 		static::assertIsString($file->getAccountId());
-		//$this->assertInstanceOf(FileLock::class, $file->getFileLock());
+		//static::assertInstanceOf(FileLock::class, $file->getFileLock());
 		static::assertInstanceOf(ServerSideEncryption::class, $file->getServerSideEncryption());
 		static::assertEquals($file->getPartNumber(), null);
 		static::assertInstanceOf(FilePathInfo::class, $file->getPathInfo());

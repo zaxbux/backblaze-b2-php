@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace Zaxbux\BackblazeB2\Operations;
 
-use AppendIterator;
-use NoRewindIterator;
 use Zaxbux\BackblazeB2\Http\Endpoint;
 use Zaxbux\BackblazeB2\Object\AccountAuthorization;
 use Zaxbux\BackblazeB2\Object\Key;
 use Zaxbux\BackblazeB2\Response\KeyList;
 use Zaxbux\BackblazeB2\Utils;
 
-/** @package Zaxbux\BackblazeB2\Operations */
+/** @package BackblazeB2\Operations */
 trait ApplicationKeyOperationsTrait
 {
+	/** @var \Zaxbux\BackblazeB2\Config */
+	protected $config;
 
 	/** @var \GuzzleHttp\ClientInterface */
 	protected $http;
@@ -39,7 +39,7 @@ trait ApplicationKeyOperationsTrait
 	 */
 	public function createKey(
 		string $keyName,
-		array $capabilities,
+		array $capabilities = null,
 		?int $validDuration = null,
 		?string $bucketId = null,
 		?string $namePrefix = null
@@ -56,7 +56,7 @@ trait ApplicationKeyOperationsTrait
 			]),
 		]);
 
-		return Key::fromArray(Utils::jsonDecode($response));
+		return Key::fromResponse($response);
 	}
 
 	/**
@@ -77,7 +77,7 @@ trait ApplicationKeyOperationsTrait
 			]
 		]);
 
-		return Key::fromArray(Utils::jsonDecode($response));
+		return Key::fromResponse($response);
 	}
 
 	/**
@@ -90,18 +90,18 @@ trait ApplicationKeyOperationsTrait
 	 * 
 	 * @param string $startApplicationKeyId The first key to return.
 	 * @param int    $maxKeyCount           The maximum number of keys to return in the response. The default value is
-	 *                                      1000, and the maximum is 10000. The maximum number of keys returned per
+	 *                                      100, and the maximum is 10000. The maximum number of keys returned per
 	 *                                      transaction is 1000.
 	 */
 	public function listKeys(
 		?string $startApplicationKeyId = null,
-		?int $maxKeyCount = 1000
+		?int $maxKeyCount = null
 	): KeyList {
 		$response = $this->http->request('POST', Endpoint::LIST_KEYS, [
 			'json' => Utils::filterRequestOptions([
 				Key::ATTRIBUTE_ACCOUNT_ID => $this->accountAuthorization()->getAccountId(),
 			], [
-				Key::ATTRIBUTE_MAX_KEY_COUNT => $maxKeyCount,
+				Key::ATTRIBUTE_MAX_KEY_COUNT => $maxKeyCount ?? $this->config->maxKeyCount(),
 				Key::ATTRIBUTE_START_APPLICATION_KEY_ID => $startApplicationKeyId
 			]),
 		]);
@@ -114,17 +114,19 @@ trait ApplicationKeyOperationsTrait
 	 * 
 	 * @see Client::listKeys()
 	 */
-	public function listAllKeys(string $startApplicationKeyId = null, int $maxKeyCount = 1000, bool $loop = true): iterable
-	{
-		$allKeys = new AppendIterator();
+	public function listAllKeys(
+		string $startApplicationKeyId = null,
+		int $maxKeyCount = null
+	): KeyList {
+		$allKeys = new KeyList();
 
 		$nextApplicationKeyId = $startApplicationKeyId ?? '';
 
 		while ($nextApplicationKeyId !== null) {
-			$keys = $this->listKeys($startApplicationKeyId, $maxKeyCount);
-			$nextApplicationKeyId = $keys->getNextApplicationKeyId();
+			$response             = $this->listKeys($startApplicationKeyId, $maxKeyCount);
+			$nextApplicationKeyId = $response->nextApplicationKeyId();
 
-			$allKeys->append(new NoRewindIterator($keys->getKeys()));
+			$allKeys->mergeList($response);
 		}
 
 		return $allKeys;

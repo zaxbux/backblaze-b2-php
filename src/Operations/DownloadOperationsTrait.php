@@ -13,7 +13,7 @@ use Zaxbux\BackblazeB2\Object\File;
 use Zaxbux\BackblazeB2\Object\File\DownloadOptions;
 use Zaxbux\BackblazeB2\Response\FileDownload;
 
-/** @package Zaxbux\BackblazeB2\Operations */
+/** @package BackblazeB2\Operations */
 trait DownloadOperationsTrait
 {
 	/**
@@ -49,7 +49,7 @@ trait DownloadOperationsTrait
 			], $options->getAuthorizationOptions()),
 		]);
 
-		return DownloadAuthorization::fromArray(Utils::jsonDecode($response));
+		return DownloadAuthorization::fromResponse($response);
 	}
 
 	/**

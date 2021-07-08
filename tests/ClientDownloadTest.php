@@ -20,7 +20,7 @@ class ClientDownloadTest extends ClientTestBase
 			60
 		);
 
-		$this->assertEquals('downloadAuthToken', $authorization->getAuthorizationToken());
+		static::assertEquals('downloadAuthToken', $authorization->getAuthorizationToken());
 	}
 
 	public function testDownloadByIdWithoutSavePath()
@@ -31,7 +31,7 @@ class ClientDownloadTest extends ClientTestBase
 
 		$fileContent = $this->client->downloadFileById('fileId')->getContents();
 
-		$this->assertEquals($fileContent, 'The quick brown fox jumps over the lazy dog');
+		static::assertEquals($fileContent, 'The quick brown fox jumps over the lazy dog');
 	}
 
 	public function testDownloadByIdWithSavePath()
@@ -42,8 +42,8 @@ class ClientDownloadTest extends ClientTestBase
 
 		$this->client->downloadFileById('fileId', null, __DIR__ . '/test.txt');
 
-		$this->assertFileExists(__DIR__ . '/test.txt');
-		$this->assertEquals('The quick brown fox jumps over the lazy dog', file_get_contents(__DIR__ . '/test.txt'));
+		static::assertFileExists(__DIR__ . '/test.txt');
+		static::assertEquals('The quick brown fox jumps over the lazy dog', file_get_contents(__DIR__ . '/test.txt'));
 
 		unlink(__DIR__ . '/test.txt');
 	}
@@ -67,7 +67,7 @@ class ClientDownloadTest extends ClientTestBase
 
 		$fileContent = $this->client->downloadFileByName('test.txt', 'test-bucket')->getContents();
 
-		$this->assertEquals($fileContent, 'The quick brown fox jumps over the lazy dog');
+		static::assertEquals($fileContent, 'The quick brown fox jumps over the lazy dog');
 	}
 
 	public function testDownloadByPathWithSavePath()
@@ -78,8 +78,8 @@ class ClientDownloadTest extends ClientTestBase
 
 		$this->client->downloadFileByName('test.txt', 'test-bucket', null, __DIR__ . '/test.txt');
 
-		$this->assertFileExists(__DIR__ . '/test.txt');
-		$this->assertEquals('The quick brown fox jumps over the lazy dog', file_get_contents(__DIR__ . '/test.txt'));
+		static::assertFileExists(__DIR__ . '/test.txt');
+		static::assertEquals('The quick brown fox jumps over the lazy dog', file_get_contents(__DIR__ . '/test.txt'));
 
 		unlink(__DIR__ . '/test.txt');
 	}

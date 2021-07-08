@@ -10,7 +10,7 @@ use function sha1, fstat, rewind, strlen, is_resource;
 /**
  * Calculate the length and hash of a string or stream.
  * 
- * @package Zaxbux\BackblazeB2\Object\File
+ * @package BackblazeB2\Object\File
  */
 final class FileUploadMetadata {
 	

@@ -12,7 +12,7 @@ use Zaxbux\BackblazeB2\Traits\ProxyArrayAccessToPropertiesTrait;
 /**
  * @link https://www.backblaze.com/b2/docs/server_side_encryption.html
  * 
- * @package Zaxbux\BackblazeB2\Object\File
+ * @package BackblazeB2\Object\File
  */
 class FileLock implements JsonSerializable, ArrayAccess {
 	use ProxyArrayAccessToPropertiesTrait;

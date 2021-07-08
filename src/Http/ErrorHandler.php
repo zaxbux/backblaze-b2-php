@@ -33,7 +33,7 @@ use Zaxbux\BackblazeB2\Exceptions\Request\{
 	ServiceUnavailableException,
 };
 
-/** @package Zaxbux\BackblazeB2\Http */
+/** @package BackblazeB2\Http */
 class ErrorHandler
 {
 	private const ERROR_CODES = [

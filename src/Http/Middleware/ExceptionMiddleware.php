@@ -8,7 +8,7 @@ use Zaxbux\BackblazeB2\Http\ErrorHandler;
 use Zaxbux\BackblazeB2\Http\Exceptions\TooManyRequestsException;
 use Zaxbux\BackblazeB2\Http\StatusCode;
 
-/** @package Zaxbux\BackblazeB2\Http\Middleware */
+/** @package BackblazeB2\Http\Middleware */
 class ExceptionMiddleware
 {
 	public function __invoke(callable $handler)

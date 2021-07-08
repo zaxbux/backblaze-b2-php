@@ -9,7 +9,7 @@ use Psr\Http\Message\ResponseInterface;
 use Zaxbux\BackblazeB2\Config;
 use Zaxbux\BackblazeB2\Http\StatusCode;
 
-/** @package Zaxbux\BackblazeB2\Http\Middleware */
+/** @package BackblazeB2\Http\Middleware */
 class RetryMiddleware
 {
 	protected const RETRY_STATUS_CODES = [

@@ -9,7 +9,7 @@ use Zaxbux\BackblazeB2\Object\File\FileInfo;
 use Zaxbux\BackblazeB2\Object\File\FileUploadMetadata;
 use Zaxbux\BackblazeB2\Object\File\ServerSideEncryption;
 
-/** @package Zaxbux\BackblazeB2\Helpers */
+/** @package BackblazeB2\Helpers */
 class LargeFileUpload {
 	private $client;
 	private $stream;

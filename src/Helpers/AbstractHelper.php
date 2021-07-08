@@ -8,7 +8,7 @@ use GuzzleHttp\ClientInterface;
 use Zaxbux\BackblazeB2\Client;
 use Zaxbux\BackblazeB2\Interfaces\HelperInterface;
 
-/** @package Zaxbux\BackblazeB2\Helpers */
+/** @package BackblazeB2\Helpers */
 abstract class AbstractHelper implements HelperInterface
 {
 	/** @var \Zaxbux\BackblazeB2\Client */

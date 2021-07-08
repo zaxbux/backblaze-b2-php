@@ -75,14 +75,14 @@ abstract class KeyObjectTestBase extends TestCase
 	}
 
 	protected static function isKeyList($keyList) {
-		static::assertIsIterable($keyList->getKeys());
+		static::assertIsIterable($keyList);
 
 		// Get a copy of keys as an array to avoid generator issues
-		$keys = $keyList->getKeysArray();
+		$keys = $keyList->getArrayCopy();
 
-		static::assertCount(1000, $keys);
+		static::assertCount(10, $keys);
 		static::assertContainsOnlyInstancesOf(Key::class, $keys);
 		
-		static::assertEquals(null, $keyList->getNextApplicationKeyId());
+		static::assertEquals(null, $keyList->nextApplicationKeyId());
 	}
 }

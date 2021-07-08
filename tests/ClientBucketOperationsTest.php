@@ -2,11 +2,8 @@
 
 namespace tests;
 
-use BlastCloud\Guzzler\Expectation;
-use Zaxbux\BackblazeB2\Client;
 use Zaxbux\BackblazeB2\Object\Bucket;
 use Zaxbux\BackblazeB2\Object\Bucket\BucketType;
-use Zaxbux\BackblazeB2\Exceptions\Request\B2APIException;
 use Zaxbux\BackblazeB2\Exceptions\Request\BadRequestException;
 use Zaxbux\BackblazeB2\Exceptions\Request\DuplicateBucketNameException;
 use Zaxbux\BackblazeB2\Http\Endpoint;
@@ -27,9 +24,9 @@ class ClientBucketOperationsTest extends ClientTestBase
 		);
 
 		// Test that we get a private bucket back after creation
-		$this->assertInstanceOf(Bucket::class, $bucket);
-		$this->assertEquals('Test bucket', $bucket->getName());
-		$this->assertEquals(BucketType::PRIVATE, $bucket->getType());
+		static::assertInstanceOf(Bucket::class, $bucket);
+		static::assertEquals('Test bucket', $bucket->getName());
+		static::assertEquals(BucketType::PRIVATE, $bucket->getType());
 	}
 
 	public function testCreatePublicBucket()
@@ -47,9 +44,9 @@ class ClientBucketOperationsTest extends ClientTestBase
 			BucketType::PUBLIC
 		);
 
-		$this->assertInstanceOf(Bucket::class, $bucket);
-		$this->assertEquals('Test bucket', $bucket->getName());
-		$this->assertEquals(BucketType::PUBLIC, $bucket->getType());
+		static::assertInstanceOf(Bucket::class, $bucket);
+		static::assertEquals('Test bucket', $bucket->getName());
+		static::assertEquals(BucketType::PUBLIC, $bucket->getType());
 	}
 
 	public function testBucketAlreadyExistsExceptionThrown()
@@ -89,9 +86,9 @@ class ClientBucketOperationsTest extends ClientTestBase
 			BucketType::PRIVATE
 		);
 
-		$this->assertInstanceOf(Bucket::class, $bucket);
-		$this->assertEquals('bucketId', $bucket->getId());
-		$this->assertEquals(BucketType::PRIVATE, $bucket->getType());
+		static::assertInstanceOf(Bucket::class, $bucket);
+		static::assertEquals('bucketId', $bucket->getId());
+		static::assertEquals(BucketType::PRIVATE, $bucket->getType());
 	}
 
 	public function testUpdateBucketToPublic()
@@ -105,9 +102,9 @@ class ClientBucketOperationsTest extends ClientTestBase
 			'bucketId'
 		);
 
-		$this->assertInstanceOf(Bucket::class, $bucket);
-		$this->assertEquals('bucketId', $bucket->getId());
-		$this->assertEquals(BucketType::PUBLIC, $bucket->getType());
+		static::assertInstanceOf(Bucket::class, $bucket);
+		static::assertEquals('bucketId', $bucket->getId());
+		static::assertEquals(BucketType::PUBLIC, $bucket->getType());
 	}
 
 	public function testList3Buckets()
@@ -116,10 +113,10 @@ class ClientBucketOperationsTest extends ClientTestBase
 			MockResponse::fromFile('list_buckets_3.json'),
 		);
 
-		$buckets = $this->client->listBuckets()->getBucketsArray();
-		$this->assertIsArray($buckets);
-		$this->assertCount(3, $buckets);
-		$this->assertInstanceOf(Bucket::class, $buckets[0]);
+		$buckets = $this->client->listBuckets()->getArrayCopy();
+		static::assertIsArray($buckets);
+		static::assertCount(3, $buckets);
+		static::assertInstanceOf(Bucket::class, $buckets[0]);
 	}
 
 	public function testEmptyArrayWithNoBuckets()
@@ -128,9 +125,9 @@ class ClientBucketOperationsTest extends ClientTestBase
 			MockResponse::fromFile('list_buckets_0.json'),
 		);
 
-		$buckets = $this->client->listBuckets()->getBucketsArray();
-		$this->assertIsArray($buckets);
-		$this->assertCount(0, $buckets);
+		$buckets = $this->client->listBuckets()->getArrayCopy();
+		static::assertIsArray($buckets);
+		static::assertCount(0, $buckets);
 	}
 
 	public function testDeleteBucket()
@@ -144,7 +141,7 @@ class ClientBucketOperationsTest extends ClientTestBase
 
 		$bucket = $this->client->deleteBucket('bucketId');
 
-		$this->assertInstanceOf(Bucket::class, $bucket);
+		static::assertInstanceOf(Bucket::class, $bucket);
 	}
 
 	public function testDeleteBucketWithFiles()
@@ -168,7 +165,7 @@ class ClientBucketOperationsTest extends ClientTestBase
 
 		$bucket = $this->client->deleteBucket('bucketId', true);
 
-		$this->assertInstanceOf(Bucket::class, $bucket);
+		static::assertInstanceOf(Bucket::class, $bucket);
 	}
 
 	public function testBadJsonThrownDeletingNonExistentBucket()

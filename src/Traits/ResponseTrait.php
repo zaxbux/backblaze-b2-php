@@ -2,14 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Zaxbux\BackblazeB2\Response;
+namespace Zaxbux\BackblazeB2\Traits;
 
-use JsonException;
 use Psr\Http\Message\ResponseInterface;
 use Zaxbux\BackblazeB2\Utils;
 
-/** @package Zaxbux\BackblazeB2\Response */
-abstract class AbstractResponse {
+/** @package BackblazeB2\Traits */
+trait ResponseTrait {
 
 	/** @var ResponseInterface */
 	protected $rawResponse;
@@ -18,14 +17,13 @@ abstract class AbstractResponse {
 	 * Create a new instance of this class and populate it.
 	 * 
 	 * @param ResponseInterface $response B2 API response.
-	 * @return AbstractListResponse 
 	 */
-	abstract public static function fromResponse(ResponseInterface $response): AbstractResponse;
+	abstract public static function fromResponse(ResponseInterface $response);
 
-	public function __construct(ResponseInterface $response)
+	/*public function __construct(ResponseInterface $response)
 	{
 		$this->rawResponse = $response;
-	}
+	}*/
 
 	/**
 	 * Get the raw response.
@@ -44,10 +42,6 @@ abstract class AbstractResponse {
 	 */
 	public function json(): ?array
 	{
-		try {
-			return Utils::jsonDecode((string) $this->rawResponse->getBody());
-		} catch (JsonException $ex) {}
-
-		return null;
+		return Utils::jsonDecode($this->rawResponse);
 	}
 }

@@ -8,7 +8,7 @@ use Zaxbux\BackblazeB2\Object\File\DownloadOptions;
 use Zaxbux\BackblazeB2\Response\FileDownload;
 use Zaxbux\BackblazeB2\Utils;
 
-/** @package Zaxbux\BackblazeB2\Helpers */
+/** @package BackblazeB2\Helpers */
 class DownloadHelper extends AbstractHelper {
 	/**
 	 * Internal method to save/stream files.

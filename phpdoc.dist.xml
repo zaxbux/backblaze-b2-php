@@ -6,14 +6,26 @@
         xsi:noNamespaceSchemaLocation="https://docs.phpdoc.org/latest/phpdoc.xsd"
 >
     <paths>
-        <output>docs/build/api</output>
-        <cache>docs/build/cache</cache>
+        <output>build/docs</output>
+        <cache>build/docs/cache</cache>
     </paths>
     <version number="2.0.0">
+        <folder>latest</folder>
         <api>
             <source dsn=".">
                 <path>src</path>
             </source>
+            <output>api</output>
+            <default-package-name>BackblazeB2</default-package-name>
+            <!--<markers>
+                <marker></marker>
+            </markers>-->
         </api>
+        <guide format="md">
+            <source dsn=".">
+                <path>docs</path>
+            </source>
+            <output>docs</output>
+        </guide>
     </version>
 </phpdocumentor>

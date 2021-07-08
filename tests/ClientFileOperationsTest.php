@@ -21,9 +21,9 @@ class ClientFileOperationsTest extends ClientTestBase
 			'newFileName'
 		);
 
-		$this->assertInstanceOf(File::class, $newFile);
-		$this->assertEquals('newFileName', $newFile->getName());
-		$this->assertEquals('newFileId', $newFile->getId());
+		static::assertInstanceOf(File::class, $newFile);
+		static::assertEquals('newFileName', $newFile->getName());
+		static::assertEquals('newFileId', $newFile->getId());
 	}
 
 	public function testDeleteFileVersion()
@@ -35,7 +35,7 @@ class ClientFileOperationsTest extends ClientTestBase
 
 		$fileId = $this->client->getFileByName('Test file.bin', 'bucketId')->getId();
 
-		$this->assertInstanceOf(File::class, $this->client->deleteFileVersion('Test file.bin', $fileId));
+		static::assertInstanceOf(File::class, $this->client->deleteFileVersion('Test file.bin', $fileId));
 	}
 	
 
@@ -52,7 +52,7 @@ class ClientFileOperationsTest extends ClientTestBase
 
 		$file = $this->client->deleteFileVersion('fileId');
 
-		$this->assertInstanceOf(File::class, $file);
+		static::assertInstanceOf(File::class, $file);
 	}
 
 	public function testDeletingNonExistentFileThrowsException()
@@ -63,7 +63,7 @@ class ClientFileOperationsTest extends ClientTestBase
 			MockResponse::fromFile('delete_file_non_existent.json', 400),
 		);
 
-		$this->assertNull($this->client->deleteFileVersion('fileId', 'fileName'));
+		static::assertNull($this->client->deleteFileVersion('fileId', 'fileName'));
 	}
 
 	public function testGetFileInfo()
@@ -76,7 +76,7 @@ class ClientFileOperationsTest extends ClientTestBase
 
 		$file = $this->client->getFileInfo('file_id');
 
-		$this->assertInstanceOf(File::class, $file);
+		static::assertInstanceOf(File::class, $file);
 	}
 
 	public function testHideFile()
@@ -90,7 +90,7 @@ class ClientFileOperationsTest extends ClientTestBase
 
 		$file = $this->client->hideFile('testfile.bin', 'bucketId');
 
-		$this->assertInstanceOf(File::class, $file);
+		static::assertInstanceOf(File::class, $file);
 	}
 
 	public function testListFileNames()
@@ -104,10 +104,10 @@ class ClientFileOperationsTest extends ClientTestBase
 
 		$response = $this->client->listFileNames('bucketId');
 
-		$this->assertInstanceOf(FileList::class, $response);
-		$this->assertCount(3, $response->getFilesArray());
-		$this->assertEquals(null, $response->getNextFileId());
-		$this->assertEquals(null, $response->getNextFileName());
+		static::assertInstanceOf(FileList::class, $response);
+		static::assertCount(3, $response);
+		static::assertEquals(null, $response->getNextFileId());
+		static::assertEquals(null, $response->getNextFileName());
 	}
 
 	public function testListFileVersions()
@@ -121,10 +121,10 @@ class ClientFileOperationsTest extends ClientTestBase
 
 		$response = $this->client->listFileVersions('bucketId');
 
-		$this->assertInstanceOf(FileList::class, $response);
-		$this->assertCount(3, $response->getFilesArray());
-		$this->assertEquals(null, $response->getNextFileId());
-		$this->assertEquals(null, $response->getNextFileName());
+		static::assertInstanceOf(FileList::class, $response);
+		static::assertCount(3, $response);
+		static::assertEquals(null, $response->getNextFileId());
+		static::assertEquals(null, $response->getNextFileName());
 	}
 
 	public function testUpdateLegalFileHold()
@@ -138,7 +138,7 @@ class ClientFileOperationsTest extends ClientTestBase
 
 		$file = $this->client->updateFileLegalHold('file_id', 'file_name', FileLock::LEGAL_HOLD_ENABLED);
 
-		$this->assertInstanceOf(File::class, $file);
+		static::assertInstanceOf(File::class, $file);
 	}
 
 	public function testUpdateLegalFileHoldWithoutFileName()
@@ -153,7 +153,7 @@ class ClientFileOperationsTest extends ClientTestBase
 
 		$file = $this->client->updateFileLegalHold('file_id', null, FileLock::LEGAL_HOLD_ENABLED);
 
-		$this->assertInstanceOf(File::class, $file);
+		static::assertInstanceOf(File::class, $file);
 	}
 
 	public function testUpdateFileRetention()
@@ -170,7 +170,7 @@ class ClientFileOperationsTest extends ClientTestBase
 			'remainUntilTimestamp' => 0
 		]);
 
-		$this->assertInstanceOf(File::class, $file);
+		static::assertInstanceOf(File::class, $file);
 	}
 
 	public function testUpdateFileRetentionWithoutFileName()
@@ -188,7 +188,7 @@ class ClientFileOperationsTest extends ClientTestBase
 			'remainUntilTimestamp' => 0
 		]);
 
-		$this->assertInstanceOf(File::class, $file);
+		static::assertInstanceOf(File::class, $file);
 	}
 	
 
@@ -201,9 +201,9 @@ class ClientFileOperationsTest extends ClientTestBase
 
 		$files = $this->client->listAllFileNames('bucketId');
 
-		$this->assertIsIterable($files);
-		$this->assertInstanceOf(File::class, $files->current());
-		$this->assertCount(1500, $files);
+		static::assertIsIterable($files);
+		static::assertInstanceOf(File::class, $files->current());
+		static::assertCount(1500, $files);
 	}
 
 	public function testListFileNamesWithNoFiles()
@@ -213,9 +213,9 @@ class ClientFileOperationsTest extends ClientTestBase
 		);
 
 		$response = $this->client->listFileNames('bucketId');
-		$this->assertInstanceOf(FileList::class, $response);
-		$files = $response->getFilesArray();
-		$this->assertCount(0, $files);
+		static::assertInstanceOf(FileList::class, $response);
+		// /$files = $response->getFilesArray();
+		static::assertCount(0, $response);
 	}
 
 	public function testListAllFileVersions()
@@ -231,7 +231,7 @@ class ClientFileOperationsTest extends ClientTestBase
 
 		$file = $this->client->getFileById('fileId', 'bucketId');
 
-		$this->assertInstanceOf(File::class, $file);
+		static::assertInstanceOf(File::class, $file);
 	}
 
 	public function testGettingNonExistentFileThrowsException()
@@ -257,11 +257,11 @@ class ClientFileOperationsTest extends ClientTestBase
 
 		$response = $this->client->deleteAllFileVersions('fileId', null, null, null, 'bucketId');
 
-		$this->assertInstanceOf(FileList::class, $response);
+		static::assertInstanceOf(FileList::class, $response);
 
-		$files = $response->getFilesArray();
-		$this->assertCount(3, $files);
-		$this->assertContainsOnlyInstancesOf(File::class, $files);
+		//$files = $response->getFilesArray();
+		static::assertCount(3, $response);
+		static::assertContainsOnlyInstancesOf(File::class, $response);
 	}
 	
 }

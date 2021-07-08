@@ -2,16 +2,15 @@
 
 namespace Zaxbux\BackblazeB2\Response;
 
-use Iterator;
-use Psr\Http\Message\ResponseInterface;
 use Zaxbux\BackblazeB2\Object\File;
-use Zaxbux\BackblazeB2\Utils;
 
-/** @package Zaxbux\BackblazeB2\Response */
-class FileList extends AbstractListResponse {
+/** @package BackblazeB2\Response */
+class FileList extends AbstractListResponse
+{
+	public const ATTRIBUTE_FILES                 = 'files';
+	public const ATTRIBUTE_NEXT_FILE_ID          = 'nextFileId';
+	public const ATTRIBUTE_NEXT_FILE_NAME        = 'nextFileName';
 	
-	/** @var Iterator<File> */
-	private $files;
 	
 	/** @var string */
 	private $nextFileId;
@@ -20,41 +19,21 @@ class FileList extends AbstractListResponse {
 	private $nextFileName;
 
 	public function __construct(
-		iterable $files,
+		?array $files = [],
 		?string $nextFileId = null,
 		?string $nextFileName = null
 	) {
-			$this->files        = $files;
-			$this->nextFileId   = $nextFileId;
-			$this->nextFileName = $nextFileName;
+		parent::__construct($files);
+		$this->nextFileId   = $nextFileId;
+		$this->nextFileName = $nextFileName;
 	}
 
-	/**
-	 * Get the value of files.
-	 */ 
-	public function getFiles(): Iterator
+	public function current(): File
 	{
-		return $this->files;
+		$value = parent::current();
+		return $value instanceof File ? $value : File::fromArray($value);
 	}
 
-	/**
-	 * Get the value of files.
-	 * 
-	 * @return iterable<File>
-	 */ 
-	public function getFilesArray(): iterable
-	{
-		return iterator_to_array($this->getFiles());
-	}
-
-	/**
-	 * 
-	 * @return null|File 
-	 */
-	public function first(): ?File
-	{
-		return $this->getFiles()->current();
-	}
 
 	/**
 	 * Get the value of nextFileId.
@@ -72,21 +51,14 @@ class FileList extends AbstractListResponse {
 		return $this->nextFileName;
 	}
 
-	/**
-	 * @inheritdoc
-	 * 
-	 * @return FileList
-	 */
-	public static function fromResponse(ResponseInterface $response): FileList
+	protected static function fromArray($data): FileList
 	{
-		$data = Utils::jsonDecode((string) $response->getBody(), true);
-
-		return new FileList(
-			static::createObjectIterable(File::class, $data[File::ATTRIBUTE_FILES]),
+		return new static(
+			$data[static::ATTRIBUTE_FILES],
 			// Not set when listing files by name
-			$data[File::ATTRIBUTE_NEXT_FILE_ID] ?? null,
+			$data[static::ATTRIBUTE_NEXT_FILE_ID] ?? null,
 			// Not set when listing large files
-			$data[File::ATTRIBUTE_NEXT_FILE_NAME] ?? null
+			$data[static::ATTRIBUTE_NEXT_FILE_NAME] ?? null
 		);
 	}
 }

@@ -13,7 +13,7 @@ use Zaxbux\BackblazeB2\Response\BucketList;
 use Zaxbux\BackblazeB2\Object\Bucket\BucketType;
 use Zaxbux\BackblazeB2\Utils;
 
-/** @package Zaxbux\BackblazeB2\Operations */
+/** @package BackblazeB2\Operations */
 trait BucketOperationsTrait
 {
 
@@ -57,7 +57,7 @@ trait BucketOperationsTrait
 			]),
 		]);
 
-		return Bucket::fromArray(Utils::jsonDecode($response));
+		return Bucket::fromResponse($response);
 	}
 
 	/**
@@ -85,7 +85,7 @@ trait BucketOperationsTrait
 			]
 		]);
 
-		return Bucket::fromArray(Utils::jsonDecode($response));
+		return Bucket::fromResponse($response);
 	}
 
 	/**
@@ -106,9 +106,9 @@ trait BucketOperationsTrait
 	 *                              If "all" is specified, it must be the only type.
 	 */
 	public function listBuckets(
+		?array $bucketTypes = null,
 		?string $bucketId = null,
-		?string $bucketName = null,
-		?array $bucketTypes = null
+		?string $bucketName = null
 	): BucketList {
 		$response = $this->http->request('POST', Endpoint::LIST_BUCKETS, [
 			'json' => Utils::filterRequestOptions([
@@ -162,7 +162,7 @@ trait BucketOperationsTrait
 			])
 		]);
 
-		return Bucket::fromArray(Utils::jsonDecode($response));
+		return Bucket::fromResponse($response);
 	}
 
 	/**
@@ -177,9 +177,9 @@ trait BucketOperationsTrait
 		?string $bucketId = null,
 		?array $bucketTypes = null
 	): Bucket {
-		$response = $this->listBuckets($bucketId, null, $bucketTypes);
+		$response = $this->listBuckets($bucketTypes, $bucketId);
 
-		$buckets = $response->getBucketsArray();
+		$buckets = $response->getArrayCopy();
 
 		if (count($buckets) !== 1) {
 			throw new NotFoundException(sprintf('Bucket "%s" not found.', $bucketId));
@@ -200,12 +200,12 @@ trait BucketOperationsTrait
 	{
 		$response = $this->listBuckets(null, $bucketName, $bucketTypes);
 
-		$buckets = $response->getBucketsArray();
+		//$buckets = $response->getArrayCopy();
 
-		if (count($buckets) !== 1) {
+		if (!$response->valid()) {
 			throw new NotFoundException(sprintf('Bucket "%s" not found.', $bucketName));
 		}
 
-		return $buckets[0];
+		return $response->current();
 	}
 }

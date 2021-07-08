@@ -10,7 +10,7 @@ use Zaxbux\BackblazeB2\Object\AccountAuthorization;
 /**
  * A builtin authorization cache.
  * 
- * @package Zaxbux\BackblazeB2\Classes
+ * @package BackblazeB2\Classes
  */
 class BuiltinAuthorizationCache implements AuthorizationCacheInterface
 {

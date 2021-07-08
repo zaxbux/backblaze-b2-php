@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Zaxbux\BackblazeB2\Operations;
 
-use AppendIterator;
-use NoRewindIterator;
 use Zaxbux\BackblazeB2\Http\Endpoint;
 use Zaxbux\BackblazeB2\Object\AccountAuthorization;
 use Zaxbux\BackblazeB2\Object\File;
@@ -17,7 +15,7 @@ use Zaxbux\BackblazeB2\Response\FileList;
 use Zaxbux\BackblazeB2\Response\FilePartList;
 use Zaxbux\BackblazeB2\Utils;
 
-/** @package Zaxbux\BackblazeB2\Operations */
+/** @package BackblazeB2\Operations */
 trait LargeFileOperationsTrait
 {
 
@@ -44,7 +42,7 @@ trait LargeFileOperationsTrait
 			],
 		]);
 
-		return File::fromArray(Utils::jsonDecode($response));
+		return File::fromResponse($response);
 	}
 
 	/**
@@ -88,7 +86,7 @@ trait LargeFileOperationsTrait
 			]),
 		]);
 
-		return File::fromArray(Utils::jsonDecode($response));
+		return File::fromResponse($response);
 	}
 
 	/**
@@ -113,7 +111,7 @@ trait LargeFileOperationsTrait
 			]
 		]);
 
-		return File::fromArray(Utils::jsonDecode($response));
+		return File::fromResponse($response);
 	}
 
 	/**
@@ -134,7 +132,7 @@ trait LargeFileOperationsTrait
 			]
 		]);
 
-		return UploadPartUrl::fromArray(Utils::jsonDecode($response));
+		return UploadPartUrl::fromResponse($response);
 	}
 
 	/**
@@ -245,7 +243,7 @@ trait LargeFileOperationsTrait
 			])
 		]);
 
-		return File::fromArray(Utils::jsonDecode($response));
+		return File::fromResponse($response);
 	}
 
 	/**
@@ -288,7 +286,7 @@ trait LargeFileOperationsTrait
 			], $serverSideEncryption->getHeaders() ?? []),
 		]);
 
-		return File::fromArray(Utils::jsonDecode($response));
+		return File::fromResponse($response);
 	}
 
 	/**
@@ -302,14 +300,14 @@ trait LargeFileOperationsTrait
 		string $fileId,
 		int $startPartNumber = null
 	): iterable {
-		$allParts = new AppendIterator();
+		$allParts = new FileList();
 		$nextPartNumber = $startPartNumber ?? 0;
 
 		while ($nextPartNumber !== null) {
-			$parts          = $this->listParts($fileId, $startPartNumber);
-			$nextPartNumber = $parts->getNextPartNumber();
+			$response       = $this->listParts($fileId, $startPartNumber);
+			$nextPartNumber = $response->getNextPartNumber();
 
-			$allParts->append(new NoRewindIterator($parts->getParts()));
+			$allParts->mergeList($response);
 		}
 
 		return $allParts;
@@ -330,14 +328,14 @@ trait LargeFileOperationsTrait
 		?int $maxFileCount = 100
 	): iterable {
 
-		$allFiles = new AppendIterator();
+		$allFiles = new FileList();
 		$nextFileId = $startFileId ?? '';
 
 		while ($nextFileId !== null) {
-			$files = $this->listUnfinishedLargeFiles($bucketId, $namePrefix, $startFileId, $maxFileCount);
-			$nextFileId = $files->getNextFileId();
+			$response   = $this->listUnfinishedLargeFiles($bucketId, $namePrefix, $startFileId, $maxFileCount);
+			$nextFileId = $response->getNextFileId();
 
-			$allFiles->append(new NoRewindIterator($files->getFiles()));
+			$allFiles->mergeList($response);
 		}
 
 		return $allFiles;

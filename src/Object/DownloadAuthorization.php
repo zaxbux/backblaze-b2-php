@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace Zaxbux\BackblazeB2\Object;
 
 use Zaxbux\BackblazeB2\Interfaces\B2ObjectInterface;
+use Zaxbux\BackblazeB2\Traits\HydrateFromResponseTrait;
 use Zaxbux\BackblazeB2\Traits\ProxyArrayAccessToPropertiesTrait;
 
-/** @package Zaxbux\BackblazeB2\Object */
+/** @package BackblazeB2\Object */
 class DownloadAuthorization implements B2ObjectInterface
 {
 	use ProxyArrayAccessToPropertiesTrait;
+	use HydrateFromResponseTrait;
 
 	public const ATTRIBUTE_BUCKET_ID           = 'bucketId';
 	public const ATTRIBUTE_FILE_NAME_PREFIX    = 'fileNamePrefix';

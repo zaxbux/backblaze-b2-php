@@ -9,12 +9,14 @@ use function sprintf;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 use RuntimeException;
+use Zaxbux\BackblazeB2\Traits\ResponseTrait;
 
 /** 
  * A response representing a file download.
- * @package Zaxbux\BackblazeB2\Response
+ * @package BackblazeB2\Response
  */
-class FileDownload extends AbstractResponse {
+class FileDownload {
+	use ResponseTrait;
 
 	/** @var string */
 	private $filePath;
@@ -23,7 +25,7 @@ class FileDownload extends AbstractResponse {
 		ResponseInterface $response,
 		?string $filePath = null
 	) {
-		parent::__construct($response);
+		$this->rawResponse = $response;
 		$this->filePath = $filePath;
 	}
 

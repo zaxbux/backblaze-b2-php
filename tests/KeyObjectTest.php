@@ -22,7 +22,7 @@ class KeyObjectTest extends KeyObjectTestBase
 
 	public function testKeyList()
 	{
-		$keys = static::createKeys(1000);
+		$keys = static::createKeys(10);
 
 		$keyList = new KeyList($keys);
 
@@ -32,8 +32,8 @@ class KeyObjectTest extends KeyObjectTestBase
 	public function testKeyListFromResponse()
 	{
 		$keyList = KeyList::fromResponse(new Response(200, [], json_encode([
-			Key::ATTRIBUTE_KEYS => static::createKeys(1000),
-			Key::ATTRIBUTE_NEXT_APPLICATION_KEY_ID => null,
+			KeyList::ATTRIBUTE_KEYS => static::createKeys(10),
+			KeyList::ATTRIBUTE_NEXT_APPLICATION_KEY_ID => null,
 		])));
 
 		static::isKeyList($keyList);

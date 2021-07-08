@@ -9,7 +9,7 @@ use Zaxbux\BackblazeB2\Interfaces\AuthorizationCacheInterface;
 /**
  * The main configuration object for the client.
  * 
- * @package Zaxbux\BackblazeB2
+ * @package BackblazeB2
  */
 class Config
 {
@@ -89,13 +89,13 @@ class Config
 	 * Maximum number of application keys to return per call.
 	 * @var int
 	 */
-	public $maxKeyCount;
+	private $maxKeyCount;
 
 	/**
 	 * Maximum number of files to return per call.
 	 * @var int
 	 */
-	public $maxFileCount;
+	private $maxFileCount;
 
 	/**
 	 * Size limit to determine if the upload will use the large-file process.
@@ -132,6 +132,16 @@ class Config
 	public function authorizationCache(): AuthorizationCacheInterface
 	{
 		return $this->authorizationCache;
+	}
+
+	public function maxKeyCount(): int
+	{
+		return $this->maxKeyCount;
+	}
+
+	public function maxFileCount(): int
+	{
+		return $this->maxFileCount;
 	}
 
 	public function __construct(

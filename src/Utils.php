@@ -9,7 +9,7 @@ use GuzzleHttp\Utils as GuzzleUtils;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 
-/** @package Zaxbux\BackblazeB2 */
+/** @package BackblazeB2 */
 final class Utils
 {
 	/**
@@ -96,6 +96,11 @@ final class Utils
 		return sprintf('%s %s+php/%s %s', $appName, Client::USER_AGENT_PREFIX . Client::VERSION, PHP_VERSION, GuzzleUtils::defaultUserAgent());
 	}
 
+	/**
+	 * 
+	 * @param string|ResponseInterface $data 
+	 * @return array 
+	 */
 	public static function jsonDecode($data): array
 	{
 		if ($data instanceof ResponseInterface) {

@@ -2,7 +2,7 @@
 
 namespace Zaxbux\BackblazeB2\Http;
 
-/** @package Zaxbux\BackblazeB2\Http */
+/** @package BackblazeB2\Http */
 final class StatusCode
 {
 	public const HTTP_CONTINUE = 100;

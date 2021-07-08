@@ -9,13 +9,15 @@ use Zaxbux\BackblazeB2\Interfaces\B2ObjectInterface;
 use Zaxbux\BackblazeB2\Classes\FilePathInfo;
 use Zaxbux\BackblazeB2\Object\File\FileInfo;
 use Zaxbux\BackblazeB2\Object\File\ServerSideEncryption;
+use Zaxbux\BackblazeB2\Traits\HydrateFromResponseTrait;
 use Zaxbux\BackblazeB2\Traits\ProxyArrayAccessToPropertiesTrait;
 
 
-/** @package Zaxbux\BackblazeB2\Object */
+/** @package BackblazeB2\Object */
 class File implements B2ObjectInterface
 {
 	use ProxyArrayAccessToPropertiesTrait;
+	use HydrateFromResponseTrait;
 
 	public const ATTRIBUTE_ACCOUNT_ID            = 'accountId';
 	public const ATTRIBUTE_ACTION                = 'action';
@@ -33,19 +35,14 @@ class File implements B2ObjectInterface
 	public const ATTRIBUTE_FILE_NAME             = 'fileName';
 	public const ATTRIBUTE_FILE_NAME_PREFIX      = 'fileNamePrefix';
 	public const ATTRIBUTE_FILE_RETENTION        = 'fileRetention';
-	public const ATTRIBUTE_FILES                 = 'files';
 	public const ATTRIBUTE_LARGE_FILE_ID         = 'largeFileId';
 	public const ATTRIBUTE_LEGAL_HOLD            = 'legalHold';
 	public const ATTRIBUTE_MAX_FILE_COUNT        = 'maxFileCount';
 	public const ATTRIBUTE_MAX_PART_COUNT        = 'maxPartCount';
 	public const ATTRIBUTE_METADATA_DIRECTIVE    = 'metadataDirective';
 	public const ATTRIBUTE_NAME_PREFIX           = 'namePrefix';
-	public const ATTRIBUTE_NEXT_FILE_ID          = 'nextFileId';
-	public const ATTRIBUTE_NEXT_FILE_NAME        = 'nextFileName';
-	public const ATTRIBUTE_NEXT_PART_NUMBER      = 'nextPartNumber';
 	public const ATTRIBUTE_PART_NUMBER           = 'partNumber';
 	public const ATTRIBUTE_PART_SHA1_ARRAY       = 'partSha1Array';
-	public const ATTRIBUTE_PARTS                 = 'parts';
 	public const ATTRIBUTE_PREFIX                = 'prefix';
 	public const ATTRIBUTE_RANGE                 = 'range';
 	public const ATTRIBUTE_SOURCE_FILE_ID        = 'sourceFileId';
