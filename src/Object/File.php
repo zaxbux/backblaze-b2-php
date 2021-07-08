@@ -56,6 +56,12 @@ class File implements B2ObjectInterface
 
 	public const CONTENT_TYPE_AUTO = 'b2/x-auto';
 
+	/**
+	 * Since B2 has no support for directories,
+	 * objects ending with this suffix can be treated like a directory.
+	 */
+	public const VIRTUAL_DIRECTORY_SUFFIX = '.bzEmpty';
+
 	public const METADATA_DIRECTIVE_COPY    = 'COPY';
 	public const METADATA_DIRECTIVE_REPLACE = 'REPLACE';
 
