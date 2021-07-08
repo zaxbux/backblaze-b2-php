@@ -58,7 +58,7 @@ class ApplicationKeyOperationsHelper extends AbstractHelper {
 	public function delete(): Key
 	{
 		$this->assertApplicationKeyIsSet();
-		$this->applicationKey = $this->client->deleteKey($this->applicationKey->getApplicationKeyId());
+		$this->applicationKey = $this->client->deleteKey($this->applicationKey->applicationKeyId());
 		return $this->applicationKey;
 	}
 

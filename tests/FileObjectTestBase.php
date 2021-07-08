@@ -40,24 +40,24 @@ abstract class FileObjectTestBase extends TestCase
 	protected static function isFileObject($file): void
 	{
 		static::assertInstanceOf(File::class, $file);
-		static::assertIsString($file->getId());
-		static::assertIsString($file->getName());
-		static::assertIsString($file->getBucketId());
-		static::assertInstanceOf(FileActionType::class, $file->getAction());
-		static::assertEquals(FileActionType::UPLOAD, $file->getAction());
-		static::assertInstanceOf(FileInfo::class, $file->getInfo());
-		static::assertIsInt($file->getContentLength());
-		static::assertIsString($file->getContentType());
-		static::assertEquals($file->getContentMd5(), md5('backblaze'));
-		static::assertEquals($file->getContentSha1(), sha1('backblaze'));
-		static::assertIsString($file->getAccountId());
-		//static::assertInstanceOf(FileLock::class, $file->getFileLock());
-		static::assertInstanceOf(ServerSideEncryption::class, $file->getServerSideEncryption());
-		static::assertEquals($file->getPartNumber(), null);
-		static::assertInstanceOf(FilePathInfo::class, $file->getPathInfo());
-		static::assertEqualsWithDelta(Utils::nowInMilliseconds(), $file->getUploadTimestamp(), 100);
-		static::assertEqualsWithDelta(Utils::nowInMilliseconds(), $file->getLastModifiedTimestamp(), 100);
-		static::assertEquals('extension', $file->getPathInfo()->extension);
+		static::assertIsString($file->id());
+		static::assertIsString($file->name());
+		static::assertIsString($file->bucketId());
+		static::assertInstanceOf(FileActionType::class, $file->action());
+		static::assertEquals(FileActionType::UPLOAD, $file->action());
+		static::assertInstanceOf(FileInfo::class, $file->info());
+		static::assertIsInt($file->contentLength());
+		static::assertIsString($file->contentType());
+		static::assertEquals($file->contentMd5(), md5('backblaze'));
+		static::assertEquals($file->contentSha1(), sha1('backblaze'));
+		static::assertIsString($file->accountId());
+		//static::assertInstanceOf(FileLock::class, $file->fileLock());
+		static::assertInstanceOf(ServerSideEncryption::class, $file->serverSideEncryption());
+		static::assertEquals($file->partNumber(), null);
+		static::assertInstanceOf(FilePathInfo::class, $file->pathInfo());
+		static::assertEqualsWithDelta(Utils::nowInMilliseconds(), $file->uploadTimestamp(), 100);
+		static::assertEqualsWithDelta(Utils::nowInMilliseconds(), $file->lastModifiedTimestamp(), 100);
+		static::assertEquals('extension', $file->pathInfo()->extension);
 		static::assertJson(json_encode($file));
 	}
 }

@@ -45,7 +45,7 @@ class FileOperationsHelper extends AbstractHelper {
 	): File {
 		$this->assertFileIsSet();
 		return $this->client->copyFile(
-			$this->file->getId(),
+			$this->file->id(),
 			$fileName,
 			$destinationBucketId,
 			$range,
@@ -62,27 +62,27 @@ class FileOperationsHelper extends AbstractHelper {
 	public function deleteVersion(?bool $bypassGovernance = false): File
 	{
 		$this->assertFileIsSet();
-		return $this->client->deleteFileVersion($this->file->getId(), $this->file->getName(), $bypassGovernance);
+		return $this->client->deleteFileVersion($this->file->id(), $this->file->name(), $bypassGovernance);
 	}
 
 	public function hide(): File
 	{
 		$this->assertFileIsSet();
-		return $this->client->hideFile($this->file->getId());
+		return $this->client->hideFile($this->file->id());
 	}
 
 	public function updateLegalHold(string $legalHold): File
 	{
 		$this->assertFileIsSet();
-		return $this->client->updateFileLegalHold($this->file->getId(), $this->file->getName(), $legalHold);
+		return $this->client->updateFileLegalHold($this->file->id(), $this->file->name(), $legalHold);
 	}
 
 	public function updateRetention(array $retention, ?bool $bypassGovernance = false): File
 	{
 		$this->assertFileIsSet();
 		return $this->client->updateFileRetention(
-			$this->file->getId(),
-			$this->file->getName(),
+			$this->file->id(),
+			$this->file->name(),
 			$retention,
 			$bypassGovernance
 		);
@@ -92,8 +92,8 @@ class FileOperationsHelper extends AbstractHelper {
 	{
 		$this->assertFileIsSet();
 		return $this->client->deleteAllFileVersions(
-			$this->file->getId(),
-			$this->file->getName(),
+			$this->file->id(),
+			$this->file->name(),
 			null,
 			null,
 			null,
@@ -109,7 +109,7 @@ class FileOperationsHelper extends AbstractHelper {
 		$this->assertFileIsSet();
 
 		return $this->client->downloadFileById(
-			$this->file->getId(),
+			$this->file->id(),
 			$options,
 			$sink,
 			$headersOnly

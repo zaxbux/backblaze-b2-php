@@ -20,7 +20,7 @@ class ClientDownloadTest extends ClientTestBase
 			60
 		);
 
-		static::assertEquals('downloadAuthToken', $authorization->getAuthorizationToken());
+		static::assertEquals('downloadAuthToken', $authorization->authorizationToken());
 	}
 
 	public function testDownloadByIdWithoutSavePath()

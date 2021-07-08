@@ -169,14 +169,14 @@ class Client
 		return $client;
 	}
 
-	public function getAllowedBucketId(): ?string
+	public function allowedBucketId(): ?string
 	{
-		return $this->accountAuthorization->getAllowed('bucketId') ?? null;
+		return $this->accountAuthorization->allowed('bucketId') ?? null;
 	}
 
-	public function getAllowedBucketName(): ?string
+	public function allowedBucketName(): ?string
 	{
-		return $this->accountAuthorization->getAllowed('bucketName') ?? null;
+		return $this->accountAuthorization->allowed('bucketName') ?? null;
 	}
 
 	/**

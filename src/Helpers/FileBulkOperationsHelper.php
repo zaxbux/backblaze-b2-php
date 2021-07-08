@@ -37,7 +37,7 @@ class FileBulkOperationsHelper extends AbstractHelper
 	public function updateLegalHold(string $legalHold): FileList
 	{
 		return $this->apply(function(File $version) use ($legalHold) {
-			$this->client->updateFileLegalHold($version->getId(), $version->getName(), $legalHold);
+			$this->client->updateFileLegalHold($version->id(), $version->name(), $legalHold);
 		});
 	}
 
@@ -45,8 +45,8 @@ class FileBulkOperationsHelper extends AbstractHelper
 	{
 		return $this->apply(function($version) use ($fileRetention, $bypassGovernance) {
 			$this->client->updateFileRetention(
-				$version->getId(),
-				$version->getName(),
+				$version->id(),
+				$version->name(),
 				$fileRetention,
 				$bypassGovernance
 			);

@@ -37,7 +37,7 @@ class UploadUrl {
 	/**
 	 * Get the value of bucketId.
 	 */ 
-	public function getBucketId(): string
+	public function bucketId(): string
 	{
 		return $this->bucketId;
 	}
@@ -45,7 +45,7 @@ class UploadUrl {
 	/**
 	 * Get the value of uploadUrl.
 	 */ 
-	public function getUploadUrl(): string
+	public function uploadUrl(): string
 	{
 		return $this->uploadUrl;
 	}
@@ -53,7 +53,7 @@ class UploadUrl {
 	/**
 	 * Get the value of authorizationToken.
 	 */ 
-	public function getAuthorizationToken(): string
+	public function authorizationToken(): string
 	{
 		return $this->authorizationToken;
 	}

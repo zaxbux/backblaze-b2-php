@@ -47,7 +47,7 @@ class FileLock implements JsonSerializable, ArrayAccess {
 	/**
 	 * Get the value of fileRetentionMode
 	 */ 
-	public function getFileRetentionMode(): string
+	public function fileRetentionMode(): string
 	{
 		return $this->fileRetentionMode;
 	}
@@ -65,7 +65,7 @@ class FileLock implements JsonSerializable, ArrayAccess {
 	/**
 	 * Get the value of fileRetentionPeriod
 	 */ 
-	public function getFileRetentionPeriod(): int
+	public function fileRetentionPeriod(): int
 	{
 		return $this->fileRetentionPeriod;
 	}
@@ -83,7 +83,7 @@ class FileLock implements JsonSerializable, ArrayAccess {
 	/**
 	 * Get the value of legalHold
 	 */ 
-	public function getLegalHold(): string
+	public function legalHold(): string
 	{
 		return $this->legalHold ? static::LEGAL_HOLD_ENABLED : static::LEGAL_HOLD_DISABLED;
 	}

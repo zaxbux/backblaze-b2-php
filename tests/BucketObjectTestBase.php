@@ -45,19 +45,19 @@ abstract class BucketObjectTestBase extends TestCase
 	protected static function isBucketObject($bucket): void
 	{
 		static::assertInstanceOf(Bucket::class, $bucket);
-		static::assertIsString($bucket->getId());
-		static::assertIsString($bucket->getName());
-		static::assertIsString($bucket->getType());
-		static::assertInstanceOf(BucketInfo::class, $bucket->getInfo());
-		static::assertEquals('max-age=3600', $bucket->getInfo()->get('Cache-Control'));
-		static::assertIsString($bucket->getAccountId());
-		static::assertIsArray($bucket->getCorsRules());
-		static::assertIsArray($bucket->getLifecycleRules());
-		static::assertIsArray($bucket->getDefaultServerSideEncryption());
-		static::assertIsArray($bucket->getFileLockConfiguration());
-		static::assertIsArray($bucket->getOptions());
-		static::assertIsInt($bucket->getRevision());
-		static::assertEquals(8, $bucket->getRevision());
+		static::assertIsString($bucket->id());
+		static::assertIsString($bucket->name());
+		static::assertIsString($bucket->type());
+		static::assertInstanceOf(BucketInfo::class, $bucket->info());
+		static::assertEquals('max-age=3600', $bucket->info()->get('Cache-Control'));
+		static::assertIsString($bucket->accountId());
+		static::assertIsArray($bucket->corsRules());
+		static::assertIsArray($bucket->lifecycleRules());
+		static::assertIsArray($bucket->defaultServerSideEncryption());
+		static::assertIsArray($bucket->fileLockConfiguration());
+		static::assertIsArray($bucket->options());
+		static::assertIsInt($bucket->revision());
+		static::assertEquals(8, $bucket->revision());
 	}
 
 	protected static function isBucketList($bucketList) {

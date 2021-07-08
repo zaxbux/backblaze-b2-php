@@ -63,15 +63,15 @@ abstract class KeyObjectTestBase extends TestCase
 	protected static function isKeyObject($key): void
 	{
 		static::assertInstanceOf(Key::class, $key);
-		static::assertIsString($key->getName());
-		static::assertIsString($key->getApplicationKeyId());
-		static::assertIsString($key->getApplicationKey());
-		static::assertIsArray($key->getCapabilities());
-		static::assertIsString($key->getAccountId());
-		static::assertIsInt($key->getExpirationTimestamp());
-		static::assertIsString($key->getBucketId());
-		static::assertIsString($key->getNamePrefix());
-		static::assertIsArray($key->getOptions());
+		static::assertIsString($key->name());
+		static::assertIsString($key->applicationKeyId());
+		static::assertIsString($key->applicationKey());
+		static::assertIsArray($key->capabilities());
+		static::assertIsString($key->accountId());
+		static::assertIsInt($key->expirationTimestamp());
+		static::assertIsString($key->bucketId());
+		static::assertIsString($key->namePrefix());
+		static::assertIsArray($key->options());
 	}
 
 	protected static function isKeyList($keyList) {

@@ -86,7 +86,7 @@ class AccountAuthorization implements B2ObjectInterface
 	/**
 	 * Get the value of accountId
 	 */
-	public function getAccountId(): ?string
+	public function accountId(): ?string
 	{
 		return $this->accountId;
 	}
@@ -94,7 +94,7 @@ class AccountAuthorization implements B2ObjectInterface
 	/**
 	 * Get the value of authorizationToken
 	 */
-	public function getAuthorizationToken(): ?string
+	public function authorizationToken(): ?string
 	{
 		return $this->authorizationToken;
 	}
@@ -104,7 +104,7 @@ class AccountAuthorization implements B2ObjectInterface
 	 * 
 	 * @return null|string|array
 	 */
-	public function getAllowed(?string $key = null)
+	public function allowed(?string $key = null)
 	{
 		if ($key) {
 			return $this->allowed[$key] ?? null;
@@ -116,7 +116,7 @@ class AccountAuthorization implements B2ObjectInterface
 	/**
 	 * Get the value of apiUrl
 	 */
-	public function getApiUrl(): ?string
+	public function apiUrl(): ?string
 	{
 		return $this->apiUrl;
 	}
@@ -124,7 +124,7 @@ class AccountAuthorization implements B2ObjectInterface
 	/**
 	 * Get the value of downloadUrl
 	 */
-	public function getDownloadUrl(): ?string
+	public function downloadUrl(): ?string
 	{
 		return $this->downloadUrl;
 	}
@@ -135,7 +135,7 @@ class AccountAuthorization implements B2ObjectInterface
 	 * 
 	 * @return int The recomended part size in bytes.
 	 */
-	public function getRecommendedPartSize(): ?int
+	public function recommendedPartSize(): ?int
 	{
 		return $this->recommendedPartSize;
 	}
@@ -146,7 +146,7 @@ class AccountAuthorization implements B2ObjectInterface
 	 * 
 	 * @return int The absolute minimum part size in bytes.
 	 */
-	public function getAbsoluteMinimumPartSize(): ?int
+	public function absoluteMinimumPartSize(): ?int
 	{
 		return $this->absoluteMinimumPartSize;
 	}
@@ -154,7 +154,7 @@ class AccountAuthorization implements B2ObjectInterface
 	/**
 	 * Get the value of s3ApiUrl
 	 */
-	public function getS3ApiUrl(): ?string
+	public function s3ApiUrl(): ?string
 	{
 		return $this->s3ApiUrl;
 	}

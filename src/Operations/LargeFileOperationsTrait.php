@@ -195,7 +195,7 @@ trait LargeFileOperationsTrait
 	): FileList {
 		$response = $this->http->request('POST', Endpoint::LIST_UNFINISHED_LARGE_FILES, [
 			'json' => Utils::filterRequestOptions([
-				File::ATTRIBUTE_BUCKET_ID      => $bucketId ?? $this->getAllowedBucketId(),
+				File::ATTRIBUTE_BUCKET_ID      => $bucketId ?? $this->allowedBucketId(),
 			], [
 				File::ATTRIBUTE_NAME_PREFIX   => $namePrefix,
 				File::ATTRIBUTE_START_FILE_ID => $startFileId,
@@ -234,7 +234,7 @@ trait LargeFileOperationsTrait
 
 		$response = $this->http->request('POST', Endpoint::START_LARGE_FILE, [
 			'json' => Utils::filterRequestOptions([
-				File::ATTRIBUTE_BUCKET_ID    => $bucketId ?? $this->getAllowedBucketId(),
+				File::ATTRIBUTE_BUCKET_ID    => $bucketId ?? $this->allowedBucketId(),
 				File::ATTRIBUTE_FILE_NAME    => $fileName,
 				File::ATTRIBUTE_CONTENT_TYPE => $contentType ?? File::CONTENT_TYPE_AUTO,
 			], [
@@ -278,12 +278,12 @@ trait LargeFileOperationsTrait
 			$metadata = FileUploadMetadata::fromResource($body);
 		}
 
-		$response = $this->http->request('POST', $uploadPartUrl->getUploadUrl(), [
+		$response = $this->http->request('POST', $uploadPartUrl->uploadUrl(), [
 			'body' => $body,
 			'headers' => self::filterRequestOptions([
-				'Authorization'                => $uploadPartUrl->getAuthorizationToken(),
-				'Content-Length'               => $metadata->getLength(),
-				File::HEADER_X_BZ_CONTENT_SHA1 => $metadata->getSha1(),
+				'Authorization'                => $uploadPartUrl->authorizationToken(),
+				'Content-Length'               => $metadata->length(),
+				File::HEADER_X_BZ_CONTENT_SHA1 => $metadata->sha1(),
 				File::HEADER_X_BZ_PART_NUMBER  => $partNumber,
 			], $serverSideEncryption->getHeaders() ?? []),
 		]);
@@ -335,7 +335,7 @@ trait LargeFileOperationsTrait
 
 		while ($nextFileId !== null) {
 			$response   = $this->listUnfinishedLargeFiles($bucketId, $namePrefix, $startFileId, $maxFileCount);
-			$nextFileId = $response->getNextFileId();
+			$nextFileId = $response->nextFileId();
 
 			$allFiles->mergeList($response);
 		}

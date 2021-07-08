@@ -20,8 +20,8 @@ class ClientLargeFileOperationsTest extends ClientTestBase
 		);
 
 		static::assertInstanceOf(File::class, $newFilePart);
-		static::assertEquals(1, $newFilePart->getPartNumber());
-		static::assertEquals('largeFileId', $newFilePart->getId());
+		static::assertEquals(1, $newFilePart->partNumber());
+		static::assertEquals('largeFileId', $newFilePart->id());
 	}
 
 	public function testCancelLargeFile()
@@ -35,7 +35,7 @@ class ClientLargeFileOperationsTest extends ClientTestBase
 		);
 
 		static::assertInstanceOf(File::class, $file);
-		static::assertEquals('largeFileId', $file->getId());
+		static::assertEquals('largeFileId', $file->id());
 	}
 
 	public function testListUnfinishedLargeFiles()

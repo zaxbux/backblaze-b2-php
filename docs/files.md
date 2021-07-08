@@ -13,7 +13,7 @@ $startFileName = null;
 $files = $client->listFileNames($bucketId, $prefix, $delimiter, $startFileName);
 
 foreach ($files as $file) {
-	echo($file->getName());
+	echo($file->name());
 }
 ```
 
@@ -26,7 +26,7 @@ To copy a file in the same bucket, simply:
 ```php
 $file = $client->copyFile($sourceFileId, $fileName);
 
-echo($file->getId());  // The file ID of the copied file
+echo($file->id());  // The file ID of the copied file
 ```
 
 For a more complex copy operation:
@@ -78,9 +78,9 @@ Properties:
  * `uploadTimestamp` - A UTC timestamp when the file was uploaded.
 
 Methods:
- * `getId()`
+ * `id()`
  * `setId()`
- * `getName()`
+ * `name()`
  * `setname()`
  * `getChecksum()`
  * `setChecksum()`
@@ -90,13 +90,13 @@ Methods:
  * `setType()`
  * `getInfo()`
  * `setInfo()`
- * `getBucketId()`
+ * `bucketId()`
  * `setBucketId()`
- * `getAccountId()`
+ * `accountId()`
  * `setAccountId()`
  * `getAction()`
  * `setAction()`
- * `getUploadTimestamp()`
+ * `uploadTimestamp()`
  * `setUploadTimestamp()`
  * `isUpload()` - Returns **true** if the object is a file.
  * `isUnfinishedLargeFile()` - Returns **true** if the object is a large file upload that is not finished.

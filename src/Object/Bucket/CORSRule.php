@@ -46,7 +46,7 @@ class CORSRule implements JsonSerializable {
 	 *
 	 * @return string
 	 */ 
-	public function getCorsRulename() {
+	public function corsRulename() {
 		return $this->corsRulename;
 	}
 
@@ -68,7 +68,7 @@ class CORSRule implements JsonSerializable {
 	 *
 	 * @return array
 	 */ 
-	public function getAllowedOrigins() {
+	public function allowedOrigins() {
 		return $this->allowedOrigins;
 	}
 
@@ -90,7 +90,7 @@ class CORSRule implements JsonSerializable {
 	 *
 	 * @return array
 	 */ 
-	public function getAllowedOperations() {
+	public function allowedOperations() {
 		return $this->allowedOperations;
 	}
 
@@ -112,7 +112,7 @@ class CORSRule implements JsonSerializable {
 	 *
 	 * @return array
 	 */ 
-	public function getAllowedHeaders() {
+	public function allowedHeaders() {
 		return $this->allowedHeaders;
 	}
 
@@ -134,7 +134,7 @@ class CORSRule implements JsonSerializable {
 	 *
 	 * @return array
 	 */ 
-	public function getExposeHeaders() {
+	public function exposeHeaders() {
 		return $this->exposeHeaders;
 	}
 
@@ -156,7 +156,7 @@ class CORSRule implements JsonSerializable {
 	 *
 	 * @return int
 	 */ 
-	public function getMaxAgeSeconds() {
+	public function maxAgeSeconds() {
 		return $this->maxAgeSeconds;
 	}
 

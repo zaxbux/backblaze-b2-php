@@ -17,8 +17,8 @@ class ClientTest extends ClientTestBase
 		static::assertInstanceOf(Config::class, $this->client->getConfig());
 		static::assertInstanceOf(ClientInterface::class, $this->client->getHttpClient());
 		static::assertInstanceOf(AccountAuthorization::class, $this->client->accountAuthorization());
-		static::assertEquals('bucket_id', $this->client->getAllowedBucketId());
-		static::assertEquals('bucket_name', $this->client->getAllowedBucketName());
+		static::assertEquals('bucket_id', $this->client->allowedBucketId());
+		static::assertEquals('bucket_name', $this->client->allowedBucketName());
 	}
 
 	/*

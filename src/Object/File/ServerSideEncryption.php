@@ -79,7 +79,7 @@ class ServerSideEncryption implements JsonSerializable, ArrayAccess {
 	/**
 	 * Get the value of mode.
 	 */ 
-	public function getMode(): string
+	public function mode(): string
 	{
 		return $this->mode;
 	}
@@ -106,7 +106,7 @@ class ServerSideEncryption implements JsonSerializable, ArrayAccess {
 	/**
 	 * Get the value of algorithm.
 	 */ 
-	public function getAlgorithm(): string
+	public function algorithm(): string
 	{
 		return $this->algorithm;
 	}

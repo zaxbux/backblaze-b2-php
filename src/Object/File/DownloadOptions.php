@@ -108,7 +108,7 @@ final class DownloadOptions implements ArrayAccess, JsonSerializable
 	/**
 	 * Get the value of contentDisposition.
 	 */ 
-	public function getContentDisposition(): ?string
+	public function contentDisposition(): ?string
 	{
 		return $this->contentDisposition;
 	}
@@ -128,7 +128,7 @@ final class DownloadOptions implements ArrayAccess, JsonSerializable
 	/**
 	 * Get the value of contentEncoding.
 	 */ 
-	public function getContentEncoding(): ?string
+	public function contentEncoding(): ?string
 	{
 		return $this->contentEncoding;
 	}
@@ -148,7 +148,7 @@ final class DownloadOptions implements ArrayAccess, JsonSerializable
 	/**
 	 * Get the value of contentLanguage.
 	 */ 
-	public function getContentLanguage(): ?string
+	public function contentLanguage(): ?string
 	{
 		return $this->contentLanguage;
 	}
@@ -168,7 +168,7 @@ final class DownloadOptions implements ArrayAccess, JsonSerializable
 	/**
 	 * Get the value of contentType.
 	 */ 
-	public function getContentType(): ?string
+	public function contentType(): ?string
 	{
 		return $this->contentType;
 	}
@@ -188,7 +188,7 @@ final class DownloadOptions implements ArrayAccess, JsonSerializable
 	/**
 	 * Get the value of cacheControl.
 	 */ 
-	public function getCacheControl(): ?string
+	public function cacheControl(): ?string
 	{
 		return $this->cacheControl;
 	}
@@ -208,7 +208,7 @@ final class DownloadOptions implements ArrayAccess, JsonSerializable
 	/**
 	 * Get the value of expires.
 	 */ 
-	public function getExpires(): ?string
+	public function expires(): ?string
 	{
 		return $this->expires;
 	}
@@ -228,7 +228,7 @@ final class DownloadOptions implements ArrayAccess, JsonSerializable
 	/**
 	 * Get the value of range.
 	 */ 
-	public function getRange(): string
+	public function range(): string
 	{
 		return $this->range;
 	}
@@ -249,7 +249,7 @@ final class DownloadOptions implements ArrayAccess, JsonSerializable
 	/**
 	 * Get the value of serverSideEncryption.
 	 */ 
-	public function getServerSideEncryption(): ServerSideEncryption
+	public function serverSideEncryption(): ServerSideEncryption
 	{
 		return $this->serverSideEncryption;
 	}
@@ -287,7 +287,7 @@ final class DownloadOptions implements ArrayAccess, JsonSerializable
 	 * 
 	 * @return array 
 	 */
-	public function getAuthorizationOptions(): array
+	public function authorizationOptions(): array
 	{
 		return array_filter([
 			static::OPTION_CONTENT_DISPOSITION => $this->contentDisposition,

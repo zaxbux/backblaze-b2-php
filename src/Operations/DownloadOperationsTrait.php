@@ -46,10 +46,10 @@ trait DownloadOperationsTrait
 
 		$response = $this->http->request('POST', Endpoint::GET_DOWNLOAD_AUTHORIZATION, [
 			'json' => Utils::filterRequestOptions([
-				File::ATTRIBUTE_BUCKET_ID        => $bucketId ?? $this->getAllowedBucketId(),
+				File::ATTRIBUTE_BUCKET_ID        => $bucketId ?? $this->allowedBucketId(),
 				File::ATTRIBUTE_FILE_NAME_PREFIX => $fileNamePrefix,
 				File::ATTRIBUTE_VALID_DURATION   => $validDuration,
-			], $options->getAuthorizationOptions()),
+			], $options->authorizationOptions()),
 		]);
 
 		return DownloadAuthorization::fromResponse($response);
@@ -78,7 +78,7 @@ trait DownloadOperationsTrait
 	): FileDownload {
 		return DownloadHelper::instance($this)->download(
 			Utils::joinPaths(
-				$this->accountAuthorization()->getDownloadUrl(),
+				$this->accountAuthorization()->downloadUrl(),
 				Client::B2_API_VERSION,
 				Endpoint::DOWNLOAD_FILE_BY_ID
 			),
@@ -114,9 +114,9 @@ trait DownloadOperationsTrait
 	): FileDownload {
 		return DownloadHelper::instance($this)->download(
 			Utils::joinPaths(
-				$this->accountAuthorization()->getApiUrl(),
+				$this->accountAuthorization()->apiUrl(),
 				'file',
-				$bucketName ?? $this->getAllowedBucketName(),
+				$bucketName ?? $this->allowedBucketName(),
 				$fileName
 			),
 			null,

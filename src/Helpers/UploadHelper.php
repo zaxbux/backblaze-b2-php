@@ -38,7 +38,7 @@ class UploadHelper extends AbstractHelper {
 
 		if ($bucketIdOrUploadUrl instanceof UploadUrl) {
 			// Get bucket ID from Upload URL object.
-			$bucketId = $bucketIdOrUploadUrl->getBucketId();
+			$bucketId = $bucketIdOrUploadUrl->bucketId();
 		} else {
 			// Set null to force fetching an Upload URL.
 			$bucketIdOrUploadUrl = null;
@@ -46,7 +46,7 @@ class UploadHelper extends AbstractHelper {
 
 		$metadata = FileUploadMetadata::fromResource($stream);
 
-		if ($metadata->getLength() < File::SINGLE_FILE_MIN_SIZE || $metadata->getLength() > File::LARGE_FILE_MAX_SIZE) {
+		if ($metadata->length() < File::SINGLE_FILE_MIN_SIZE || $metadata->length() > File::LARGE_FILE_MAX_SIZE) {
 			throw new RuntimeException(sprintf(
 				'Upload size is not between %d bytes and %d bytes.',
 				File::SINGLE_FILE_MIN_SIZE,
@@ -56,9 +56,9 @@ class UploadHelper extends AbstractHelper {
 
 		// Upload as large file if greater than single file size or configured size,
 		// and greater than the minimum part size for the account.
-		if (($metadata->getLength() > File::SINGLE_FILE_MAX_SIZE ||
-			$metadata->getLength() > 200 * 1024 * 1024) &&
-			$metadata->getLength() > $this->accountAuthorization->getAbsoluteMinimumPartSize()
+		if (($metadata->length() > File::SINGLE_FILE_MAX_SIZE ||
+			$metadata->length() > 200 * 1024 * 1024) &&
+			$metadata->length() > $this->accountAuthorization->getAbsoluteMinimumPartSize()
 		) {
 			// Upload large file
 			return $this->uploadLargeFile(

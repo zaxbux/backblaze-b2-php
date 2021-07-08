@@ -27,17 +27,17 @@ class ListTest extends TestCase
 		$fileList->append(new File('id3'));
 
 		static::assertInstanceOf(File::class, $fileList->current());
-		static::assertEquals('id1', $fileList->current()->getId());
+		static::assertEquals('id1', $fileList->current()->id());
 
 		$fileList->next();
 
 		static::assertInstanceOf(File::class, $fileList->current());
-		static::assertEquals('id2', $fileList->current()->getId());
+		static::assertEquals('id2', $fileList->current()->id());
 
 		$fileList->next();
 
 		static::assertInstanceOf(File::class, $fileList->current());
-		static::assertEquals('id3', $fileList->current()->getId());
+		static::assertEquals('id3', $fileList->current()->id());
 	}
 
 	public static function testBucketList()
@@ -54,41 +54,41 @@ class ListTest extends TestCase
 		$fileList->append(new Bucket('id3', 'name3', BucketType::PRIVATE));
 
 		static::assertInstanceOf(Bucket::class, $fileList->current());
-		static::assertEquals('id1', $fileList->current()->getId());
+		static::assertEquals('id1', $fileList->current()->id());
 
 		$fileList->next();
 
 		static::assertInstanceOf(Bucket::class, $fileList->current());
-		static::assertEquals('id2', $fileList->current()->getId());
+		static::assertEquals('id2', $fileList->current()->id());
 
 		$fileList->next();
 		
 		static::assertInstanceOf(Bucket::class, $fileList->current());
-		static::assertEquals('id3', $fileList->current()->getId());
+		static::assertEquals('id3', $fileList->current()->id());
 	}
 
 	public static function testKeyList()
 	{
 		$fileList = new KeyList([
 			[
-				'name' => 'name1',
+				'applicationKeyId' => 'id1',
 			],
-			new Key('name2'),
+			new Key('id2'),
 		]);
 
-		$fileList->append(new Key('name3'));
+		$fileList->append(new Key('id3'));
 
 		static::assertInstanceOf(Key::class, $fileList->current());
-		static::assertEquals('name1', $fileList->current()->getName());
+		static::assertEquals('id1', $fileList->current()->applicationKeyId());
 
 		$fileList->next();
 
 		static::assertInstanceOf(Key::class, $fileList->current());
-		static::assertEquals('name2', $fileList->current()->getName());
+		static::assertEquals('id2', $fileList->current()->applicationKeyId());
 
 		$fileList->next();
 		
 		static::assertInstanceOf(Key::class, $fileList->current());
-		static::assertEquals('name3', $fileList->current()->getName());
+		static::assertEquals('id3', $fileList->current()->applicationKeyId());
 	}
 }

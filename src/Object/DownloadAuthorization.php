@@ -48,7 +48,7 @@ class DownloadAuthorization implements B2ObjectInterface
 	/**
 	 * Get the value of authorizationToken
 	 */
-	public function getAuthorizationToken()
+	public function authorizationToken()
 	{
 		return $this->authorizationToken;
 	}
@@ -68,7 +68,7 @@ class DownloadAuthorization implements B2ObjectInterface
 	/**
 	 * Get the value of fileNamePrefix
 	 */
-	public function getFileNamePrefix()
+	public function fileNamePrefix()
 	{
 		return $this->fileNamePrefix;
 	}
@@ -88,7 +88,7 @@ class DownloadAuthorization implements B2ObjectInterface
 	/**
 	 * Get the value of bucketId
 	 */
-	public function getBucketId()
+	public function bucketId()
 	{
 		return $this->bucketId;
 	}

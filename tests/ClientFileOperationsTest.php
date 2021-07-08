@@ -22,8 +22,8 @@ class ClientFileOperationsTest extends ClientTestBase
 		);
 
 		static::assertInstanceOf(File::class, $newFile);
-		static::assertEquals('newFileName', $newFile->getName());
-		static::assertEquals('newFileId', $newFile->getId());
+		static::assertEquals('newFileName', $newFile->name());
+		static::assertEquals('newFileId', $newFile->id());
 	}
 
 	public function testDeleteFileVersion()
@@ -33,7 +33,7 @@ class ClientFileOperationsTest extends ClientTestBase
 			MockResponse::fromFile('delete_file.json'),
 		);
 
-		$fileId = $this->client->getFileByName('Test file.bin', 'bucketId')->getId();
+		$fileId = $this->client->getFileByName('Test file.bin', 'bucketId')->id();
 
 		static::assertInstanceOf(File::class, $this->client->deleteFileVersion('Test file.bin', $fileId));
 	}
@@ -106,8 +106,8 @@ class ClientFileOperationsTest extends ClientTestBase
 
 		static::assertInstanceOf(FileList::class, $response);
 		static::assertCount(3, $response);
-		static::assertEquals(null, $response->getNextFileId());
-		static::assertEquals(null, $response->getNextFileName());
+		static::assertEquals(null, $response->nextFileId());
+		static::assertEquals(null, $response->nextFileName());
 	}
 
 	public function testListFileVersions()
@@ -123,8 +123,8 @@ class ClientFileOperationsTest extends ClientTestBase
 
 		static::assertInstanceOf(FileList::class, $response);
 		static::assertCount(3, $response);
-		static::assertEquals(null, $response->getNextFileId());
-		static::assertEquals(null, $response->getNextFileName());
+		static::assertEquals(null, $response->nextFileId());
+		static::assertEquals(null, $response->nextFileName());
 	}
 
 	public function testUpdateLegalFileHold()

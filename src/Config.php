@@ -204,6 +204,8 @@ class Config
 
 		$this->handler = $options['handler'];
 		$this->maxRetries = $options['maxRetries'];
+		$this->maxFileCount = $options['maxFileCount'];
+		$this->maxKeyCount = $options['maxKeyCount'];
 		$this->applicationName = $options['applicationName'];
 		$this->authorizationCache = $options['authorizationCache'] ?? new BuiltinAuthorizationCache();
 	}

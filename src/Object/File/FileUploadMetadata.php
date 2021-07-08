@@ -64,7 +64,7 @@ final class FileUploadMetadata {
 	/**
 	 * Get the length of the upload body in bytes.
 	 */ 
-	public function getLength(): int
+	public function length(): int
 	{
 		return $this->length;
 	}
@@ -72,7 +72,7 @@ final class FileUploadMetadata {
 	/**
 	 * Get the SHA1 hash of the upload body.
 	 */ 
-	public function getSha1(): string
+	public function sha1(): string
 	{
 		return $this->hash;
 	}
@@ -80,7 +80,7 @@ final class FileUploadMetadata {
 	/**
 	 * Get the last modified timestamp in seconds since the UNIX epoch.
 	 */ 
-	public function getLastModifiedTimestamp(): ?int
+	public function lastModifiedTimestamp(): ?int
 	{
 		return $this->mtime;
 	}

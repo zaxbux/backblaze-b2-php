@@ -57,7 +57,7 @@ class Key implements B2ObjectInterface
 	/**
 	 * Get the value of accountId.
 	 */ 
-	public function getAccountId(): ?string
+	public function accountId(): ?string
 	{
 		return $this->accountId;
 	}
@@ -65,7 +65,7 @@ class Key implements B2ObjectInterface
 	/**
 	 * Get the value of bucketId.
 	 */ 
-	public function getBucketId(): ?string
+	public function bucketId(): ?string
 	{
 		return $this->bucketId;
 	}
@@ -73,7 +73,7 @@ class Key implements B2ObjectInterface
 	/**
 	 * Get the value of name.
 	 */ 
-	public function getName(): ?string
+	public function name(): ?string
 	{
 		return $this->name;
 	}
@@ -81,7 +81,7 @@ class Key implements B2ObjectInterface
 	/**
 	 * Get the value of applicationKey.
 	 */ 
-	public function getApplicationKey(): ?string
+	public function applicationKey(): ?string
 	{
 		return $this->applicationKey;
 	}
@@ -89,7 +89,7 @@ class Key implements B2ObjectInterface
 	/**
 	 * Get the value of applicationKeyId.
 	 */ 
-	public function getApplicationKeyId(): string
+	public function applicationKeyId(): string
 	{
 		return $this->applicationKeyId;
 	}
@@ -97,7 +97,7 @@ class Key implements B2ObjectInterface
 	/**
 	 * Get the value of capabilities.
 	 */ 
-	public function getCapabilities(): ?array
+	public function capabilities(): ?array
 	{
 		return $this->capabilities;
 	}
@@ -105,7 +105,7 @@ class Key implements B2ObjectInterface
 	/**
 	 * Get the value of expirationTimestamp.
 	 */ 
-	public function getExpirationTimestamp(): ?int
+	public function expirationTimestamp(): ?int
 	{
 		return $this->expirationTimestamp;
 	}
@@ -113,7 +113,7 @@ class Key implements B2ObjectInterface
 	/**
 	 * Get the value of namePrefix.
 	 */ 
-	public function getNamePrefix(): ?string
+	public function namePrefix(): ?string
 	{
 		return $this->namePrefix;
 	}
@@ -121,7 +121,7 @@ class Key implements B2ObjectInterface
 	/**
 	 * Get the value of options.
 	 */ 
-	public function getOptions(): array
+	public function options(): array
 	{
 		return $this->options;
 	}
@@ -153,9 +153,9 @@ class Key implements B2ObjectInterface
 	 */
 	public static function fromArray(array $data): Key {
 		return new static(
-			$data[static::ATTRIBUTE_KEY_NAME] ?? null,
-			$data[static::ATTRIBUTE_APPLICATION_KEY_ID] ?? null,
+			$data[static::ATTRIBUTE_APPLICATION_KEY_ID],
 			$data[static::ATTRIBUTE_APPLICATION_KEY] ?? null,
+			$data[static::ATTRIBUTE_KEY_NAME] ?? null,
 			$data[static::ATTRIBUTE_CAPABILITIES] ?? null,
 			$data[static::ATTRIBUTE_ACCOUNT_ID] ?? null,
 			$data[static::ATTRIBUTE_EXPIRATION_TIMESTAMP] ?? null,

@@ -60,8 +60,8 @@ class LargeFileUpload {
 
 	public function useFileMetadata(FileUploadMetadata $metadata): LargeFileUpload
 	{
-		$this->contentLength = $metadata->getLength();
-		$this->contentSha1 = $metadata->getSha1();
+		$this->contentLength = $metadata->length();
+		$this->contentSha1 = $metadata->sha1();
 		return $this;
 	}
 
@@ -106,11 +106,11 @@ class LargeFileUpload {
 			$this->metadata = FileUploadMetadata::fromResource($this->stream);
 		}
 
-		if ($this->metadata->getLength() < $this->minimumPartSize()) {
+		if ($this->metadata->length() < $this->minimumPartSize()) {
 			throw new RuntimeException('Upload size is less than absolute minimum part size.');
 		}
 
-		if ($this->metadata->getLength() > File::LARGE_FILE_MAX_SIZE) {
+		if ($this->metadata->length() > File::LARGE_FILE_MAX_SIZE) {
 			throw new RuntimeException('Upload size exceeds large file limit.');
 		}
 
@@ -126,7 +126,7 @@ class LargeFileUpload {
 		);
 
 		// Get upload part url
-		$this->uploadPartUrl = $this->client->getUploadPartUrl($this->file->getId());
+		$this->uploadPartUrl = $this->client->getUploadPartUrl($this->file->id());
 
 		return $this;
 	}
@@ -139,11 +139,11 @@ class LargeFileUpload {
 			$partString = fread($this->stream, $offset);
 			
 			$metadata = FileUploadMetadata::fromResource($partString);
-			array_push($this->partSha1Array, $metadata->getSha1());
+			array_push($this->partSha1Array, $metadata->sha1());
 
 			$part = $this->client->uploadPart(
 				$partString,
-				$this->file->getId(),
+				$this->file->id(),
 				$this->partCount,
 				$this->serverSideEncryption,
 				$this->uploadPartUrl,

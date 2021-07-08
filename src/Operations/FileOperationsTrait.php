@@ -101,7 +101,7 @@ trait FileOperationsTrait
 		$response = $this->http->request('POST', Endpoint::DELETE_FILE_VERSION, [
 			'json' => Utils::filterRequestOptions([
 				File::ATTRIBUTE_FILE_ID   => $fileId,
-				File::ATTRIBUTE_FILE_NAME => $fileName ?? $this->getFileById($fileId)->getId(),
+				File::ATTRIBUTE_FILE_NAME => $fileName ?? $this->getFileById($fileId)->id(),
 			], [
 				File::ATTRIBUTE_BYPASS_GOVERNANCE => $bypassGovernance,
 			]),
@@ -148,7 +148,7 @@ trait FileOperationsTrait
 
 		$response = $this->http->request('POST', Endpoint::HIDE_FILE, [
 			'json' => [
-				File::ATTRIBUTE_BUCKET_ID => $bucketId ?? $this->getAllowedBucketId(),
+				File::ATTRIBUTE_BUCKET_ID => $bucketId ?? $this->allowedBucketId(),
 				File::ATTRIBUTE_FILE_NAME => $fileName,
 			]
 		]);
@@ -185,7 +185,7 @@ trait FileOperationsTrait
 	): FileList {
 		$response = $this->http->request('POST', Endpoint::LIST_FILE_NAMES, [
 			'json' => Utils::filterRequestOptions([
-				File::ATTRIBUTE_BUCKET_ID      => $bucketId ?? $this->getAllowedBucketId(),
+				File::ATTRIBUTE_BUCKET_ID      => $bucketId ?? $this->allowedBucketId(),
 				File::ATTRIBUTE_MAX_FILE_COUNT => $maxFileCount ?? $this->config->maxFileCount(),
 			], [
 				File::ATTRIBUTE_PREFIX => $prefix,
@@ -230,7 +230,7 @@ trait FileOperationsTrait
 	): FileList {
 		$response = $this->http->request('POST', Endpoint::LIST_FILE_VERSIONS, [
 			'json' => Utils::filterRequestOptions([
-				File::ATTRIBUTE_BUCKET_ID      => $bucketId ?? $this->getAllowedBucketId(),
+				File::ATTRIBUTE_BUCKET_ID      => $bucketId ?? $this->allowedBucketId(),
 			], [
 				File::ATTRIBUTE_START_FILE_NAME => $startFileName,
 				File::ATTRIBUTE_START_FILE_ID   => $startFileId,
@@ -262,7 +262,7 @@ trait FileOperationsTrait
 	): File {
 		$response = $this->http->request('POST', Endpoint::UPDATE_FILE_LEGAL_HOLD, [
 			'json' => Utils::filterRequestOptions([
-				File::ATTRIBUTE_FILE_NAME  => $fileName ?? $this->getFileById($fileId)->getName(),
+				File::ATTRIBUTE_FILE_NAME  => $fileName ?? $this->getFileById($fileId)->name(),
 				File::ATTRIBUTE_FILE_ID    => $fileId,
 				File::ATTRIBUTE_LEGAL_HOLD => $legalHold,
 			]),
@@ -293,7 +293,7 @@ trait FileOperationsTrait
 	): File {
 		$response = $this->http->request('POST', Endpoint::UPDATE_FILE_RETENTION, [
 			'json' => Utils::filterRequestOptions([
-				File::ATTRIBUTE_FILE_NAME         => $fileName ?? $this->getFileById($fileId)->getId(),
+				File::ATTRIBUTE_FILE_NAME         => $fileName ?? $this->getFileById($fileId)->id(),
 				File::ATTRIBUTE_FILE_ID           => $fileId,
 				File::ATTRIBUTE_FILE_RETENTION    => $fileRetention,
 				File::ATTRIBUTE_BYPASS_GOVERNANCE => $bypassGovernance,
@@ -321,7 +321,7 @@ trait FileOperationsTrait
 
 		while ($nextFileName !== null) {
 			$response     = $this->listFileNames($bucketId, $prefix, $delimiter, $startFileName);
-			$nextFileName = $response->getNextFileName();
+			$nextFileName = $response->nextFileName();
 
 			$allFiles->mergeList($response);
 		}
@@ -358,8 +358,8 @@ trait FileOperationsTrait
 
 		while ($nextFileId !== null && $nextFileName !== null) {
 			$response     = $this->listFileVersions($bucketId, $prefix, $delimiter, $startFileName, $startFileId);
-			$nextFileId   = $response->getNextFileId();
-			$nextFileName = $response->getNextFileName();
+			$nextFileId   = $response->nextFileId();
+			$nextFileName = $response->nextFileName();
 
 			$allFiles->mergeList($response);
 		}
@@ -403,8 +403,8 @@ trait FileOperationsTrait
 		while ($fileVersions->valid()) {
 
 			$deleted->append($this->deleteFileVersion(
-				$fileVersions->current()->getName(),
-				$fileVersions->current()->getId(),
+				$fileVersions->current()->name(),
+				$fileVersions->current()->id(),
 				$bypassGovernance
 			));
 

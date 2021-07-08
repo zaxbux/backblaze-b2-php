@@ -34,7 +34,7 @@ trait UploadOperationsTrait
 	{
 		$response = $this->http->request('POST', Endpoint::GET_UPLOAD_URL, [
 			'json' => [
-				File::ATTRIBUTE_BUCKET_ID => $bucketId ?? $this->getAllowedBucketId()
+				File::ATTRIBUTE_BUCKET_ID => $bucketId ?? $this->allowedBucketId()
 			]
 		]);
 
@@ -79,19 +79,19 @@ trait UploadOperationsTrait
 		}
 
 		$uploadMetadata = FileUploadMetadata::fromResource($body);
-		$mtime = $uploadMetadata->getLastModifiedTimestamp();
+		$mtime = $uploadMetadata->lastModifiedTimestamp();
 		if ($mtime > 0) {
 			$fileInfo->setLastModifiedTimestamp($mtime);
 		}
 
-		$response = $this->http->request('POST', $uploadUrl->getUploadUrl(), [
+		$response = $this->http->request('POST', $uploadUrl->uploadUrl(), [
 			'body'    => $body,
 			'headers' => Utils::filterRequestOptions(
 				[
-					'Authorization'                => $uploadUrl->getAuthorizationToken(),
+					'Authorization'                => $uploadUrl->authorizationToken(),
 					'Content-Type'                 => $contentType ?? File::CONTENT_TYPE_AUTO,
-					'Content-Length'               => $uploadMetadata->getLength(),
-					File::HEADER_X_BZ_CONTENT_SHA1 => $uploadMetadata->getSha1(),
+					'Content-Length'               => $uploadMetadata->length(),
+					File::HEADER_X_BZ_CONTENT_SHA1 => $uploadMetadata->sha1(),
 					File::HEADER_X_BZ_FILE_NAME    => $fileName, //rawurlencode($fileName),// urlencode($fileName),
 				],
 				($serverSideEncryption->getHeaders() ?? []),

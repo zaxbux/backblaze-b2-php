@@ -52,7 +52,7 @@ trait BucketOperationsTrait
 	): Bucket {
 		$response = $this->http->request('POST', Endpoint::CREATE_BUCKET, [
 			'json' => Utils::filterRequestOptions([
-				Bucket::ATTRIBUTE_ACCOUNT_ID  => $this->accountAuthorization()->getAccountId(),
+				Bucket::ATTRIBUTE_ACCOUNT_ID  => $this->accountAuthorization()->accountId(),
 				Bucket::ATTRIBUTE_BUCKET_NAME => $bucketName,
 				Bucket::ATTRIBUTE_BUCKET_TYPE => $bucketType,
 			], [
@@ -87,7 +87,7 @@ trait BucketOperationsTrait
 
 		$response = $this->http->request('POST', Endpoint::DELETE_BUCKET, [
 			'json' => [
-				Bucket::ATTRIBUTE_ACCOUNT_ID => $this->accountAuthorization()->getAccountId(),
+				Bucket::ATTRIBUTE_ACCOUNT_ID => $this->accountAuthorization()->accountId(),
 				Bucket::ATTRIBUTE_BUCKET_ID  => $bucketId
 			]
 		]);
@@ -119,7 +119,7 @@ trait BucketOperationsTrait
 	): BucketList {
 		$response = $this->http->request('POST', Endpoint::LIST_BUCKETS, [
 			'json' => Utils::filterRequestOptions([
-				Bucket::ATTRIBUTE_ACCOUNT_ID => $this->accountAuthorization()->getAccountId(),
+				Bucket::ATTRIBUTE_ACCOUNT_ID => $this->accountAuthorization()->accountId(),
 			], [
 				Bucket::ATTRIBUTE_BUCKET_ID    => $bucketId,
 				Bucket::ATTRIBUTE_BUCKET_NAME  => $bucketName,
@@ -160,8 +160,8 @@ trait BucketOperationsTrait
 	): Bucket {
 		$response = $this->http->request('POST', Endpoint::UPDATE_BUCKET, [
 			'json' => Utils::filterRequestOptions([
-				Bucket::ATTRIBUTE_ACCOUNT_ID => $this->accountAuthorization()->getAccountId(),
-				Bucket::ATTRIBUTE_BUCKET_ID  => $bucketId ?? $this->getAllowedBucketId(),
+				Bucket::ATTRIBUTE_ACCOUNT_ID => $this->accountAuthorization()->accountId(),
+				Bucket::ATTRIBUTE_BUCKET_ID  => $bucketId ?? $this->allowedBucketId(),
 			], [
 				Bucket::ATTRIBUTE_BUCKET_TYPE       => $bucketType,
 				Bucket::ATTRIBUTE_BUCKET_INFO       => $bucketInfo,

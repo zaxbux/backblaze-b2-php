@@ -38,7 +38,7 @@ class FileList extends AbstractListResponse
 	/**
 	 * Get the value of nextFileId.
 	 */ 
-	public function getNextFileId(): ?string
+	public function nextFIleId(): ?string
 	{
 		return $this->nextFileId;
 	}
@@ -46,7 +46,7 @@ class FileList extends AbstractListResponse
 	/**
 	 * Get the value of nextFileName.
 	 */ 
-	public function getNextFileName(): ?string
+	public function nextFIleName(): ?string
 	{
 		return $this->nextFileName;
 	}

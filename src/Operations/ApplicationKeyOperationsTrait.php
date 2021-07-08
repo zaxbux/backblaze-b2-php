@@ -46,7 +46,7 @@ trait ApplicationKeyOperationsTrait
 	): Key {
 		$response = $this->http->request('POST', Endpoint::CREATE_KEY, [
 			'json' => Utils::filterRequestOptions([
-				Key::ATTRIBUTE_ACCOUNT_ID    => $this->accountAuthorization()->getAccountId(),
+				Key::ATTRIBUTE_ACCOUNT_ID    => $this->accountAuthorization()->accountId(),
 				Key::ATTRIBUTE_CAPABILITIES  => $capabilities,
 				Key::ATTRIBUTE_KEY_NAME      => $keyName,
 			], [
@@ -99,7 +99,7 @@ trait ApplicationKeyOperationsTrait
 	): KeyList {
 		$response = $this->http->request('POST', Endpoint::LIST_KEYS, [
 			'json' => Utils::filterRequestOptions([
-				Key::ATTRIBUTE_ACCOUNT_ID => $this->accountAuthorization()->getAccountId(),
+				Key::ATTRIBUTE_ACCOUNT_ID => $this->accountAuthorization()->accountId(),
 			], [
 				Key::ATTRIBUTE_MAX_KEY_COUNT => $maxKeyCount ?? $this->config->maxKeyCount(),
 				Key::ATTRIBUTE_START_APPLICATION_KEY_ID => $startApplicationKeyId

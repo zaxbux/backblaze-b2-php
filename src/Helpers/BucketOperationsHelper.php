@@ -63,7 +63,7 @@ class BucketOperationsHelper extends AbstractHelper {
 	public function delete(?bool $withFiles = false): Bucket
 	{
 		$this->assertBucketIsSet();
-		$this->bucket = $this->client->deleteBucket($this->bucket->getId(), $withFiles);
+		$this->bucket = $this->client->deleteBucket($this->bucket->id(), $withFiles);
 		return $this->bucket;
 	}
 
@@ -78,7 +78,7 @@ class BucketOperationsHelper extends AbstractHelper {
 	): Bucket {
 		$this->assertBucketIsSet();
 		$this->bucket = $this->client->updateBucket(
-			$this->bucket->getId(),
+			$this->bucket->id(),
 			$type,
 			$info,
 			$corsRules,
@@ -98,7 +98,7 @@ class BucketOperationsHelper extends AbstractHelper {
 	): FileList {
 		$this->assertBucketIsSet();
 		return $this->client->listFileNames(
-			$this->bucket->getId(),
+			$this->bucket->id(),
 			$prefix,
 			$delimiter,
 			$startFileName,
@@ -115,7 +115,7 @@ class BucketOperationsHelper extends AbstractHelper {
 	): FileList {
 		$this->assertBucketIsSet();
 		return $this->client->listFileVersions(
-			$this->bucket->getId(),
+			$this->bucket->id(),
 			$prefix,
 			$delimiter,
 			$startFileName,
@@ -131,7 +131,7 @@ class BucketOperationsHelper extends AbstractHelper {
 	): FileList {
 		$this->assertBucketIsSet();
 		return $this->client->listAllFileNames(
-			$this->bucket->getId(),
+			$this->bucket->id(),
 			$prefix,
 			$delimiter,
 			$startFileName,
@@ -146,7 +146,7 @@ class BucketOperationsHelper extends AbstractHelper {
 	): FileList {
 		$this->assertBucketIsSet();
 		return $this->client->listAllFileNames(
-			$this->bucket->getId(),
+			$this->bucket->id(),
 			$prefix,
 			$delimiter,
 			$startFileName,

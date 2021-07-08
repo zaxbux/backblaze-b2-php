@@ -95,7 +95,7 @@ class Bucket implements B2ObjectInterface
 	/**
 	 * Get the value of accountId
 	 */
-	public function getAccountId()
+	public function accountId()
 	{
 		return $this->accountId;
 	}
@@ -115,7 +115,7 @@ class Bucket implements B2ObjectInterface
 	/**
 	 * Get the value of id
 	 */
-	public function getId()
+	public function id()
 	{
 		return $this->id;
 	}
@@ -135,7 +135,7 @@ class Bucket implements B2ObjectInterface
 	/**
 	 * Get the value of name
 	 */
-	public function getName()
+	public function name()
 	{
 		return $this->name;
 	}
@@ -155,7 +155,7 @@ class Bucket implements B2ObjectInterface
 	/**
 	 * Get the value of type
 	 */
-	public function getType()
+	public function type()
 	{
 		return $this->type;
 	}
@@ -175,7 +175,7 @@ class Bucket implements B2ObjectInterface
 	/**
 	 * Get the value of info
 	 */
-	public function getInfo()
+	public function info()
 	{
 		return $this->info;
 	}
@@ -195,7 +195,7 @@ class Bucket implements B2ObjectInterface
 	/**
 	 * Get the value of corsRules
 	 */
-	public function getCorsRules()
+	public function corsRules()
 	{
 		return $this->corsRules;
 	}
@@ -215,7 +215,7 @@ class Bucket implements B2ObjectInterface
 	/**
 	 * Get the value of fileLockConfiguration
 	 */
-	public function getFileLockConfiguration()
+	public function fileLockConfiguration()
 	{
 		return $this->fileLockConfiguration;
 	}
@@ -235,7 +235,7 @@ class Bucket implements B2ObjectInterface
 	/**
 	 * Get the value of defaultServerSideEncryption
 	 */
-	public function getDefaultServerSideEncryption()
+	public function defaultServerSideEncryption()
 	{
 		return $this->defaultServerSideEncryption;
 	}
@@ -255,7 +255,7 @@ class Bucket implements B2ObjectInterface
 	/**
 	 * Get the value of lifecycleRules
 	 */
-	public function getLifecycleRules()
+	public function lifecycleRules()
 	{
 		return $this->lifecycleRules;
 	}
@@ -275,7 +275,7 @@ class Bucket implements B2ObjectInterface
 	/**
 	 * Get the value of revision
 	 */
-	public function getRevision()
+	public function revision()
 	{
 		return $this->revision;
 	}
@@ -295,7 +295,7 @@ class Bucket implements B2ObjectInterface
 	/**
 	 * Get the value of options
 	 */
-	public function getOptions()
+	public function options()
 	{
 		return $this->options;
 	}

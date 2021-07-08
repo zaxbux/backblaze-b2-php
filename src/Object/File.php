@@ -177,7 +177,7 @@ class File implements B2ObjectInterface
 	/**
 	 * Get the file account ID.
 	 */
-	public function getAccountId(): string
+	public function accountId(): string
 	{
 		return $this->accountId;
 	}
@@ -197,7 +197,7 @@ class File implements B2ObjectInterface
 	/**
 	 * Get the file ID.
 	 */
-	public function getId(): string
+	public function id(): string
 	{
 		return $this->id;
 	}
@@ -217,7 +217,7 @@ class File implements B2ObjectInterface
 	/**
 	 * Get the file name (path).
 	 */
-	public function getName(): string
+	public function name(): string
 	{
 		return $this->name;
 	}
@@ -235,7 +235,7 @@ class File implements B2ObjectInterface
 	/**
 	 * Get the file bucket ID.
 	 */
-	public function getBucketId(): string
+	public function bucketId(): string
 	{
 		return $this->bucketId;
 	}
@@ -255,7 +255,7 @@ class File implements B2ObjectInterface
 	/**
 	 * Get the file action (type).
 	 */
-	public function getAction(): FileActionType
+	public function action(): FileActionType
 	{
 		return $this->action;
 	}
@@ -275,7 +275,7 @@ class File implements B2ObjectInterface
 	/**
 	 * Get the file info.
 	 */
-	public function getInfo(): FileInfo
+	public function info(): FileInfo
 	{
 		return $this->info;
 	}
@@ -295,7 +295,7 @@ class File implements B2ObjectInterface
 	/**
 	 * Get the file size.
 	 */
-	public function getContentLength(): int
+	public function contentLength(): int
 	{
 		return $this->contentLength;
 	}
@@ -315,7 +315,7 @@ class File implements B2ObjectInterface
 	/**
 	 * Get the file type.
 	 */
-	public function getContentType(): string
+	public function contentType(): string
 	{
 		return $this->contentType;
 	}
@@ -335,7 +335,7 @@ class File implements B2ObjectInterface
 	/**
 	 * Get the file SHA1 checksum.
 	 */
-	public function getContentSha1(): string
+	public function contentSha1(): string
 	{
 		return $this->contentSha1;
 	}
@@ -355,7 +355,7 @@ class File implements B2ObjectInterface
 	/**
 	 * Get the file MD5 hash.
 	 */
-	public function getContentMd5(): string
+	public function contentMd5(): string
 	{
 		return $this->contentMd5;
 	}
@@ -375,7 +375,7 @@ class File implements B2ObjectInterface
 	/**
 	 * Get the UTC timestamp when the file was uploaded. Always `0` if the action is `folder`.
 	 */
-	public function getUploadTimestamp(): int
+	public function uploadTimestamp(): int
 	{
 		return $this->action->isFolder() ? 0 : $this->uploadTimestamp;
 	}
@@ -393,7 +393,7 @@ class File implements B2ObjectInterface
 	/**
 	 * Get the value of retention.
 	 */
-	public function getRetention(): array
+	public function retention(): array
 	{
 		return $this->retention;
 	}
@@ -413,7 +413,7 @@ class File implements B2ObjectInterface
 	/**
 	 * Get the value of legalHold.
 	 */
-	public function getLegalHold(): array
+	public function legalHold(): array
 	{
 		return $this->legalHold;
 	}
@@ -433,7 +433,7 @@ class File implements B2ObjectInterface
 	/**
 	 * Get the value of serverSideEncryption.
 	 */
-	public function getServerSideEncryption(): ?ServerSideEncryption
+	public function serverSideEncryption(): ?ServerSideEncryption
 	{
 		return $this->serverSideEncryption;
 	}
@@ -453,7 +453,7 @@ class File implements B2ObjectInterface
 	/**
 	 * Get the value of partNumber.
 	 */
-	public function getPartNumber(): ?int
+	public function partNumber(): ?int
 	{
 		return $this->partNumber;
 	}
@@ -476,7 +476,7 @@ class File implements B2ObjectInterface
 	 * @param null|bool $milliseconds Set to `false` to get timestamp in seconds.
 	 * @return null|int Time since UNIX epoch.
 	 */
-	public function getLastModifiedTimestamp(?bool $milliseconds = true): ?int
+	public function lastModifiedTimestamp(?bool $milliseconds = true): ?int
 	{
 		if ($this->info) {
 			$t = $this->info->get(FileInfo::B2_FILE_INFO_MTIME, null);
@@ -489,7 +489,7 @@ class File implements B2ObjectInterface
 	/**
 	 * @see pathinfo()
 	 */
-	public function getPathInfo(): FilePathInfo
+	public function pathInfo(): FilePathInfo
 	{
 		return FilePathInfo::fromPath($this->name);
 	}

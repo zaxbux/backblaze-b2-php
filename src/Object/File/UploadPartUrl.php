@@ -37,7 +37,7 @@ class UploadPartUrl {
 	/**
 	 * Get the value of fileId.
 	 */ 
-	public function getFileId(): string
+	public function fileId(): string
 	{
 		return $this->fileId;
 	}
@@ -45,7 +45,7 @@ class UploadPartUrl {
 	/**
 	 * Get the value of uploadUrl.
 	 */ 
-	public function getUploadUrl(): string
+	public function uploadUrl(): string
 	{
 		return $this->uploadUrl;
 	}
@@ -53,7 +53,7 @@ class UploadPartUrl {
 	/**
 	 * Get the value of authorizationToken.
 	 */ 
-	public function getAuthorizationToken(): string
+	public function authorizationToken(): string
 	{
 		return $this->authorizationToken;
 	}

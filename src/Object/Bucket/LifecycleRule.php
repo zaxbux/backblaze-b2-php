@@ -33,7 +33,7 @@ class LifecycleRule implements JsonSerializable
 	 *
 	 * @return string
 	 */ 
-	public function getFileNamePrefix() {
+	public function fileNamePrefix() {
 		return $this->fileNamePrefix;
 	}
 
@@ -55,7 +55,7 @@ class LifecycleRule implements JsonSerializable
 	 *
 	 * @return string
 	 */ 
-	public function getDaysFromUploadingToHiding() {
+	public function daysFromUploadingToHiding() {
 		return $this->daysFromUploadingToHiding;
 	}
 
@@ -77,7 +77,7 @@ class LifecycleRule implements JsonSerializable
 	 *
 	 * @return string
 	 */ 
-	public function getDaysFromHidingToDeleting() {
+	public function daysFromHidingToDeleting() {
 		return $this->daysFromHidingToDeleting;
 	}
 

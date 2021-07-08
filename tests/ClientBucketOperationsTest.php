@@ -25,8 +25,8 @@ class ClientBucketOperationsTest extends ClientTestBase
 
 		// Test that we get a private bucket back after creation
 		static::assertInstanceOf(Bucket::class, $bucket);
-		static::assertEquals('Test bucket', $bucket->getName());
-		static::assertEquals(BucketType::PRIVATE, $bucket->getType());
+		static::assertEquals('Test bucket', $bucket->name());
+		static::assertEquals(BucketType::PRIVATE, $bucket->type());
 	}
 
 	public function testCreatePublicBucket()
@@ -45,8 +45,8 @@ class ClientBucketOperationsTest extends ClientTestBase
 		);
 
 		static::assertInstanceOf(Bucket::class, $bucket);
-		static::assertEquals('Test bucket', $bucket->getName());
-		static::assertEquals(BucketType::PUBLIC, $bucket->getType());
+		static::assertEquals('Test bucket', $bucket->name());
+		static::assertEquals(BucketType::PUBLIC, $bucket->type());
 	}
 
 	public function testBucketAlreadyExistsExceptionThrown()
@@ -87,8 +87,8 @@ class ClientBucketOperationsTest extends ClientTestBase
 		);
 
 		static::assertInstanceOf(Bucket::class, $bucket);
-		static::assertEquals('bucketId', $bucket->getId());
-		static::assertEquals(BucketType::PRIVATE, $bucket->getType());
+		static::assertEquals('bucketId', $bucket->id());
+		static::assertEquals(BucketType::PRIVATE, $bucket->type());
 	}
 
 	public function testUpdateBucketToPublic()
@@ -103,8 +103,8 @@ class ClientBucketOperationsTest extends ClientTestBase
 		);
 
 		static::assertInstanceOf(Bucket::class, $bucket);
-		static::assertEquals('bucketId', $bucket->getId());
-		static::assertEquals(BucketType::PUBLIC, $bucket->getType());
+		static::assertEquals('bucketId', $bucket->id());
+		static::assertEquals(BucketType::PUBLIC, $bucket->type());
 	}
 
 	public function testList3Buckets()
