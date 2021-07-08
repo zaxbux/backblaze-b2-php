@@ -1,10 +1,8 @@
 TODO:
-	☐ Implement all API exceptions
-	Guzzle:
-		
 	Tests:
 		☐ Test all auxillary objects
 	Objects:
 		☐ CORS Rule
 		☐ Lifecycle Rule
+		☐ File Retention
 		☐ SSE

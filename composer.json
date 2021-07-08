@@ -7,11 +7,6 @@
     "type": "library",
     "authors": [
         {
-            "name": "Chris White",
-            "email": "chris@cwhite.me",
-            "homepage": "https://cwhite.me"
-        },
-        {
             "name": "Zachary Schneider",
             "email": "hello@zacharyschneider.ca",
             "homepage": "https://www.zacharyschneider.ca"
