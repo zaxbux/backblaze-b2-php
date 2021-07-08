@@ -15,6 +15,8 @@ use Zaxbux\BackblazeB2\Utils;
 /** @package BackblazeB2\Operations */
 trait FileOperationsTrait
 {
+	/** @var \Zaxbux\BackblazeB2\Config */
+	protected $config;
 
 	/** @var \GuzzleHttp\ClientInterface */
 	protected $http;
@@ -179,12 +181,12 @@ trait FileOperationsTrait
 		?string $prefix = null,
 		?string $delimiter = null,
 		?string $startFileName = null,
-		?int $maxFileCount = 1000
+		?int $maxFileCount = null
 	): FileList {
 		$response = $this->http->request('POST', Endpoint::LIST_FILE_NAMES, [
 			'json' => Utils::filterRequestOptions([
 				File::ATTRIBUTE_BUCKET_ID      => $bucketId ?? $this->getAllowedBucketId(),
-				File::ATTRIBUTE_MAX_FILE_COUNT => $maxFileCount,
+				File::ATTRIBUTE_MAX_FILE_COUNT => $maxFileCount ?? $this->config->maxFileCount(),
 			], [
 				File::ATTRIBUTE_PREFIX => $prefix,
 				File::ATTRIBUTE_DELIMITER => $delimiter,
@@ -224,7 +226,7 @@ trait FileOperationsTrait
 		?string $delimiter = null,
 		?string $startFileName = null,
 		?string $startFileId = null,
-		?int $maxFileCount = 1000
+		?int $maxFileCount = null
 	): FileList {
 		$response = $this->http->request('POST', Endpoint::LIST_FILE_VERSIONS, [
 			'json' => Utils::filterRequestOptions([
@@ -232,7 +234,7 @@ trait FileOperationsTrait
 			], [
 				File::ATTRIBUTE_START_FILE_NAME => $startFileName,
 				File::ATTRIBUTE_START_FILE_ID   => $startFileId,
-				File::ATTRIBUTE_MAX_FILE_COUNT => $maxFileCount,
+				File::ATTRIBUTE_MAX_FILE_COUNT  => $maxFileCount ?? $this->config->maxFileCount(),
 				File::ATTRIBUTE_PREFIX          => $prefix,
 				File::ATTRIBUTE_DELIMITER       => $delimiter,
 			]),
@@ -260,7 +262,7 @@ trait FileOperationsTrait
 	): File {
 		$response = $this->http->request('POST', Endpoint::UPDATE_FILE_LEGAL_HOLD, [
 			'json' => Utils::filterRequestOptions([
-				File::ATTRIBUTE_FILE_NAME  => $fileName ?? $this->getFileById($fileId)->getId(),
+				File::ATTRIBUTE_FILE_NAME  => $fileName ?? $this->getFileById($fileId)->getName(),
 				File::ATTRIBUTE_FILE_ID    => $fileId,
 				File::ATTRIBUTE_LEGAL_HOLD => $legalHold,
 			]),
@@ -312,14 +314,13 @@ trait FileOperationsTrait
 		?string $bucketId = null,
 		string $prefix = '',
 		string $delimiter = null,
-		string $startFileName = null,
-		int $maxFileCount = 1000
+		string $startFileName = null
 	): FileList {
 		$allFiles = new FileList();
 		$nextFileName = $startFileName ?? '';
 
 		while ($nextFileName !== null) {
-			$response     = $this->listFileNames($bucketId, $prefix, $delimiter, $startFileName, $maxFileCount);
+			$response     = $this->listFileNames($bucketId, $prefix, $delimiter, $startFileName);
 			$nextFileName = $response->getNextFileName();
 
 			$allFiles->mergeList($response);

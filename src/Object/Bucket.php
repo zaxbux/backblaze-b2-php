@@ -15,19 +15,21 @@ class Bucket implements B2ObjectInterface
 	use ProxyArrayAccessToPropertiesTrait;
 	use HydrateFromResponseTrait;
 
-	public const ATTRIBUTE_ACCOUNT_ID       = 'accountId';
-	public const ATTRIBUTE_BUCKET_ID        = 'bucketId';
-	public const ATTRIBUTE_BUCKET_INFO      = 'bucketInfo';
-	public const ATTRIBUTE_BUCKET_NAME      = 'bucketName';
-	public const ATTRIBUTE_BUCKET_TYPE      = 'bucketType';
-	public const ATTRIBUTE_BUCKET_TYPES     = 'bucketTypes';
-	public const ATTRIBUTE_CORS_RULES       = 'corsRules';
-	public const ATTRIBUTE_DEFAULT_SSE      = 'defaultServerSideEncryption';
-	public const ATTRIBUTE_FILE_LOCK_CONFIG = 'fileLockConfiguration';
-	public const ATTRIBUTE_IF_REVISION_IS   = 'ifRevisionIs';
-	public const ATTRIBUTE_LIFECYCLE_RULES  = 'lifecycleRules';
-	public const ATTRIBUTE_OPTIONS          = 'options';
-	public const ATTRIBUTE_REVISION         = 'revision';
+	public const ATTRIBUTE_ACCOUNT_ID        = 'accountId';
+	public const ATTRIBUTE_BUCKET_ID         = 'bucketId';
+	public const ATTRIBUTE_BUCKET_INFO       = 'bucketInfo';
+	public const ATTRIBUTE_BUCKET_NAME       = 'bucketName';
+	public const ATTRIBUTE_BUCKET_TYPE       = 'bucketType';
+	public const ATTRIBUTE_BUCKET_TYPES      = 'bucketTypes';
+	public const ATTRIBUTE_CORS_RULES        = 'corsRules';
+	public const ATTRIBUTE_DEFAULT_RETENTION = 'defaultRetention';
+	public const ATTRIBUTE_DEFAULT_SSE       = 'defaultServerSideEncryption';
+	public const ATTRIBUTE_FILE_LOCK_ENABLED = 'fileLockEnabled';
+	public const ATTRIBUTE_FILE_LOCK_CONFIG  = 'fileLockConfiguration';
+	public const ATTRIBUTE_IF_REVISION_IS    = 'ifRevisionIs';
+	public const ATTRIBUTE_LIFECYCLE_RULES   = 'lifecycleRules';
+	public const ATTRIBUTE_OPTIONS           = 'options';
+	public const ATTRIBUTE_REVISION          = 'revision';
 
 
 	/** @var string */

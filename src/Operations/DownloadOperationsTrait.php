@@ -16,6 +16,9 @@ use Zaxbux\BackblazeB2\Response\FileDownload;
 /** @package BackblazeB2\Operations */
 trait DownloadOperationsTrait
 {
+	/** @var \Zaxbux\BackblazeB2\Config */
+	protected $config;
+	
 	/**
 	 * Generates an authorization token that can be used to download files
 	 * with the specified prefix from a private B2 bucket.

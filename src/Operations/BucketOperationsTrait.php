@@ -17,6 +17,9 @@ use Zaxbux\BackblazeB2\Utils;
 trait BucketOperationsTrait
 {
 
+	/** @var \Zaxbux\BackblazeB2\Config */
+	protected $config;
+	
 	/** @var \GuzzleHttp\ClientInterface */
 	protected $http;
 
@@ -43,7 +46,9 @@ trait BucketOperationsTrait
 		?string $bucketType = BucketType::PRIVATE,
 		$bucketInfo = null,
 		?array $corsRules = null,
-		?array $lifecycleRules = null
+		?array $lifecycleRules = null,
+		?bool $fileLockEnabled = false,
+		?array $defaultSSE = null
 	): Bucket {
 		$response = $this->http->request('POST', Endpoint::CREATE_BUCKET, [
 			'json' => Utils::filterRequestOptions([
@@ -51,9 +56,11 @@ trait BucketOperationsTrait
 				Bucket::ATTRIBUTE_BUCKET_NAME => $bucketName,
 				Bucket::ATTRIBUTE_BUCKET_TYPE => $bucketType,
 			], [
-				Bucket::ATTRIBUTE_BUCKET_INFO     => $bucketInfo,
-				Bucket::ATTRIBUTE_CORS_RULES      => $corsRules,
-				Bucket::ATTRIBUTE_LIFECYCLE_RULES => $lifecycleRules,
+				Bucket::ATTRIBUTE_BUCKET_INFO       => $bucketInfo,
+				Bucket::ATTRIBUTE_CORS_RULES        => $corsRules,
+				Bucket::ATTRIBUTE_LIFECYCLE_RULES   => $lifecycleRules,
+				Bucket::ATTRIBUTE_FILE_LOCK_ENABLED => $fileLockEnabled,
+				Bucket::ATTRIBUTE_DEFAULT_SSE       => $defaultSSE,
 			]),
 		]);
 
@@ -147,6 +154,8 @@ trait BucketOperationsTrait
 		?array $bucketInfo = null,
 		?array $corsRules = null,
 		?array $lifecycleRules = null,
+		?array $defaultRetention = null,
+		?array $defaultSSE = null,
 		?int $ifRevisionIs = null
 	): Bucket {
 		$response = $this->http->request('POST', Endpoint::UPDATE_BUCKET, [
@@ -154,11 +163,13 @@ trait BucketOperationsTrait
 				Bucket::ATTRIBUTE_ACCOUNT_ID => $this->accountAuthorization()->getAccountId(),
 				Bucket::ATTRIBUTE_BUCKET_ID  => $bucketId ?? $this->getAllowedBucketId(),
 			], [
-				Bucket::ATTRIBUTE_BUCKET_TYPE     => $bucketType,
-				Bucket::ATTRIBUTE_BUCKET_INFO     => $bucketInfo,
-				Bucket::ATTRIBUTE_CORS_RULES      => $corsRules,
-				Bucket::ATTRIBUTE_LIFECYCLE_RULES => $lifecycleRules,
-				Bucket::ATTRIBUTE_IF_REVISION_IS  => $ifRevisionIs,
+				Bucket::ATTRIBUTE_BUCKET_TYPE       => $bucketType,
+				Bucket::ATTRIBUTE_BUCKET_INFO       => $bucketInfo,
+				Bucket::ATTRIBUTE_CORS_RULES        => $corsRules,
+				Bucket::ATTRIBUTE_LIFECYCLE_RULES   => $lifecycleRules,
+				Bucket::ATTRIBUTE_DEFAULT_RETENTION => $defaultRetention,
+				Bucket::ATTRIBUTE_DEFAULT_SSE       => $defaultSSE,
+				Bucket::ATTRIBUTE_IF_REVISION_IS    => $ifRevisionIs,
 			])
 		]);
 

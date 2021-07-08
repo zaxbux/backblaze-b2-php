@@ -15,6 +15,9 @@ use Zaxbux\BackblazeB2\Utils;
 /** @package BackblazeB2\Operations */
 trait UploadOperationsTrait
 {
+	/** @var \Zaxbux\BackblazeB2\Config */
+	protected $config;
+	
 	/**
 	 * Gets a URL and authorization token to use for uploading files.
 	 * 

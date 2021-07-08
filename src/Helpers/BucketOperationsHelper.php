@@ -8,6 +8,7 @@ use BadMethodCallException;
 use Zaxbux\BackblazeB2\Object\Bucket;
 use Zaxbux\BackblazeB2\Object\Bucket\BucketType;
 use Zaxbux\BackblazeB2\Response\BucketList;
+use Zaxbux\BackblazeB2\Response\FileList;
 
 /** @package BackblazeB2\Helpers */
 class BucketOperationsHelper extends AbstractHelper {
@@ -17,12 +18,20 @@ class BucketOperationsHelper extends AbstractHelper {
 
 	/**
 	 * Specify which bucket to preform operations on. Must call this method before using `update()` or `delete()`.
-	 * @param null|Bucket $bucket 
+	 * @param null|string|Bucket $bucket 
 	 * @return BucketOperationsHelper 
 	 */
-	public function withBucket(?Bucket $bucket = null): BucketOperationsHelper
+	public function withBucket($bucket = null): BucketOperationsHelper
 	{
-		$this->bucket = $bucket;
+		if ($bucket instanceof Bucket) {
+			$this->bucket = $bucket;
+		}
+
+		// Only the bucketId is required for helper methods
+		if (is_string($bucket)) {
+			$this->bucket = new Bucket($bucket, '', '');
+		}
+
 		return $this;
 	}
 
@@ -36,28 +45,113 @@ class BucketOperationsHelper extends AbstractHelper {
 		?string $type = BucketType::PRIVATE,
 		$info = null,
 		?array $corsRules = null,
-		?array $lifecycleRules = null
+		?array $lifecycleRules = null,
+		?bool $fileLockEnabled = false,
+		?array $defaultSSE = null
 	): Bucket {
-		return $this->client->createBucket($name, $type, $info, $corsRules, $lifecycleRules);
+		return $this->client->createBucket(
+			$name,
+			$type,
+			$info,
+			$corsRules,
+			$lifecycleRules,
+			$fileLockEnabled,
+			$defaultSSE
+		);
 	}
 
 	public function delete(?bool $withFiles = false): Bucket
 	{
-		static::assertBucketIsSet();
+		$this->assertBucketIsSet();
 		$this->bucket = $this->client->deleteBucket($this->bucket->getId(), $withFiles);
 		return $this->bucket;
 	}
 
 	public function update(
-		$info = null,
+		?array $info = null,
+		?string $type = null,
 		?array $corsRules = null,
 		?array $lifecycleRules = null,
-		?string $type = null,
+		?array $defaultRetention = null,
+		?array $defaultSSE = null,
 		?int $ifRevisionIs = null
 	): Bucket {
-		static::assertBucketIsSet();
-		$this->bucket = $this->client->updateBucket($this->bucket->getId(), $type, $info, $corsRules, $lifecycleRules, $ifRevisionIs);
+		$this->assertBucketIsSet();
+		$this->bucket = $this->client->updateBucket(
+			$this->bucket->getId(),
+			$type,
+			$info,
+			$corsRules,
+			$lifecycleRules,
+			$defaultRetention,
+			$defaultSSE,
+			$ifRevisionIs
+		);
 		return $this->bucket;
+	}
+
+	public function listFileNames(
+		?string $prefix = null,
+		?string $delimiter = null,
+		?string $startFileName = null,
+		?int $maxFileCount = null
+	): FileList {
+		$this->assertBucketIsSet();
+		return $this->client->listFileNames(
+			$this->bucket->getId(),
+			$prefix,
+			$delimiter,
+			$startFileName,
+			$maxFileCount
+		);
+	}
+
+	public function listFileVersions(
+		?string $prefix = null,
+		?string $delimiter = null,
+		?string $startFileName = null,
+		?string $startFileId = null,
+		?int $maxFileCount = null
+	): FileList {
+		$this->assertBucketIsSet();
+		return $this->client->listFileVersions(
+			$this->bucket->getId(),
+			$prefix,
+			$delimiter,
+			$startFileName,
+			$startFileId,
+			$maxFileCount
+		);
+	}
+
+	public function listAllFileNames(
+		?string $prefix = null,
+		?string $delimiter = null,
+		?string $startFileName = null
+	): FileList {
+		$this->assertBucketIsSet();
+		return $this->client->listAllFileNames(
+			$this->bucket->getId(),
+			$prefix,
+			$delimiter,
+			$startFileName,
+		);
+	}
+
+	public function listAllFileVersions(
+		?string $prefix = null,
+		?string $delimiter = null,
+		?string $startFileName = null,
+		?string $startFileId = null
+	): FileList {
+		$this->assertBucketIsSet();
+		return $this->client->listAllFileNames(
+			$this->bucket->getId(),
+			$prefix,
+			$delimiter,
+			$startFileName,
+			$startFileId,
+		);
 	}
 
 	public function getByName(string $name, ?array $types = null): Bucket

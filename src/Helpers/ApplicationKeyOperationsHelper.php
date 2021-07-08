@@ -16,12 +16,20 @@ class ApplicationKeyOperationsHelper extends AbstractHelper {
 
 	/**
 	 * Specify which applicationKey to preform operations on. Must call this method before calling `delete()`.
-	 * @param null|Key $applicationKey 
+	 * @param null|string|Key $applicationKey 
 	 * @return ApplicationKeyOperationsHelper 
 	 */
-	public function withApplicationKey(?Key $applicationKey): ApplicationKeyOperationsHelper
+	public function withApplicationKey($applicationKey = null): ApplicationKeyOperationsHelper
 	{
-		$this->applicationKey = $applicationKey;
+		if ($applicationKey instanceof Key) {
+			$this->applicationKey = $applicationKey;
+		}
+
+		// Only the applicationKeyId is required for helper methods
+		if (is_string($applicationKey)) {
+			$this->applicationKey = new Key($applicationKey);
+		}
+		
 		return $this;
 	}
 
@@ -43,17 +51,13 @@ class ApplicationKeyOperationsHelper extends AbstractHelper {
 		return $this->client->listKeys($startApplicationKeyId, $maxKeyCount);
 	}
 
-	public function listAll(
-		?string $startApplicationKeyId = null,
-		?int $maxKeyCount = null
-	): KeyList
-	{
-		return $this->client->listAllKeys($startApplicationKeyId, $maxKeyCount);
+	public function listAll(?string $startApplicationKeyId = null): KeyList {
+		return $this->client->listAllKeys($startApplicationKeyId);
 	}
 
 	public function delete(): Key
 	{
-		static::assertApplicationKeyIsSet();
+		$this->assertApplicationKeyIsSet();
 		$this->applicationKey = $this->client->deleteKey($this->applicationKey->getApplicationKeyId());
 		return $this->applicationKey;
 	}

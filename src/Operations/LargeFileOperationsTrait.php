@@ -18,6 +18,8 @@ use Zaxbux\BackblazeB2\Utils;
 /** @package BackblazeB2\Operations */
 trait LargeFileOperationsTrait
 {
+	/** @var \Zaxbux\BackblazeB2\Config */
+	protected $config;
 
 	/** @var \GuzzleHttp\ClientInterface */
 	protected $http;

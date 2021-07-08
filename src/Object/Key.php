@@ -57,7 +57,7 @@ class Key implements B2ObjectInterface
 	/**
 	 * Get the value of accountId.
 	 */ 
-	public function getAccountId(): string
+	public function getAccountId(): ?string
 	{
 		return $this->accountId;
 	}
@@ -65,7 +65,7 @@ class Key implements B2ObjectInterface
 	/**
 	 * Get the value of bucketId.
 	 */ 
-	public function getBucketId(): string
+	public function getBucketId(): ?string
 	{
 		return $this->bucketId;
 	}
@@ -73,7 +73,7 @@ class Key implements B2ObjectInterface
 	/**
 	 * Get the value of name.
 	 */ 
-	public function getName(): string
+	public function getName(): ?string
 	{
 		return $this->name;
 	}
@@ -81,7 +81,7 @@ class Key implements B2ObjectInterface
 	/**
 	 * Get the value of applicationKey.
 	 */ 
-	public function getApplicationKey(): string
+	public function getApplicationKey(): ?string
 	{
 		return $this->applicationKey;
 	}
@@ -97,7 +97,7 @@ class Key implements B2ObjectInterface
 	/**
 	 * Get the value of capabilities.
 	 */ 
-	public function getCapabilities(): array
+	public function getCapabilities(): ?array
 	{
 		return $this->capabilities;
 	}
@@ -127,9 +127,9 @@ class Key implements B2ObjectInterface
 	}
 
 	public function __construct(
-		?string $name = null,
-		?string $applicationKeyId = null,
+		string $applicationKeyId,
 		?string $applicationKey = null,
+		?string $name = null,
 		?array $capabilities = null,
 		?string $accountId = null,
 		?int $expirationTimestamp = null,
@@ -137,9 +137,9 @@ class Key implements B2ObjectInterface
 		?string $namePrefix = null,
 		?array $options = null
 	) {
-		$this->name = $name;
 		$this->applicationKeyId = $applicationKeyId;
 		$this->applicationKey = $applicationKey;
+		$this->name = $name;
 		$this->capabilities = $capabilities ?? [];
 		$this->accountId = $accountId;
 		$this->expirationTimestamp = $expirationTimestamp;

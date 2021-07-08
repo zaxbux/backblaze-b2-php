@@ -5,6 +5,16 @@ This section explains how to download files.
 
 ## Calling the API
 
+### Download Authorization
+
+See [b2_get_download_authorization](https://www.backblaze.com/b2/docs/b2_get_download_authorization.html).
+
+To generate an authorization token for a private bucket, use the `getDownloadAuthorization()` method.
+
+```php
+$authorization = $client->getDownloadAuthorization($bucketId, $fileNamePrefix, $validDuration, $options);
+```
+
 There are two ways to download a file, by ID or by name. `downloadFileById()` and `downloadFileByName()` both return an array containing the response headers and the file stream.
 
 ### Downloading a File by ID

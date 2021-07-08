@@ -115,15 +115,14 @@ trait ApplicationKeyOperationsTrait
 	 * @see Client::listKeys()
 	 */
 	public function listAllKeys(
-		string $startApplicationKeyId = null,
-		int $maxKeyCount = null
+		string $startApplicationKeyId = null
 	): KeyList {
 		$allKeys = new KeyList();
 
 		$nextApplicationKeyId = $startApplicationKeyId ?? '';
 
 		while ($nextApplicationKeyId !== null) {
-			$response             = $this->listKeys($startApplicationKeyId, $maxKeyCount);
+			$response             = $this->listKeys($startApplicationKeyId);
 			$nextApplicationKeyId = $response->nextApplicationKeyId();
 
 			$allKeys->mergeList($response);
