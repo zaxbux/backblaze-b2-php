@@ -30,11 +30,13 @@ class DownloadHelper extends AbstractHelper {
 			$options = DownloadOptions::fromArray($options ?? []);
 		}
 
-		// Build query string from query parameters and download options.
-		$queryString = implode('&', [http_build_query($query ?? []), $options->toQueryString() ?? []]);
-
-		$response = $this->getHttpClient()->request($headersOnly ? 'HEAD' : 'GET', $downloadUrl, [
-			'query'   => $queryString,
+		$response = $this->getHttpClient()->request(
+			$headersOnly ? 'HEAD' : 'GET',
+			Utils::joinPaths(
+				$this->client->accountAuthorization()->downloadUrl(),
+				$downloadUrl
+			), [
+			'query'   => Utils::filterRequestOptions([], $query, $options->getDownloadQueryOptions()),
 			'headers' => $options->getHeaders(),
 			'sink'    => $sink ?? null,
 			'stream'  => Utils::isStream($sink),

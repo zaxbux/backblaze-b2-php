@@ -45,7 +45,7 @@ class Config
 
 	/**
 	 * Custom Guzzle handler or handler stack.
-	 * @var callable|\GuzzleHttp\HandlerStack
+	 * @var \GuzzleHttp\HandlerStack
 	 */
 	private $handler;
 
@@ -161,14 +161,6 @@ class Config
 
 	public function handler(): HandlerStack
 	{
-		if (!$this->handler) {
-			$this->handler = HandlerStack::create();
-		}
-
-		if (is_callable($this->handler) && !$this->handler instanceof HandlerStack) {
-			$this->handler = new HandlerStack(($this->handler));
-		}
-
 		return $this->handler;
 	}
 
@@ -202,7 +194,12 @@ class Config
 	private function setOptions(array $options) {
 		$options = array_merge(static::DEFAULTS, $options);
 
-		$this->handler = $options['handler'];
+		$this->handler = $options['handler'] ?? HandlerStack::create();
+
+		if (is_callable($this->handler) && !$this->handler instanceof HandlerStack) {
+			$this->handler = new HandlerStack(($this->handler));
+		}
+
 		$this->maxRetries = $options['maxRetries'];
 		$this->maxFileCount = $options['maxFileCount'];
 		$this->maxKeyCount = $options['maxKeyCount'];

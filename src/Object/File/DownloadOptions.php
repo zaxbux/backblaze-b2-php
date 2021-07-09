@@ -337,8 +337,8 @@ final class DownloadOptions implements ArrayAccess, JsonSerializable
 	 * 
 	 * @return string The query string.
 	 */
-	public function toQueryString() {
-		return http_build_query([
+	public function getDownloadQueryOptions() {
+		return array_filter([
 			static::OPTION_AUTHORIZATION => $this->authorization,
 			static::OPTION_CONTENT_DISPOSITION => $this->contentDisposition,
 			static::OPTION_CONTENT_ENCODING => $this->contentEncoding,

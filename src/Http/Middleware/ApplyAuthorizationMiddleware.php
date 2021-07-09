@@ -46,7 +46,7 @@ class ApplyAuthorizationMiddleware
 	protected function applyToken(RequestInterface $request): RequestInterface
 	{
 		$request = Psr7Utils::modifyRequest($request, [
-			'uri' => new Uri(Utils::joinPaths($this->client->accountAuthorization()->apiUrl(), (string)$request->getUri())),
+			'uri' => new Uri(Utils::joinPaths($request->getUri()->getHost() ? '' : $this->client->accountAuthorization()->apiUrl(), (string)$request->getUri())),
 			'set_headers' => [
 				'Authorization' => $this->client->accountAuthorization()->authorizationToken(),
 			],

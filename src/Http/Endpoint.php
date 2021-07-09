@@ -15,7 +15,7 @@ final class Endpoint
 	public const DELETE_FILE_VERSION = 'b2_delete_file_version';
 	public const DELETE_KEY = 'b2_delete_key';
 	public const DOWNLOAD_FILE_BY_ID = 'b2_download_file_by_id';
-	public const DOWNLOAD_FILE_BY_NAME = 'b2_download_file_by_name';
+	public const DOWNLOAD_FILE_BY_NAME = 'file';
 	public const FINISH_LARGE_FILE = 'b2_finish_large_file';
 	public const GET_DOWNLOAD_AUTHORIZATION = 'b2_get_download_authorization';
 	public const GET_FILE_INFO = 'b2_get_file_info';

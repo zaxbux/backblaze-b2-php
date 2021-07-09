@@ -3,6 +3,6 @@
 namespace Zaxbux\BackblazeB2\Exceptions;
 
 /** @package BackblazeB2\Exceptions */
-class NotFoundException extends \Exception {
+class NoResultsException extends \Exception {
 
 }

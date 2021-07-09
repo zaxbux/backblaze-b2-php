@@ -194,8 +194,8 @@ class ServerSideEncryption implements JsonSerializable, ArrayAccess {
 		$customerKeyMd5 = $data[static::ATTRIBUTE_CUSTOMER_KEY_MD5] ?? null;
 		
 		return new ServerSideEncryption(
-			$data[static::ATTRIBUTE_MODE] ?? static::MODE_CUSTOMER,
-			$data[static::ATTRIBUTE_ALGORITHM] ?? static::ALGORITHM_AES256,
+			$data[static::ATTRIBUTE_MODE] ?? null,
+			$data[static::ATTRIBUTE_ALGORITHM] ?? null,
 			$customerKey ? ($rawKeys ? base64_encode($customerKey) : $customerKey) : null,
 			$customerKeyMd5 ? ($rawKeys ? base64_encode($customerKeyMd5) : $customerKeyMd5) : null
 		);

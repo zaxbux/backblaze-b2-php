@@ -76,8 +76,8 @@ class UploadHelper extends AbstractHelper {
 
 		// Upload as regular file
 		return $this->client->uploadFile(
-			$bucketId,
 			$fileName,
+			$bucketId,
 			$stream,
 			$contentType,
 			$fileInfo,

@@ -92,7 +92,7 @@ trait UploadOperationsTrait
 					'Content-Type'                 => $contentType ?? File::CONTENT_TYPE_AUTO,
 					'Content-Length'               => $uploadMetadata->length(),
 					File::HEADER_X_BZ_CONTENT_SHA1 => $uploadMetadata->sha1(),
-					File::HEADER_X_BZ_FILE_NAME    => $fileName, //rawurlencode($fileName),// urlencode($fileName),
+					File::HEADER_X_BZ_FILE_NAME    => urlencode($fileName),
 				],
 				($serverSideEncryption->getHeaders() ?? []),
 				($fileInfo->getHeaders() ?? [])

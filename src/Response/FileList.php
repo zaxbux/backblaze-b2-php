@@ -28,9 +28,10 @@ class FileList extends AbstractListResponse
 		$this->nextFileName = $nextFileName;
 	}
 
-	public function current(): File
+	public function current(): ?File
 	{
 		$value = parent::current();
+		if (!$value) return null;
 		return $value instanceof File ? $value : File::fromArray($value);
 	}
 
@@ -38,7 +39,7 @@ class FileList extends AbstractListResponse
 	/**
 	 * Get the value of nextFileId.
 	 */ 
-	public function nextFIleId(): ?string
+	public function nextFileId(): ?string
 	{
 		return $this->nextFileId;
 	}
@@ -46,7 +47,7 @@ class FileList extends AbstractListResponse
 	/**
 	 * Get the value of nextFileName.
 	 */ 
-	public function nextFIleName(): ?string
+	public function nextFileName(): ?string
 	{
 		return $this->nextFileName;
 	}

@@ -35,6 +35,8 @@ final class Utils
 		$options = [];
 
 		foreach ($optional as $set) {
+			if (!isset($set)) continue;
+			
 			if (is_array($set)) {
 				// Remove options with NULL values
 				$set += array_filter($set);

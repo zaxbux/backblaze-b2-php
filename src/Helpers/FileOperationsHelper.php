@@ -121,11 +121,6 @@ class FileOperationsHelper extends AbstractHelper {
 		return $this->client->getFileInfo($fileId);
 	}
 
-	public function getById(string $fileId): File
-	{
-		return $this->client->getFileById($fileId);
-	}
-
 	public function getByName(string $fileName): File
 	{
 		return $this->client->getFileByName($fileName);

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Zaxbux\BackblazeB2\Operations;
 
-use Zaxbux\BackblazeB2\Exceptions\NotFoundException;
+use Zaxbux\BackblazeB2\Exceptions\NoResultsException;
 use Zaxbux\BackblazeB2\Http\Endpoint;
 use Zaxbux\BackblazeB2\Object\AccountAuthorization;
 use Zaxbux\BackblazeB2\Object\Bucket;
@@ -182,7 +182,7 @@ trait BucketOperationsTrait
 	 * @param string $bucketId        The ID of the bucket to fetch. Defaults to the authorized bucket, if any.
 	 * @param array|null $bucketTypes Filter for bucket types returned in the list buckets response.
 	 * 
-	 * @throws NotFoundException 
+	 * @throws NoResultsException 
 	 */
 	public function getBucketById(
 		?string $bucketId = null,
@@ -193,7 +193,7 @@ trait BucketOperationsTrait
 		$buckets = $response->getArrayCopy();
 
 		if (count($buckets) !== 1) {
-			throw new NotFoundException(sprintf('Bucket "%s" not found.', $bucketId));
+			throw new NoResultsException(sprintf('Bucket "%s" not found.', $bucketId));
 		}
 
 		return $buckets[0];
@@ -205,7 +205,7 @@ trait BucketOperationsTrait
 	 * @param string $bucketName      The name of the bucket to fetch.
 	 * @param array|null $bucketTypes Filter for bucket types returned in the list buckets response.
 	 * 
-	 * @throws NotFoundException 
+	 * @throws NoResultsException 
 	 */
 	public function getBucketByName(string $bucketName, array $bucketTypes = null): Bucket
 	{
@@ -214,7 +214,7 @@ trait BucketOperationsTrait
 		//$buckets = $response->getArrayCopy();
 
 		if (!$response->valid()) {
-			throw new NotFoundException(sprintf('Bucket "%s" not found.', $bucketName));
+			throw new NoResultsException(sprintf('Bucket "%s" not found.', $bucketName));
 		}
 
 		return $response->current();

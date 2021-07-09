@@ -77,11 +77,7 @@ trait DownloadOperationsTrait
 		?bool $headersOnly = false
 	): FileDownload {
 		return DownloadHelper::instance($this)->download(
-			Utils::joinPaths(
-				$this->accountAuthorization()->downloadUrl(),
-				Client::B2_API_VERSION,
-				Endpoint::DOWNLOAD_FILE_BY_ID
-			),
+			Client::B2_API_VERSION .Endpoint::DOWNLOAD_FILE_BY_ID,
 			[File::ATTRIBUTE_FILE_ID => $fileId],
 			$options,
 			$sink,
@@ -114,8 +110,7 @@ trait DownloadOperationsTrait
 	): FileDownload {
 		return DownloadHelper::instance($this)->download(
 			Utils::joinPaths(
-				$this->accountAuthorization()->apiUrl(),
-				'file',
+				Endpoint::DOWNLOAD_FILE_BY_NAME,
 				$bucketName ?? $this->allowedBucketName(),
 				$fileName
 			),

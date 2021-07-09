@@ -51,9 +51,6 @@ $client->bucket(Bucket|'bucketId')->listAllFileVersions();
 // Get information on a file.
 $client->file()->getInfo('fileId');
 
-// Get a file by ID.
-$client->file()->getById('fileId');
-
 // Get a file by name.
 $client->file()->getByName('fileName');
 

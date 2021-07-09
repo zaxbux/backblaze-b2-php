@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Zaxbux\BackblazeB2\Operations;
 
-use Zaxbux\BackblazeB2\Exceptions\NotFoundException;
+use Zaxbux\BackblazeB2\Exceptions\NoResultsException;
 use Zaxbux\BackblazeB2\Http\Endpoint;
 use Zaxbux\BackblazeB2\Object\AccountAuthorization;
 use Zaxbux\BackblazeB2\Object\File;
@@ -101,7 +101,7 @@ trait FileOperationsTrait
 		$response = $this->http->request('POST', Endpoint::DELETE_FILE_VERSION, [
 			'json' => Utils::filterRequestOptions([
 				File::ATTRIBUTE_FILE_ID   => $fileId,
-				File::ATTRIBUTE_FILE_NAME => $fileName ?? $this->getFileById($fileId)->id(),
+				File::ATTRIBUTE_FILE_NAME => $fileName ?? $this->getFileInfo($fileId)->name(),
 			], [
 				File::ATTRIBUTE_BYPASS_GOVERNANCE => $bypassGovernance,
 			]),
@@ -222,7 +222,7 @@ trait FileOperationsTrait
 	 */
 	public function listFileVersions(
 		?string $bucketId = null,
-		?string $prefix = '',
+		?string $prefix = null,
 		?string $delimiter = null,
 		?string $startFileName = null,
 		?string $startFileId = null,
@@ -262,7 +262,7 @@ trait FileOperationsTrait
 	): File {
 		$response = $this->http->request('POST', Endpoint::UPDATE_FILE_LEGAL_HOLD, [
 			'json' => Utils::filterRequestOptions([
-				File::ATTRIBUTE_FILE_NAME  => $fileName ?? $this->getFileById($fileId)->name(),
+				File::ATTRIBUTE_FILE_NAME  => $fileName ?? $this->getFileInfo($fileId)->name(),
 				File::ATTRIBUTE_FILE_ID    => $fileId,
 				File::ATTRIBUTE_LEGAL_HOLD => $legalHold,
 			]),
@@ -293,7 +293,7 @@ trait FileOperationsTrait
 	): File {
 		$response = $this->http->request('POST', Endpoint::UPDATE_FILE_RETENTION, [
 			'json' => Utils::filterRequestOptions([
-				File::ATTRIBUTE_FILE_NAME         => $fileName ?? $this->getFileById($fileId)->id(),
+				File::ATTRIBUTE_FILE_NAME         => $fileName ?? $this->getFileInfo($fileId)->name(),
 				File::ATTRIBUTE_FILE_ID           => $fileId,
 				File::ATTRIBUTE_FILE_RETENTION    => $fileRetention,
 				File::ATTRIBUTE_BYPASS_GOVERNANCE => $bypassGovernance,
@@ -312,7 +312,7 @@ trait FileOperationsTrait
 	 */
 	public function listAllFileNames(
 		?string $bucketId = null,
-		string $prefix = '',
+		string $prefix = null,
 		string $delimiter = null,
 		string $startFileName = null
 	): FileList {
@@ -332,7 +332,7 @@ trait FileOperationsTrait
 	public function getFileByName(string $fileName, ?string $bucketId = null): File
 	{
 		if (!$file = $this->listFileNames($bucketId, '', null, $fileName, 1)->current()) {
-			throw new NotFoundException(sprintf('No results returned for file name "%s"', $fileName));
+			throw new NoResultsException(sprintf('No results returned for file name "%s"', $fileName));
 		}
 
 		return $file;
@@ -347,7 +347,7 @@ trait FileOperationsTrait
 	 */
 	public function listAllFileVersions(
 		?string $bucketId = null,
-		?string $prefix = '',
+		?string $prefix = null,
 		?string $delimiter = null,
 		?string $startFileName = null,
 		?string $startFileId = null
@@ -367,15 +367,6 @@ trait FileOperationsTrait
 		return $allFiles;
 	}
 
-	public function getFileById(string $fileId, ?string $bucketId = null): File
-	{
-		if (!$file = $this->listFileVersions($bucketId, '', null, null, $fileId, 1)->current()) {
-			throw new NotFoundException(sprintf('No results returned for file id "%s"', $fileId));
-		}
-
-		return $file;
-	}
-
 	/**
 	 * Deletes all versions of a file(s) in a bucket.
 	 * 
@@ -391,7 +382,7 @@ trait FileOperationsTrait
 	public function deleteAllFileVersions(
 		?string $startFileId = null,
 		?string $startFileName = null,
-		?string $prefix = '',
+		?string $prefix = null,
 		?string $delimiter = null,
 		?string $bucketId = null,
 		?bool $bypassGovernance = false
@@ -403,8 +394,8 @@ trait FileOperationsTrait
 		while ($fileVersions->valid()) {
 
 			$deleted->append($this->deleteFileVersion(
-				$fileVersions->current()->name(),
 				$fileVersions->current()->id(),
+				$fileVersions->current()->name(),
 				$bypassGovernance
 			));
 
