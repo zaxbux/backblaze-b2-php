@@ -1,6 +1,52 @@
 TODO:
+	Official Integration Checklist:
+		✔ Do not store `accountId` provided by user.
+			- Only store `accountId` from API authorize response.
+
+		✔ Set a `User-Agent` header.
+
+		✘ Multi-threaded uploads
+			- PHP isn't great at multi-threading.
+		✘ Multi-threaded downloads
+			- PHP isn't great at multi-threading.
+		
+		☐ Handle HTTP 503 errors from any call except `b2_upload_*`
+			- Make another attempt.
+			- May include `Retry-After` header.
+			- Use exponential back-off by default.
+		☐ Handle HTTP 503 errors for `b2_upload_file` and `b2_upload_part`
+			- Obtain new upload URL and auth token
+
+		☐ Handle HTTP 401 errors for all calls
+			- Code `unauthorized` - don't retry
+			- Code `bad_auth_token` or `expired_auth_token` - obtain new account authorization
+		
+		☐ Interoperability metadata
+			✔ X-Bz-Info-src_last_modified_millis
+			☐ X-Bz-Info-large_file_sha1
+		
+		✔ Deleting file versions
+			- Handle deleting the latest version or all versions.
+		
+		✘ Timing background work
+			- Not applicable
+		
+		✔ Creating buckets
+			- Buckets are created as **private** by default
+		
+		☐ Re-attempt `b2_upload_file` and `b2_upload_part` and fetch new upload URL when:
+			- An HTTPS connection cannot be made. (e.g., connection timeout).
+			- The HTTPS connection is broken. (e.g., broken pipe or connection reset)
+			- The HTTPS connection times out waiting for a response (socket timeout).
+			- The HTTP response status is 408 (Request Timeout).
+			- The HTTP response status is between 500-599, including 503 Service Unavailable.
+	
 	Tests:
 		☐ Test all auxillary objects
+	Integration Tests:
+		☐ Send `X-Bz-Test-Mode: fail_some_uploads` header on `b2_upload_file` calls.
+		☐ Send `X-Bz-Test-Mode: expire_some_account_authorization_tokens` header.
+		☐ Send `X-Bz-Test-Mode: force_cap_exceeded` header on upload/download related calls.
 	Objects:
 		☐ CORS Rule
 		☐ Lifecycle Rule
