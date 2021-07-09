@@ -2,6 +2,7 @@
 
 namespace tests;
 
+use BlastCloud\Guzzler\Expectation;
 use Zaxbux\BackblazeB2\Utils as ClientUtils;
 use Zaxbux\BackblazeB2\Helpers\UploadHelper;
 use Zaxbux\BackblazeB2\Http\Endpoint;
@@ -19,20 +20,21 @@ class ClientUploadTest extends ClientTestBase
 		$filePath = ClientUtils::joinFilePaths(__DIR__, 'responses', 'download_content');
 
 		$file = UploadHelper::instance($this->client)->uploadFile(
-			'/file/name.txt',
 			'bucketId',
+			'/file/name.txt',
 			$filePath,
 			'text/plain'
 		);
 
 		static::assertInstanceOf(File::class, $file);
 
-		$this->guzzler->expects($this->once())
-			->post('https://pod-000-1005-03.backblaze.com/b2api/v2/b2_upload_file?cvt=c001_v0001005_t0027&bucket=4a48fe8875c6214145260818')
-			->withHeader('Content-Length', 43)
-			->withHeader(File::HEADER_X_BZ_FILE_NAME, '/file/name.txt')
-			->withHeader(File::HEADER_X_BZ_CONTENT_SHA1, sha1_file($filePath))
-			->withBody(file_get_contents($filePath));
+		$this->guzzler->assertLast(function (Expectation $expectation) use ($filePath) {
+			$expectation->post('https://pod-000-1005-03.backblaze.com/b2api/v2/b2_upload_file')
+				->withHeader('Content-Length', 43)
+				->withHeader(File::HEADER_X_BZ_FILE_NAME, urlencode('/file/name.txt'))
+				->withHeader(File::HEADER_X_BZ_CONTENT_SHA1, sha1_file($filePath))
+				->withBody(file_get_contents($filePath));
+		});
 	}
 	
 	public function testUploadingResource()

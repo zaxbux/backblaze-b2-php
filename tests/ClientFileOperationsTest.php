@@ -35,19 +35,19 @@ class ClientFileOperationsTest extends ClientTestBase
 
 		$fileId = $this->client->getFileByName('Test file.bin', 'bucketId')->id();
 
-		static::assertInstanceOf(File::class, $this->client->deleteFileVersion('Test file.bin', $fileId));
+		static::assertInstanceOf(File::class, $this->client->deleteFileVersion($fileId, 'Test file.bin'));
 	}
 	
 
 	public function testDeleteFileWithoutName()
 	{
 		$this->guzzler->queueResponse(
-			MockResponse::fromFile('list_file_versions.json'),
+			MockResponse::fromFile('get_file_info.json'),
 			MockResponse::fromFile('delete_file.json'),
 		);
 
 		$this->guzzler->expects($this->once())
-			->post(static::getEndpointUri(Endpoint::LIST_FILE_VERSIONS))
+			->post(static::getEndpointUri(Endpoint::GET_FILE_INFO))
 			->post(static::getEndpointUri(Endpoint::DELETE_FILE_VERSION));
 
 		$file = $this->client->deleteFileVersion('fileId');
@@ -144,11 +144,12 @@ class ClientFileOperationsTest extends ClientTestBase
 	public function testUpdateLegalFileHoldWithoutFileName()
 	{
 		$this->guzzler->queueResponse(
-			MockResponse::fromFile('list_file_versions.json'),
+			MockResponse::fromFile('get_file_info.json'),
 			MockResponse::fromFile('update_file_legal_hold.json'),
 		);
 
 		$this->guzzler->expects($this->once())
+			->post(static::getEndpointUri(Endpoint::GET_FILE_INFO))
 			->post(static::getEndpointUri(Endpoint::UPDATE_FILE_LEGAL_HOLD));
 
 		$file = $this->client->updateFileLegalHold('file_id', null, FileLock::LEGAL_HOLD_ENABLED);
@@ -176,11 +177,12 @@ class ClientFileOperationsTest extends ClientTestBase
 	public function testUpdateFileRetentionWithoutFileName()
 	{
 		$this->guzzler->queueResponse(
-			MockResponse::fromFile('list_file_versions.json'),
+			MockResponse::fromFile('get_file_info.json'),
 			MockResponse::fromFile('update_file_retention.json'),
 		);
 
 		$this->guzzler->expects($this->once())
+			->post(static::getEndpointUri(Endpoint::GET_FILE_INFO))
 			->post(static::getEndpointUri(Endpoint::UPDATE_FILE_RETENTION));
 
 		$file = $this->client->updateFileRetention('file_id', null, [
@@ -229,7 +231,7 @@ class ClientFileOperationsTest extends ClientTestBase
 			MockResponse::fromFile('get_file.json'),
 		);
 
-		$file = $this->client->getFileById('fileId', 'bucketId');
+		$file = $this->client->getFileInfo('fileId');
 
 		static::assertInstanceOf(File::class, $file);
 	}
@@ -242,7 +244,7 @@ class ClientFileOperationsTest extends ClientTestBase
 			MockResponse::fromFile('get_file_non_existent.json', 400),
 		);
 
-		$this->client->getFileById('fileId', 'bucketId');
+		$this->client->getFileInfo('fileId');
 	}
 
 	public function testDeleteAllFileVersions()
