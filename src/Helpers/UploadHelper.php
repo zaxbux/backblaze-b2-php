@@ -30,8 +30,8 @@ class UploadHelper extends AbstractHelper {
 		$stream,
 		?string $contentType = null,
 		?FileInfo $fileInfo = null,
-		?array $fileRetention,
-		?bool $legalHold,
+		?array $fileRetention = null,
+		?bool $legalHold = null,
 		?ServerSideEncryption $serverSideEncryption = null
 	): File {
 		$bucketId = $bucketIdOrUploadUrl;
@@ -157,8 +157,8 @@ class UploadHelper extends AbstractHelper {
 		$stream,
 		?string $contentType = null,
 		?FileInfo $fileInfo = null,
-		?array $fileRetention,
-		?bool $legalHold,
+		?array $fileRetention = null,
+		?bool $legalHold = null,
 		?ServerSideEncryption $serverSideEncryption = null,
 		?FileUploadMetadata $metadata = null
 	): File {
