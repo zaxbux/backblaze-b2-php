@@ -15,7 +15,7 @@ class Config
 {
 	public const DEFAULTS = [
 		'applicationName' => '',
-		'handler' => null,
+		//'handler' => null,
 		'middleware' => [],
 		'useHttpErrors' => null,
 		'maxRetries' => 4,
@@ -162,7 +162,7 @@ class Config
 	public function handler(): HandlerStack
 	{
 		if (!$this->handler) {
-			$this->handler = new HandlerStack();
+			$this->handler = HandlerStack::create();
 		}
 
 		if (is_callable($this->handler) && !$this->handler instanceof HandlerStack) {
