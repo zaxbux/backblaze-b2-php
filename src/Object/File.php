@@ -485,8 +485,11 @@ class File implements B2ObjectInterface
 	public function lastModifiedTimestamp(?bool $milliseconds = true): ?int
 	{
 		if ($this->info) {
-			$t = (int) $this->info->get(FileInfo::B2_FILE_INFO_MTIME, null);
-			return $milliseconds ? $t : round($t / 1000);
+			$t = $this->info->get(FileInfo::B2_FILE_INFO_MTIME);
+			if (is_string($t)) {
+				$t = (int) $t;
+				return $milliseconds ? $t : round($t / 1000);
+			}
 		}
 
 		return null;
