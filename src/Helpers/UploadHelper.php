@@ -12,7 +12,8 @@ use Zaxbux\BackblazeB2\Object\File\ServerSideEncryption;
 use Zaxbux\BackblazeB2\Object\File\UploadUrl;
 
 /** @package BackblazeB2\Helpers */
-class UploadHelper extends AbstractHelper {
+class UploadHelper extends AbstractHelper
+{
 	/**
 	 * Upload a file. Automatically decides the upload method (regular or large file).
 	 *
@@ -57,7 +58,7 @@ class UploadHelper extends AbstractHelper {
 		// Upload as large file if greater than single file size or configured size,
 		// and greater than the minimum part size for the account.
 		if (($metadata->length() > File::SINGLE_FILE_MAX_SIZE ||
-			$metadata->length() > 200 * 1024 * 1024) &&
+				$metadata->length() > 200 * 1024 * 1024) &&
 			$metadata->length() > $this->accountAuthorization->getAbsoluteMinimumPartSize()
 		) {
 			// Upload large file
@@ -121,11 +122,11 @@ class UploadHelper extends AbstractHelper {
 		}
 
 		$file = $this->uploadStream(
-			$bucketIdOrUploadUrl, 
-			$fileName, 
-			$handle, 
-			$contentType, 
-			$fileInfo, 
+			$bucketIdOrUploadUrl,
+			$fileName,
+			$handle,
+			$contentType,
+			$fileInfo,
 			$fileRetention,
 			$legalHold,
 			$serverSideEncryption
@@ -137,7 +138,7 @@ class UploadHelper extends AbstractHelper {
 
 		return $file;
 	}
-	
+
 	/**
 	 * Helper method that implements the entire large file upload process.
 	 * 
@@ -147,7 +148,7 @@ class UploadHelper extends AbstractHelper {
 	 * @param null|string               $contentType          
 	 * @param null|FileInfo             $fileInfo             
 	 * @param null|ServerSideEncryption $serverSideEncryption 
-	 * @param null|UploadMetadata       $metadata             
+	 * @param null|FileUploadMetadata   $metadata             
 	 * 
 	 * @throws RuntimeException
 	 */

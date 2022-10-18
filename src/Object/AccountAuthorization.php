@@ -6,8 +6,6 @@ namespace Zaxbux\BackblazeB2\Object;
 
 use function time;
 
-use GuzzleHttp\Utils;
-use Psr\Http\Message\ResponseInterface;
 use Zaxbux\BackblazeB2\Interfaces\B2ObjectInterface;
 use Zaxbux\BackblazeB2\Interfaces\AuthorizationCacheInterface;
 use Zaxbux\BackblazeB2\Traits\HydrateFromResponseTrait;
@@ -133,7 +131,7 @@ class AccountAuthorization implements B2ObjectInterface
 	 * The recommended part size for each part of a large file (except the last one).
 	 * It is recommended to use this part size for optimal performance.
 	 * 
-	 * @return int The recomended part size in bytes.
+	 * @return int The recommended part size in bytes.
 	 */
 	public function recommendedPartSize(): ?int
 	{
