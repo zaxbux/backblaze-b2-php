@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace tests;
 
 use Zaxbux\BackblazeB2\Object\File;
+use Zaxbux\BackblazeB2\Object\File\FileInfo;
 
 class FileObjectTest extends FileObjectTestBase
 {
