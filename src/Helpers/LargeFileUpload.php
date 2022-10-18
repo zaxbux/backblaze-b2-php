@@ -10,7 +10,8 @@ use Zaxbux\BackblazeB2\Object\File\FileUploadMetadata;
 use Zaxbux\BackblazeB2\Object\File\ServerSideEncryption;
 
 /** @package BackblazeB2\Helpers */
-class LargeFileUpload {
+class LargeFileUpload
+{
 	private $client;
 	private $stream;
 	private $fileName;
@@ -38,7 +39,8 @@ class LargeFileUpload {
 		$this->client = $client;
 	}
 
-	public static function create(Client $client) {
+	public static function create(Client $client)
+	{
 		return new static($client);
 	}
 
@@ -131,13 +133,14 @@ class LargeFileUpload {
 		return $this;
 	}
 
-	public function uploadParts() {
+	public function uploadParts()
+	{
 		while ($this->remainingBytes() > 0) {
 			$this->partCount++;
 			$offset = $this->bytesToSend();
 
 			$partString = fread($this->stream, $offset);
-			
+
 			$metadata = FileUploadMetadata::fromResource($partString);
 			array_push($this->partSha1Array, $metadata->sha1());
 
@@ -156,25 +159,27 @@ class LargeFileUpload {
 		return $this;
 	}
 
-	public function finish() {
+	public function finish()
+	{
 		// Finish large file
 
 		// Get file info to confirm
 		return $this;
 	}
 
-	public function getFile() {
+	public function getFile()
+	{
 		return $this->file;
 	}
 
 	private function minimumPartSize(): int
 	{
-		return $this->client->accountAuthorization()->getAbsoluteMinimumPartSize();
+		return $this->client->accountAuthorization()->absoluteMinimumPartSize();
 	}
 
 	private function recommendedPartSize(): int
 	{
-		return $this->client->accountAuthorization()->getRecommendedPartSize();
+		return $this->client->accountAuthorization()->recommendedPartSize();
 	}
 
 	private function remainingBytes(): int
@@ -188,7 +193,7 @@ class LargeFileUpload {
 		if ($this->remainingBytes() < $this->minimumPartSize()) {
 			return $this->remainingBytes();
 		}
-		
+
 		return $this->recommendedPartSize();
 	}
 }
