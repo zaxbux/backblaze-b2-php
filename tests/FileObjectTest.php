@@ -17,4 +17,22 @@ class FileObjectTest extends FileObjectTestBase
 	{
 		static::isFileObject(File::fromArray(static::getFileInit()));
 	}
+
+	public function testLastModifiedTimestampString()
+	{
+		$init = static::getFileInit();
+		// If the last modified time was set as a string, it should be converted to an int
+		$init[File::ATTRIBUTE_FILE_INFO][FileInfo::B2_FILE_INFO_MTIME] = '1234';
+		$file = File::fromArray($init);
+		static::assertEquals(1234, $file->lastModifiedTimestamp());
+	}
+
+	public function testLastModifiedTimestampNull()
+	{
+		$init = static::getFileInit();
+		// If the last modified time does not exist, it should be returned as null
+		unset($init[File::ATTRIBUTE_FILE_INFO][FileInfo::B2_FILE_INFO_MTIME]);
+		$file = File::fromArray($init);
+		static::assertEquals(null, $file->lastModifiedTimestamp());
+	}
 }
