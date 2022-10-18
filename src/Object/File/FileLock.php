@@ -14,7 +14,8 @@ use Zaxbux\BackblazeB2\Traits\ProxyArrayAccessToPropertiesTrait;
  * 
  * @package BackblazeB2\Object\File
  */
-class FileLock implements JsonSerializable, ArrayAccess {
+class FileLock implements JsonSerializable, ArrayAccess
+{
 	use ProxyArrayAccessToPropertiesTrait;
 
 	public const ATTRIBUTE_IS_CLIENT_AUTHORIZED_TO_READ = 'isClientAuthorizedToRead';
@@ -34,19 +35,19 @@ class FileLock implements JsonSerializable, ArrayAccess {
 
 	/** @var array */
 	private $clientAuthorizedToRead = [];
-	
+
 	/** @var string */
 	private $fileRetentionMode;
-	
+
 	/** @var int */
 	private $fileRetentionPeriod;
-	
+
 	/** @var bool */
 	private $legalHold;
 
 	/**
 	 * Get the value of fileRetentionMode
-	 */ 
+	 */
 	public function fileRetentionMode(): string
 	{
 		return $this->fileRetentionMode;
@@ -54,7 +55,7 @@ class FileLock implements JsonSerializable, ArrayAccess {
 
 	/**
 	 * Set the value of fileRetentionMode
-	 */ 
+	 */
 	public function setFileRetentionMode(string $fileRetentionMode): FileLock
 	{
 		$this->fileRetentionMode = $fileRetentionMode;
@@ -64,7 +65,7 @@ class FileLock implements JsonSerializable, ArrayAccess {
 
 	/**
 	 * Get the value of fileRetentionPeriod
-	 */ 
+	 */
 	public function fileRetentionPeriod(): int
 	{
 		return $this->fileRetentionPeriod;
@@ -72,7 +73,7 @@ class FileLock implements JsonSerializable, ArrayAccess {
 
 	/**
 	 * Set the value of fileRetentionPeriod
-	 */ 
+	 */
 	public function setFileRetentionPeriod($fileRetentionPeriod): FileLock
 	{
 		$this->fileRetentionPeriod = $fileRetentionPeriod;
@@ -82,7 +83,7 @@ class FileLock implements JsonSerializable, ArrayAccess {
 
 	/**
 	 * Get the value of legalHold
-	 */ 
+	 */
 	public function legalHold(): string
 	{
 		return $this->legalHold ? static::LEGAL_HOLD_ENABLED : static::LEGAL_HOLD_DISABLED;
@@ -91,7 +92,7 @@ class FileLock implements JsonSerializable, ArrayAccess {
 	/**
 	 * Set the value of legalHold
 	 * @param bool|string $legalHold
-	 */ 
+	 */
 	public function setLegalHold($legalHold): FileLock
 	{
 		if ($legalHold === static::LEGAL_HOLD_ENABLED || $legalHold === true) {
@@ -111,12 +112,11 @@ class FileLock implements JsonSerializable, ArrayAccess {
 	) {
 		$this->fileRetentionMode = $fileRetentionMode;
 		$this->fileRetentionPeriod = $fileRetentionPeriod;
-		$this->legalHold = $legalHold === null ? null : (
-			$legalHold ? static::LEGAL_HOLD_ENABLED : static::LEGAL_HOLD_DISABLED
+		$this->legalHold = $legalHold === null ? null : ($legalHold ? static::LEGAL_HOLD_ENABLED : static::LEGAL_HOLD_DISABLED
 		);
 		$this->clientAuthorizedToRead = $clientAuthorizedToRead;
 	}
-	
+
 	/**
 	 * Get the File Lock configuration as headers understood by the B2 API.
 	 * 
@@ -149,7 +149,8 @@ class FileLock implements JsonSerializable, ArrayAccess {
 		);
 	}
 
-	public function isClientAuthorizedToRead($attribute): ?bool {
+	public function isClientAuthorizedToRead($attribute): ?bool
+	{
 		return $this->clientAuthorizedToRead[$attribute] ?? null;
 	}
 
@@ -172,7 +173,7 @@ class FileLock implements JsonSerializable, ArrayAccess {
 	}
 
 	/** @inheritdoc */
-	public function jsonSerialize()
+	public function jsonSerialize(): mixed
 	{
 		return $this->toArray();
 	}

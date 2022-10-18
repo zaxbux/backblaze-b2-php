@@ -60,7 +60,7 @@ final class DownloadOptions implements ArrayAccess, JsonSerializable
 
 	/** @var bool */
 	private $sseHeadersEnabled = false;
-	
+
 	/**
 	 * 
 	 * @param string                     $authorization 
@@ -93,8 +93,8 @@ final class DownloadOptions implements ArrayAccess, JsonSerializable
 		$this->cacheControl = $cacheControl;
 		$this->expires = $expires;
 		$this->range = $range;
-		
-		if (! $serverSideEncryption instanceof ServerSideEncryption) {
+
+		if (!$serverSideEncryption instanceof ServerSideEncryption) {
 			$serverSideEncryption = ServerSideEncryption::fromArray($serverSideEncryption ?? []);
 		}
 
@@ -107,7 +107,7 @@ final class DownloadOptions implements ArrayAccess, JsonSerializable
 
 	/**
 	 * Get the value of contentDisposition.
-	 */ 
+	 */
 	public function contentDisposition(): ?string
 	{
 		return $this->contentDisposition;
@@ -117,7 +117,7 @@ final class DownloadOptions implements ArrayAccess, JsonSerializable
 	 * Set the value of contentDisposition.
 	 *
 	 * @param string $contentDisposition
-	 */ 
+	 */
 	public function setContentDisposition(string $contentDisposition): DownloadOptions
 	{
 		$this->contentDisposition = $contentDisposition;
@@ -127,7 +127,7 @@ final class DownloadOptions implements ArrayAccess, JsonSerializable
 
 	/**
 	 * Get the value of contentEncoding.
-	 */ 
+	 */
 	public function contentEncoding(): ?string
 	{
 		return $this->contentEncoding;
@@ -137,7 +137,7 @@ final class DownloadOptions implements ArrayAccess, JsonSerializable
 	 * Set the value of contentEncoding.
 	 *
 	 * @param string $contentEncoding
-	 */ 
+	 */
 	public function setContentEncoding(string $contentEncoding): DownloadOptions
 	{
 		$this->contentEncoding = $contentEncoding;
@@ -147,7 +147,7 @@ final class DownloadOptions implements ArrayAccess, JsonSerializable
 
 	/**
 	 * Get the value of contentLanguage.
-	 */ 
+	 */
 	public function contentLanguage(): ?string
 	{
 		return $this->contentLanguage;
@@ -157,7 +157,7 @@ final class DownloadOptions implements ArrayAccess, JsonSerializable
 	 * Set the value of contentLanguage.
 	 *
 	 * @param string $contentLanguage
-	 */ 
+	 */
 	public function setContentLanguage(string $contentLanguage): DownloadOptions
 	{
 		$this->contentLanguage = $contentLanguage;
@@ -167,7 +167,7 @@ final class DownloadOptions implements ArrayAccess, JsonSerializable
 
 	/**
 	 * Get the value of contentType.
-	 */ 
+	 */
 	public function contentType(): ?string
 	{
 		return $this->contentType;
@@ -177,7 +177,7 @@ final class DownloadOptions implements ArrayAccess, JsonSerializable
 	 * Set the value of contentType.
 	 *
 	 * @param string $contentType
-	 */ 
+	 */
 	public function setContentType(string $contentType): DownloadOptions
 	{
 		$this->contentType = $contentType;
@@ -187,7 +187,7 @@ final class DownloadOptions implements ArrayAccess, JsonSerializable
 
 	/**
 	 * Get the value of cacheControl.
-	 */ 
+	 */
 	public function cacheControl(): ?string
 	{
 		return $this->cacheControl;
@@ -197,7 +197,7 @@ final class DownloadOptions implements ArrayAccess, JsonSerializable
 	 * Set the value of cacheControl.
 	 *
 	 * @param string $cacheControl
-	 */ 
+	 */
 	public function setCacheControl(string $cacheControl): DownloadOptions
 	{
 		$this->cacheControl = $cacheControl;
@@ -207,7 +207,7 @@ final class DownloadOptions implements ArrayAccess, JsonSerializable
 
 	/**
 	 * Get the value of expires.
-	 */ 
+	 */
 	public function expires(): ?string
 	{
 		return $this->expires;
@@ -217,7 +217,7 @@ final class DownloadOptions implements ArrayAccess, JsonSerializable
 	 * Set the value of expires.
 	 *
 	 * @param string $expires
-	 */ 
+	 */
 	public function setExpires(string $expires): DownloadOptions
 	{
 		$this->expires = $expires;
@@ -227,7 +227,7 @@ final class DownloadOptions implements ArrayAccess, JsonSerializable
 
 	/**
 	 * Get the value of range.
-	 */ 
+	 */
 	public function range(): string
 	{
 		return $this->range;
@@ -238,7 +238,7 @@ final class DownloadOptions implements ArrayAccess, JsonSerializable
 	 * 
 	 * @param string $range A standard RFC 7233 byte-range request string,
 	 *                      which will return just part of the stored file.
-	 */ 
+	 */
 	public function setRange($range): DownloadOptions
 	{
 		$this->range = $range;
@@ -248,7 +248,7 @@ final class DownloadOptions implements ArrayAccess, JsonSerializable
 
 	/**
 	 * Get the value of serverSideEncryption.
-	 */ 
+	 */
 	public function serverSideEncryption(): ServerSideEncryption
 	{
 		return $this->serverSideEncryption;
@@ -258,7 +258,7 @@ final class DownloadOptions implements ArrayAccess, JsonSerializable
 	 * Set the value of serverSideEncryption.
 	 *
 	 * @param ServerSideEncryption|array|null
-	 */ 
+	 */
 	public function setServerSideEncryption($serverSideEncryption): DownloadOptions
 	{
 		$this->serverSideEncryption = $serverSideEncryption instanceof ServerSideEncryption
@@ -309,8 +309,7 @@ final class DownloadOptions implements ArrayAccess, JsonSerializable
 		return array_filter([
 			static::HEADER_RANGE => $this->range,
 			static::HEADER_AUTHORIZATION => $this->authorization,
-		] + (
-			$this->sseHeadersEnabled ? $this->serverSideEncryption->getHeaders() : []
+		] + ($this->sseHeadersEnabled ? $this->serverSideEncryption->getHeaders() : []
 		));
 	}
 
@@ -318,7 +317,8 @@ final class DownloadOptions implements ArrayAccess, JsonSerializable
 	 * 
 	 * @return string[] 
 	 */
-	public function toArray() {
+	public function toArray()
+	{
 		return array_filter([
 			static::OPTION_AUTHORIZATION => $this->authorization,
 			static::OPTION_CONTENT_DISPOSITION => $this->contentDisposition,
@@ -337,7 +337,8 @@ final class DownloadOptions implements ArrayAccess, JsonSerializable
 	 * 
 	 * @return string The query string.
 	 */
-	public function getDownloadQueryOptions() {
+	public function getDownloadQueryOptions()
+	{
 		return array_filter([
 			static::OPTION_AUTHORIZATION => $this->authorization,
 			static::OPTION_CONTENT_DISPOSITION => $this->contentDisposition,
@@ -371,7 +372,7 @@ final class DownloadOptions implements ArrayAccess, JsonSerializable
 	/**
 	 * @inheritdoc
 	 */
-	public function jsonSerialize()
+	public function jsonSerialize(): mixed
 	{
 		return $this->toArray();
 	}

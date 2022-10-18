@@ -31,10 +31,8 @@ trait ProxyArrayAccessToPropertiesTrait
 
     /**
      * @param mixed $offset
-     *
-     * @return mixed
      */
-    public function offsetGet($offset)
+    public function offsetGet($offset): mixed
     {
         $property = $this->formatPropertyName((string) $offset);
 

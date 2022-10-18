@@ -17,7 +17,8 @@ use Zaxbux\BackblazeB2\Traits\ProxyArrayAccessToPropertiesTrait;
  * @link https://www.backblaze.com/b2/docs/server_side_encryption.html
  * @package BackblazeB2\Object\File
  */
-class ServerSideEncryption implements JsonSerializable, ArrayAccess {
+class ServerSideEncryption implements JsonSerializable, ArrayAccess
+{
 	use ProxyArrayAccessToPropertiesTrait;
 
 	public const MODE_B2       = 'SSE-B2';
@@ -36,13 +37,13 @@ class ServerSideEncryption implements JsonSerializable, ArrayAccess {
 
 	/** @var string */
 	private $mode;
-	
+
 	/** @var string */
 	private $algorithm;
-	
+
 	/** @var string */
 	private $customerKey;
-	
+
 	/** @var string */
 	private $customerKeyMd5;
 
@@ -75,10 +76,10 @@ class ServerSideEncryption implements JsonSerializable, ArrayAccess {
 			base64_encode($digest)
 		);
 	}
-	
+
 	/**
 	 * Get the value of mode.
-	 */ 
+	 */
 	public function mode(): string
 	{
 		return $this->mode;
@@ -89,7 +90,7 @@ class ServerSideEncryption implements JsonSerializable, ArrayAccess {
 	 * @param string $mode
 	 * 
 	 * @throws InvalidArgumentException If the `$mode` is not a valid mode.
-	 */ 
+	 */
 	public function setMode(string $mode): ServerSideEncryption
 	{
 		/*if ($mode !== static::MODE_B2 || $mode !== static::MODE_CUSTOMER) {
@@ -105,7 +106,7 @@ class ServerSideEncryption implements JsonSerializable, ArrayAccess {
 
 	/**
 	 * Get the value of algorithm.
-	 */ 
+	 */
 	public function algorithm(): string
 	{
 		return $this->algorithm;
@@ -114,7 +115,7 @@ class ServerSideEncryption implements JsonSerializable, ArrayAccess {
 	/**
 	 * Set the value of algorithm.
 	 * @param string $algorithm
-	 */ 
+	 */
 	public function setAlgorithm(string $algorithm): ServerSideEncryption
 	{
 		$this->algorithm = $algorithm;
@@ -125,7 +126,7 @@ class ServerSideEncryption implements JsonSerializable, ArrayAccess {
 	/**
 	 * Get the value of customerKey.
 	 * @param bool $raw Set to `true` to decode value as *base64* first.
-	 */ 
+	 */
 	public function getCustomerKey(bool $raw = false): string
 	{
 		return $raw ? base64_decode($this->customerKey) : $this->customerKey;
@@ -135,7 +136,7 @@ class ServerSideEncryption implements JsonSerializable, ArrayAccess {
 	 * Set the value of customerKey.
 	 * @param string $customerKey AES-256 encryption key.
 	 * @param bool   $raw         Set to `true` to encode value as *base64* first.
-	 */ 
+	 */
 	public function setCustomerKey(string $customerKey, bool $raw = false): ServerSideEncryption
 	{
 		$this->customerKey = $raw ? base64_encode($customerKey) : $customerKey;
@@ -146,7 +147,7 @@ class ServerSideEncryption implements JsonSerializable, ArrayAccess {
 	/**
 	 * Get the value of customerKeyMd5.
 	 * @param bool $raw Set to `true` to decode value as *base64* first.
-	 */ 
+	 */
 	public function getCustomerKeyMd5(bool $raw = false): string
 	{
 		return $raw ? base64_decode($this->customerKeyMd5) : $this->customerKeyMd5;
@@ -156,7 +157,7 @@ class ServerSideEncryption implements JsonSerializable, ArrayAccess {
 	 * Set the value of customerKeyMd5.
 	 * @param string $customerKeyMd5 MD5 digest of the encryption key.
 	 * @param bool   $raw            Set to `true` to encode value as *base64* first.
-	 */ 
+	 */
 	public function setCustomerKeyMd5(string $customerKeyMd5, bool $raw = false): ServerSideEncryption
 	{
 		$this->customerKeyMd5 = $raw ? base64_encode($customerKeyMd5) : $customerKeyMd5;
@@ -192,7 +193,7 @@ class ServerSideEncryption implements JsonSerializable, ArrayAccess {
 	{
 		$customerKey    = $data[static::ATTRIBUTE_CUSTOMER_KEY] ?? null;
 		$customerKeyMd5 = $data[static::ATTRIBUTE_CUSTOMER_KEY_MD5] ?? null;
-		
+
 		return new ServerSideEncryption(
 			$data[static::ATTRIBUTE_MODE] ?? null,
 			$data[static::ATTRIBUTE_ALGORITHM] ?? null,
@@ -212,7 +213,7 @@ class ServerSideEncryption implements JsonSerializable, ArrayAccess {
 	}
 
 	/** @inheritdoc */
-	public function jsonSerialize()
+	public function jsonSerialize(): mixed
 	{
 		return $this->toArray();
 	}

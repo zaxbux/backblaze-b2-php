@@ -17,7 +17,7 @@ trait UploadOperationsTrait
 {
 	/** @var \Zaxbux\BackblazeB2\Config */
 	protected $config;
-	
+
 	/**
 	 * Gets a URL and authorization token to use for uploading files.
 	 * 
@@ -59,7 +59,7 @@ trait UploadOperationsTrait
 	 */
 	public function uploadFile(
 		string $fileName,
-		?string $bucketId = null,
+		string $bucketId = null,
 		$body,
 		?string $contentType = null,
 		$fileInfo = null,

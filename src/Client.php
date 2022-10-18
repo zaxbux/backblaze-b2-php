@@ -20,10 +20,10 @@ use Zaxbux\BackblazeB2\Http\Middleware\{
 use Zaxbux\BackblazeB2\Operations\{
 	ApplicationKeyOperationsTrait,
 	BucketOperationsTrait,
-    DownloadOperationsTrait,
-    FileOperationsTrait,
+	DownloadOperationsTrait,
+	FileOperationsTrait,
 	LargeFileOperationsTrait,
-    UploadOperationsTrait,
+	UploadOperationsTrait,
 };
 use Zaxbux\BackblazeB2\Interfaces\AuthorizationCacheInterface;
 use Zaxbux\BackblazeB2\Object\AccountAuthorization;
@@ -81,7 +81,7 @@ class Client
 		return $this->http;
 	}
 
-	public function accountAuthorization(): ?AccountAuthorization
+	public function accountAuthorization(): AccountAuthorization
 	{
 		return $this->accountAuthorization;
 	}
@@ -110,7 +110,8 @@ class Client
 	 * @param string $applicationKey 
 	 * @param ClientInterface $client 
 	 */
-	public function authorizeAccount(): AccountAuthorization {
+	public function authorizeAccount(): AccountAuthorization
+	{
 		$response = $this->http->request('GET', Client::BASE_URI . Client::B2_API_VERSION . Endpoint::AUTHORIZE_ACCOUNT, [
 			'headers' => [
 				'Authorization' => Utils::basicAuthorization($this->config->applicationKeyId(), $this->config->applicationKey()),
@@ -120,7 +121,8 @@ class Client
 		return AccountAuthorization::fromResponse($response);
 	}
 
-	public function refreshAccountAuthorization() {
+	public function refreshAccountAuthorization()
+	{
 		// Check cache for account authorization if account is not already authorized.
 		if (!$this->accountAuthorization && $this->config->authorizationCache() instanceof AuthorizationCacheInterface) {
 			$this->accountAuthorization = $this->config->authorizationCache()->get($this->config->applicationKeyId());
@@ -145,7 +147,8 @@ class Client
 	/**
 	 * Creates a new instance of a GuzzleHttp client.
 	 */
-	protected function createDefaultHttpClient(): ClientInterface {
+	protected function createDefaultHttpClient(): ClientInterface
+	{
 		$stack = $this->config->handler();
 
 		/*foreach ($this->config->middleware() as $name => $middleware) {
