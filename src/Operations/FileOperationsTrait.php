@@ -343,7 +343,7 @@ trait FileOperationsTrait
 	 * 
 	 * @see Client::listFileVersions()
 	 * 
-	 * @return iterable<File>
+	 * @return FileList
 	 */
 	public function listAllFileVersions(
 		?string $bucketId = null,
