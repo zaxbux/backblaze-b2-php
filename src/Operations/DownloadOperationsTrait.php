@@ -18,7 +18,7 @@ trait DownloadOperationsTrait
 {
 	/** @var \Zaxbux\BackblazeB2\Config */
 	protected $config;
-	
+
 	/**
 	 * Generates an authorization token that can be used to download files
 	 * with the specified prefix from a private B2 bucket.
@@ -77,11 +77,23 @@ trait DownloadOperationsTrait
 		?bool $headersOnly = false
 	): FileDownload {
 		return DownloadHelper::instance($this)->download(
-			Client::B2_API_VERSION .Endpoint::DOWNLOAD_FILE_BY_ID,
+			Client::B2_API_VERSION . Endpoint::DOWNLOAD_FILE_BY_ID,
 			[File::ATTRIBUTE_FILE_ID => $fileId],
 			$options,
 			$sink,
 			$headersOnly
+		);
+	}
+
+	public function getFileNameDownloadUrl(
+		string $fileName,
+		?string $bucketName = null,
+		bool $relative = true
+	): string {
+		return Utils::joinPaths(
+			($relative ? '' : $this->accountAuthorization()->downloadUrl() . '/') . Endpoint::DOWNLOAD_FILE_BY_NAME,
+			$bucketName ?? $this->allowedBucketName(),
+			$fileName
 		);
 	}
 
@@ -109,11 +121,7 @@ trait DownloadOperationsTrait
 		?bool $headersOnly = false
 	): FileDownload {
 		return DownloadHelper::instance($this)->download(
-			Utils::joinPaths(
-				Endpoint::DOWNLOAD_FILE_BY_NAME,
-				$bucketName ?? $this->allowedBucketName(),
-				$fileName
-			),
+			$this->getFileNameDownloadUrl($fileName, $bucketName),
 			null,
 			$options,
 			$sink,
