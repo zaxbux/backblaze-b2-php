@@ -331,7 +331,7 @@ trait FileOperationsTrait
 
 	public function getFileByName(string $fileName, ?string $bucketId = null): File
 	{
-		if (!$file = $this->listFileNames($bucketId, '', null, $fileName, 1)->current()) {
+		if (!$file = $this->listFileNames($bucketId, $fileName, null, null, 1)->current()) {
 			throw new NoResultsException(sprintf('No results returned for file name "%s"', $fileName));
 		}
 
