@@ -320,7 +320,7 @@ trait FileOperationsTrait
 		$nextFileName = $startFileName ?? '';
 
 		while ($nextFileName !== null) {
-			$response     = $this->listFileNames($bucketId, $prefix, $delimiter, $startFileName);
+			$response     = $this->listFileNames($bucketId, $prefix, $delimiter, $nextFileName);
 			$nextFileName = $response->nextFileName();
 
 			$allFiles->mergeList($response);
@@ -357,7 +357,7 @@ trait FileOperationsTrait
 		$nextFileName = $startFileName ?? '';
 
 		while ($nextFileId !== null && $nextFileName !== null) {
-			$response     = $this->listFileVersions($bucketId, $prefix, $delimiter, $startFileName, $startFileId);
+			$response     = $this->listFileVersions($bucketId, $prefix, $delimiter, $nextFileName, $nextFileId);
 			$nextFileId   = $response->nextFileId();
 			$nextFileName = $response->nextFileName();
 
