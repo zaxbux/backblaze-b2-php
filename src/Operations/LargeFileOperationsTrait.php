@@ -223,7 +223,7 @@ trait LargeFileOperationsTrait
 		string $fileName,
 		?string $bucketId = null,
 		?string $contentType = null,
-		?FileInfo $fileInfo = null,
+		array|FileInfo $fileInfo = [],
 		?array $fileRetention = null,
 		?array $legalHold = null,
 		?array $serverSideEncryption = null
