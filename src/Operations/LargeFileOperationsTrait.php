@@ -285,12 +285,12 @@ trait LargeFileOperationsTrait
 
         $response = $this->http->request('POST', $uploadPartUrl->uploadUrl(), [
             'body' => $body,
-            'headers' => self::filterRequestOptions([
+            'headers' => Utils::filterRequestOptions([
                 'Authorization' => $uploadPartUrl->authorizationToken(),
                 'Content-Length' => $metadata->length(),
                 File::HEADER_X_BZ_CONTENT_SHA1 => $metadata->sha1(),
                 File::HEADER_X_BZ_PART_NUMBER => $partNumber,
-            ], $serverSideEncryption->getHeaders() ?? []),
+            ], $serverSideEncryption?->getHeaders() ?? []),
         ]);
 
         return File::fromResponse($response);
