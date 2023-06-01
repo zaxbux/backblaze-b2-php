@@ -11,7 +11,7 @@ use RuntimeException;
 
 /**
  * @link https://www.backblaze.com/b2/docs/files.html#fileInfo
- * 
+ *
  * @package BackblazeB2\Classes
  */
 abstract class AbstractObjectInfo
@@ -55,16 +55,19 @@ abstract class AbstractObjectInfo
 	}
 
 	/**
-	 * 
-	 * @param null|string $key 
-	 * @param mixed       $default 
-	 * @return string|array 
+	 *
+	 * @param null|string $key
+	 * @param mixed       $default
+	 * @return string|array
 	 */
 	public function get(?string $key = null, $default = null)
 	{
-		if ($key === null) {
-			return $this->data;
-		}
+        if ($key === null) {
+            if (count($this->data)) {
+                return $this->data;
+            }
+            return null;
+        }
 
 		return $this->data[$key] ?? $default;
 	}
@@ -76,7 +79,7 @@ abstract class AbstractObjectInfo
 
 	/**
 	 * Get the file info as headers for the B2 API.
-	 * 
+	 *
 	 * @return array Array of the file info, keys beginning with `X-Bz-Info-`.
 	 */
 	public function getHeaders(): array

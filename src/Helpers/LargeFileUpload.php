@@ -13,7 +13,10 @@ use Zaxbux\BackblazeB2\Object\File\ServerSideEncryption;
 class LargeFileUpload
 {
     private $client;
-    private $stream;
+    /**
+     * @var resource $stream
+     */
+    private mixed $stream;
     private $fileName;
 
     private $contentLength;
@@ -122,8 +125,8 @@ class LargeFileUpload
 
         // Start large file
         $this->file = $this->client->startLargeFile(
-            $bucketId,
             $this->fileName,
+            $bucketId,
             $this->contentType,
             $this->fileInfo,
             $this->fileRetention,
@@ -143,12 +146,13 @@ class LargeFileUpload
             $this->partCount++;
             $offset = $this->bytesToSend();
 
+
             $partString = fread($this->stream, $offset);
 
             $metadata = FileUploadMetadata::fromResource($partString);
             $this->partSha1Array[] = $metadata->sha1();
 
-            $part = $this->client->uploadPart(
+            $this->client->uploadPart(
                 $partString,
                 $this->file->id(),
                 $this->partCount,
