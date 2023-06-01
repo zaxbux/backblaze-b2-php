@@ -18,12 +18,12 @@ class UploadHelper extends AbstractHelper
 	 * Upload a file. Automatically decides the upload method (regular or large file).
 	 *
 	 * @param string|UploadUrl          $bucketIdOrUploadUrl  Must be a bucket ID for large files.
-	 * @param string                    $fileName             
-	 * @param string|resource           $stream               
-	 * @param null|string               $contentType          
-	 * @param null|FileInfo             $fileInfo             
-	 * @param null|ServerSideEncryption $serverSideEncryption 
-	 * @return File 
+	 * @param string                    $fileName
+	 * @param string|resource           $stream
+	 * @param null|string               $contentType
+	 * @param null|FileInfo             $fileInfo
+	 * @param null|ServerSideEncryption $serverSideEncryption
+	 * @return File
 	 */
 	public function uploadStream(
 		$bucketIdOrUploadUrl,
@@ -59,7 +59,7 @@ class UploadHelper extends AbstractHelper
 		// and greater than the minimum part size for the account.
 		if (($metadata->length() > File::SINGLE_FILE_MAX_SIZE ||
 				$metadata->length() > 200 * 1024 * 1024) &&
-			$metadata->length() > $this->accountAuthorization->getAbsoluteMinimumPartSize()
+			$metadata->length() > $this->client->accountAuthorization()->getAbsoluteMinimumPartSize()
 		) {
 			// Upload large file
 			return $this->uploadLargeFile(
@@ -91,14 +91,14 @@ class UploadHelper extends AbstractHelper
 
 	/**
 	 * @see FileServiceHelpersTrait::uploadStream()
-	 * 
-	 * @param string|UploadUrl          $bucketIdOrUploadUrl  
-	 * @param string                    $fileName             
+	 *
+	 * @param string|UploadUrl          $bucketIdOrUploadUrl
+	 * @param string                    $fileName
 	 * @param string|resource           $filePath             The path to the file.
-	 * @param null|string               $contentType          
-	 * @param null|FileInfo             $fileInfo             
-	 * @param null|ServerSideEncryption $serverSideEncryption 
-	 * 
+	 * @param null|string               $contentType
+	 * @param null|FileInfo             $fileInfo
+	 * @param null|ServerSideEncryption $serverSideEncryption
+	 *
 	 * @throws RuntimeException
 	 */
 	public function uploadFile(
@@ -141,15 +141,15 @@ class UploadHelper extends AbstractHelper
 
 	/**
 	 * Helper method that implements the entire large file upload process.
-	 * 
-	 * @param string                    $bucketId 
-	 * @param string                    $fileName             
-	 * @param string|resource           $stream               
-	 * @param null|string               $contentType          
-	 * @param null|FileInfo             $fileInfo             
-	 * @param null|ServerSideEncryption $serverSideEncryption 
-	 * @param null|FileUploadMetadata   $metadata             
-	 * 
+	 *
+	 * @param string                    $bucketId
+	 * @param string                    $fileName
+	 * @param string|resource           $stream
+	 * @param null|string               $contentType
+	 * @param null|FileInfo             $fileInfo
+	 * @param null|ServerSideEncryption $serverSideEncryption
+	 * @param null|FileUploadMetadata   $metadata
+	 *
 	 * @throws RuntimeException
 	 */
 	public function uploadLargeFile(

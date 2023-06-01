@@ -99,7 +99,7 @@ class AccountAuthorization implements B2ObjectInterface
 
 	/**
 	 * Get the capabilities, bucket restrictions, and prefix restrictions.
-	 * 
+	 *
 	 * @return null|string|array
 	 */
 	public function allowed(?string $key = null)
@@ -130,7 +130,7 @@ class AccountAuthorization implements B2ObjectInterface
 	/**
 	 * The recommended part size for each part of a large file (except the last one).
 	 * It is recommended to use this part size for optimal performance.
-	 * 
+	 *
 	 * @return int The recommended part size in bytes.
 	 */
 	public function recommendedPartSize(): ?int
@@ -141,7 +141,7 @@ class AccountAuthorization implements B2ObjectInterface
 	/**
 	 * The smallest possible size of a part of a large file (except the last one).
 	 * Upload performance may be impacted if you use this value.
-	 * 
+	 *
 	 * @return int The absolute minimum part size in bytes.
 	 */
 	public function absoluteMinimumPartSize(): ?int
@@ -160,7 +160,7 @@ class AccountAuthorization implements B2ObjectInterface
 	/**
 	 * Check if the authorization token has expired, based on the `created`.
 	 * Will always return `false` if there is no `created`.
-	 * 
+	 *
 	 * @return bool `true` if `NOW` - `VALIDITY_PERIOD` ≥ `AUTHORIZATION_TIMESTAMP`; `false` otherwise.
 	 */
 	public function expired(): bool
@@ -207,4 +207,12 @@ class AccountAuthorization implements B2ObjectInterface
 	{
 		return json_encode($this);
 	}
+
+    /**
+     * @return int|int|null
+     */
+    public function getAbsoluteMinimumPartSize(): ?int
+    {
+        return $this->absoluteMinimumPartSize;
+    }
 }
