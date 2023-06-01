@@ -34,7 +34,6 @@ class UploadHelper extends AbstractHelper
         ?array $fileRetention = null,
         ?bool $legalHold = null,
         ?ServerSideEncryption $serverSideEncryption = null,
-        string|null $filePath = null,
     ): File
     {
         $bucketId = $bucketIdOrUploadUrl;
@@ -67,7 +66,7 @@ class UploadHelper extends AbstractHelper
             return $this->uploadLargeFile(
                 $bucketId,
                 $fileName,
-                $filePath,
+                $stream,
                 $contentType,
                 $fileInfo,
                 $legalHold,
@@ -130,8 +129,7 @@ class UploadHelper extends AbstractHelper
             $fileInfo,
             $fileRetention,
             $legalHold,
-            $serverSideEncryption,
-            $filePath,
+            $serverSideEncryption
         );
 
         /* Seems to cause an issue with tests: https://github.com/guzzle/guzzle/issues/366#issuecomment-20295409
@@ -156,7 +154,7 @@ class UploadHelper extends AbstractHelper
     public function uploadLargeFile(
         string                $bucketId,
         string                $fileName,
-        string                $filePath,
+        mixed                $stream,
         ?string               $contentType = null,
         FileInfo|array        $fileInfo = [],
         ?bool                 $legalHold = null,
@@ -165,7 +163,9 @@ class UploadHelper extends AbstractHelper
         ?FileUploadMetadata   $metadata = null
     ): File
     {
-        $largeFileUpload = LargeFileUpload::create($this->client)->withStream($filePath, $fileName);
+        $tempFilePath = file_put_contents(sys_get_temp_dir()."/".md5(microtime())."_".$fileName, $stream)
+
+        $largeFileUpload = LargeFileUpload::create($this->client)->withStream($tempFilePath, $fileName);
 
         if ($contentType) {
             $largeFileUpload->useContentType($contentType);
