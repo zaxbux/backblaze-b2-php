@@ -26,14 +26,14 @@ class UploadHelper extends AbstractHelper
      * @return File
      */
     public function uploadStream(
-        string                $filePath,
-                              $bucketIdOrUploadUrl,
-        string                $fileName,
-                              $stream,
-        ?string               $contentType = null,
-        FileInfo|array        $fileInfo = [],
-        ?array                $fileRetention = null,
-        ?bool                 $legalHold = null,
+        $bucketIdOrUploadUrl,
+        string $filePath,
+        string $fileName,
+        $stream,
+        ?string $contentType = null,
+        FileInfo|array $fileInfo = [],
+        ?array $fileRetention = null,
+        ?bool $legalHold = null,
         ?ServerSideEncryption $serverSideEncryption = null
     ): File
     {
@@ -67,7 +67,7 @@ class UploadHelper extends AbstractHelper
             return $this->uploadLargeFile(
                 $bucketId,
                 $fileName,
-                $stream,
+                $filePath,
                 $contentType,
                 $fileInfo,
                 $legalHold,
@@ -123,8 +123,8 @@ class UploadHelper extends AbstractHelper
         }
 
         $file = $this->uploadStream(
-            $filePath,
             $bucketIdOrUploadUrl,
+            $filePath,
             $fileName,
             $handle,
             $contentType,
