@@ -27,14 +27,14 @@ class UploadHelper extends AbstractHelper
      */
     public function uploadStream(
         $bucketIdOrUploadUrl,
-        string $filePath,
         string $fileName,
         $stream,
         ?string $contentType = null,
         FileInfo|array $fileInfo = [],
         ?array $fileRetention = null,
         ?bool $legalHold = null,
-        ?ServerSideEncryption $serverSideEncryption = null
+        ?ServerSideEncryption $serverSideEncryption = null,
+        string|null $filePath = null,
     ): File
     {
         $bucketId = $bucketIdOrUploadUrl;
@@ -124,14 +124,14 @@ class UploadHelper extends AbstractHelper
 
         $file = $this->uploadStream(
             $bucketIdOrUploadUrl,
-            $filePath,
             $fileName,
             $handle,
             $contentType,
             $fileInfo,
             $fileRetention,
             $legalHold,
-            $serverSideEncryption
+            $serverSideEncryption,
+            $filePath,
         );
 
         /* Seems to cause an issue with tests: https://github.com/guzzle/guzzle/issues/366#issuecomment-20295409
