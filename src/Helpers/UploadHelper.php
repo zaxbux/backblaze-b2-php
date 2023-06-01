@@ -163,7 +163,7 @@ class UploadHelper extends AbstractHelper
         ?FileUploadMetadata   $metadata = null
     ): File
     {
-        $tempFilePath = file_put_contents(sys_get_temp_dir()."/".md5(microtime())."_".$fileName, $stream)
+        $tempFilePath = file_put_contents(sys_get_temp_dir()."/".md5(microtime())."_".$fileName, $stream);
 
         $largeFileUpload = LargeFileUpload::create($this->client)->withStream($tempFilePath, $fileName);
 
