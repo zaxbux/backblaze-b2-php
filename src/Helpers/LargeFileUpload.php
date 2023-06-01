@@ -34,7 +34,7 @@ class LargeFileUpload
     /** @var array */
     private $partSha1Array = [];
     private FileUploadMetadata|null $metadata = null;
-    private FileInfo|null $fileInfo = null;
+    private FileInfo|array $fileInfo = [];
     private string|null $legalHold = null;
 
     public function __construct(Client $client)
@@ -71,7 +71,7 @@ class LargeFileUpload
         return $this;
     }
 
-    public function useFileInfo(FileInfo $fileInfo): LargeFileUpload
+    public function useFileInfo(FileInfo|array $fileInfo): LargeFileUpload
     {
         $this->fileInfo = $fileInfo;
         return $this;

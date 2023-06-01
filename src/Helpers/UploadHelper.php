@@ -30,7 +30,7 @@ class UploadHelper extends AbstractHelper
 		string $fileName,
 		$stream,
 		?string $contentType = null,
-		?FileInfo $fileInfo = null,
+		FileInfo|array $fileInfo = [],
 		?array $fileRetention = null,
 		?bool $legalHold = null,
 		?ServerSideEncryption $serverSideEncryption = null
@@ -106,7 +106,7 @@ class UploadHelper extends AbstractHelper
 		string $fileName,
 		string $filePath,
 		?string $contentType = null,
-		?FileInfo $fileInfo = null,
+		array|FileInfo $fileInfo = [],
 		?array $fileRetention =  null,
 		?bool $legalHold = null,
 		?ServerSideEncryption $serverSideEncryption = null
@@ -157,7 +157,7 @@ class UploadHelper extends AbstractHelper
 		string $fileName,
 		$stream,
 		?string $contentType = null,
-		?FileInfo $fileInfo = null,
+		FileInfo|array $fileInfo = [],
 		?array $fileRetention = null,
 		?bool $legalHold = null,
 		?ServerSideEncryption $serverSideEncryption = null,

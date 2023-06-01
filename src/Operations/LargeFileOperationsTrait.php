@@ -28,12 +28,12 @@ trait LargeFileOperationsTrait
 
 	/**
 	 * Cancel the upload of a large file, and deletes all of the parts that have been uploaded.
-	 * 
+	 *
 	 * @link https://www.backblaze.com/b2/docs/b2_cancel_large_file.html
-	 * 
+	 *
 	 * @b2-capability writeFiles
 	 * @b2-transaction Class A
-	 * 
+	 *
 	 * @param string $fileId The ID returned by `b2_start_large_file`.
 	 */
 	public function cancelLargeFile(string $fileId)
@@ -50,13 +50,13 @@ trait LargeFileOperationsTrait
 	/**
 	 * Copies from an existing B2 file, storing it as a part of a large file which has already been started with
 	 * `b2_start_large_file`.
-	 * 
+	 *
 	 * @link https://www.backblaze.com/b2/docs/b2_copy_part.html
-	 * 
+	 *
 	 * @b2-capability writeFiles
 	 * @b2-capability [readFiles] If the bucket is private.
 	 * @b2-transaction Class C
-	 * 
+	 *
 	 * @param string $sourceFileId   The ID of the source file being copied.
 	 * @param string $largeFileId    The ID of the large file the part will belong to.
 	 * @param int    $partNumber     A number from `1` to `10000`. The parts uploaded for one file must have
@@ -93,15 +93,15 @@ trait LargeFileOperationsTrait
 
 	/**
 	 * Converts the parts that have been uploaded into a single B2 file.
-	 * 
+	 *
 	 * @link https://www.backblaze.com/b2/docs/b2_finish_large_file.html
-	 * 
+	 *
 	 * @b2-capability writeFiles
 	 * @b2-transaction Class A
-	 * 
+	 *
 	 * @param string   $fileId The ID of the large file.
 	 * @param string[] $hashes An array of SHA1 checksums of the parts of the large file.
-	 * 
+	 *
 	 * @return File
 	 */
 	public function finishLargeFile(string $fileId, array $hashes)
@@ -117,13 +117,13 @@ trait LargeFileOperationsTrait
 	}
 
 	/**
-	 * Gets a URL to use for uploading parts of a large file. 
-	 * 
+	 * Gets a URL to use for uploading parts of a large file.
+	 *
 	 * @link https://www.backblaze.com/b2/docs/b2_get_upload_part_url.html
-	 * 
+	 *
 	 * @b2-capability writeFiles
 	 * @b2-transaction Class A
-	 * 
+	 *
 	 * @param string $fileId The ID of the large file to upload parts of.
 	 */
 	public function getUploadPartUrl(string $fileId): UploadPartUrl
@@ -138,13 +138,13 @@ trait LargeFileOperationsTrait
 	}
 
 	/**
-	 * Lists the parts that have been uploaded for a large file that has not been finished yet. 
-	 * 
+	 * Lists the parts that have been uploaded for a large file that has not been finished yet.
+	 *
 	 * @link https://www.backblaze.com/b2/docs/b2_list_parts.html
-	 * 
+	 *
 	 * @b2-capability writeFiles
 	 * @b2-transaction Class C
-	 * 
+	 *
 	 * @param string $fileId          The ID returned by b2_start_large_file. This is the file whose parts will be
 	 *                                listed.
 	 * @param int    $startPartNumber The first part to return. Used when a query hits the maxKeyCount, and you want to
@@ -175,12 +175,12 @@ trait LargeFileOperationsTrait
 	/**
 	 * Lists information about large file uploads that have been started,
 	 * but that have not been finished or canceled.
-	 * 
+	 *
 	 * @link https://www.backblaze.com/b2/docs/b2_list_unfinished_large_files.html
-	 * 
+	 *
 	 * @b2-capability listFiles
 	 * @b2-transaction Class C
-	 * 
+	 *
 	 * @param string $bucketId     The bucket to look for file names in.
 	 * @param string $namePrefix   Only return files whose names match this prefix.
 	 * @param string $startFileId  The first upload to return.
@@ -207,14 +207,14 @@ trait LargeFileOperationsTrait
 	}
 
 	/**
-	 * Prepares for uploading the parts of a large file. 
-	 * 
+	 * Prepares for uploading the parts of a large file.
+	 *
 	 * @link https://www.backblaze.com/b2/docs/b2_start_large_file.html
-	 * 
+	 *
 	 * @b2-capability writeFiles
 	 * @b2-transaction Class A
-	 * 
-	 * @param string         $bucketId    The ID of the bucket that the file will go in. 
+	 *
+	 * @param string         $bucketId    The ID of the bucket that the file will go in.
 	 * @param string         $fileName    The name of the file.
 	 * @param string         $contentType The MIME type of the content of the file.
 	 * @param FileInfo|array $fileInfo    A JSON object holding the name/value pairs for the custom file info.
@@ -223,7 +223,7 @@ trait LargeFileOperationsTrait
 		string $fileName,
 		?string $bucketId = null,
 		?string $contentType = null,
-		$fileInfo = null,
+		?FileInfo $fileInfo = null,
 		?array $fileRetention = null,
 		?array $legalHold = null,
 		?array $serverSideEncryption = null
@@ -250,12 +250,12 @@ trait LargeFileOperationsTrait
 
 	/**
 	 * Uploads one part of a large file.
-	 * 
+	 *
 	 * @link https://www.backblaze.com/b2/docs/b2_upload_part.html
-	 * 
+	 *
 	 * @b2-capability writeFiles
 	 * @b2-transaction Class A
-	 * 
+	 *
 	 * @param string|resource            $body                 The file part to be uploaded. String or stream resource.
 	 * @param string                     $fileId               The ID of the large file whose parts you want to upload.
 	 * @param int                        $partNumber           The parts uploaded for one file must have contiguous numbers, starting with 1.
@@ -293,9 +293,9 @@ trait LargeFileOperationsTrait
 
 	/**
 	 * Internal method to call the b2_list_parts API
-	 * 
+	 *
 	 * @see Client::listParts()
-	 * 
+	 *
 	 * @return iterable<File>
 	 */
 	public function listAllParts(
@@ -318,9 +318,9 @@ trait LargeFileOperationsTrait
 	/**
 	 * Lists information about *all* large file uploads that have been started,
 	 * but that have not been finished or canceled.
-	 * 
+	 *
 	 * @see Client::listUnfinishedLargeFiles()
-	 * 
+	 *
 	 * @return iterable<File>
 	 */
 	public function listAllUnfinishedLargeFiles(
