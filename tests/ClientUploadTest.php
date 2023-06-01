@@ -36,7 +36,7 @@ class ClientUploadTest extends ClientTestBase
 				->withBody(file_get_contents($filePath));
 		});
 	}
-	
+
 	public function testUploadingResource()
 	{
 		$this->guzzler->queueResponse(
@@ -52,8 +52,8 @@ class ClientUploadTest extends ClientTestBase
 
 		$file = $this->client->uploadFile(
 			'test.txt',
+            $resource,
 			'bucketId',
-			$resource
 		);
 
 		static::assertInstanceOf(File::class, $file);
@@ -79,8 +79,8 @@ class ClientUploadTest extends ClientTestBase
 
 		$file = $this->client->uploadFile(
 			'test.txt',
+			$content,
 			'bucketId',
-			$content
 		);
 
 		static::assertInstanceOf(File::class, $file);
@@ -107,9 +107,9 @@ class ClientUploadTest extends ClientTestBase
 
 		$file = $this->client->uploadFile(
 			'test.txt',
-			'bucketId',
 			$content,
-			$contentType,
+            'bucketId',
+            $contentType,
 			[
 				'src_last_modified_millis' => $lastModified
 			]
@@ -127,5 +127,5 @@ class ClientUploadTest extends ClientTestBase
 			->withHeader(FileInfo::HEADER_PREFIX.FileInfo::B2_FILE_INFO_MTIME, (string) $lastModified)
 			->withBody($content);
 	}
-	
+
 }

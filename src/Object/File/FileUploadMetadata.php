@@ -39,7 +39,7 @@ final class FileUploadMetadata
      * @param string|resource $body The resource used to calculate a length in bytes and SHA1 hash.
      * @return FileUploadMetadata
      */
-    public static function fromResource($body)
+    public static function fromResource($body): FileUploadMetadata
     {
         if (is_resource($body)) {
             // Calculate the file's hash incrementally from the stream.

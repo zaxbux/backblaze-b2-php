@@ -26,13 +26,14 @@ class UploadHelper extends AbstractHelper
      * @return File
      */
     public function uploadStream(
-        $bucketIdOrUploadUrl,
-        string $fileName,
-        $stream,
-        ?string $contentType = null,
-        FileInfo|array $fileInfo = [],
-        ?array $fileRetention = null,
-        ?bool $legalHold = null,
+        string                $filePath,
+                              $bucketIdOrUploadUrl,
+        string                $fileName,
+                              $stream,
+        ?string               $contentType = null,
+        FileInfo|array        $fileInfo = [],
+        ?array                $fileRetention = null,
+        ?bool                 $legalHold = null,
         ?ServerSideEncryption $serverSideEncryption = null
     ): File
     {
@@ -79,12 +80,10 @@ class UploadHelper extends AbstractHelper
         // Upload as regular file
         return $this->client->uploadFile(
             $fileName,
-            $bucketId,
             $stream,
+            $bucketId,
             $contentType,
             $fileInfo,
-            $fileRetention,
-            $legalHold,
             $serverSideEncryption,
             $bucketIdOrUploadUrl
         );
@@ -124,6 +123,7 @@ class UploadHelper extends AbstractHelper
         }
 
         $file = $this->uploadStream(
+            $filePath,
             $bucketIdOrUploadUrl,
             $fileName,
             $handle,
@@ -146,7 +146,6 @@ class UploadHelper extends AbstractHelper
      *
      * @param string $bucketId
      * @param string $fileName
-     * @param string|resource $stream
      * @param null|string $contentType
      * @param null|FileInfo $fileInfo
      * @param null|ServerSideEncryption $serverSideEncryption
@@ -157,16 +156,16 @@ class UploadHelper extends AbstractHelper
     public function uploadLargeFile(
         string                $bucketId,
         string                $fileName,
-                              $stream,
+        string                $filePath,
         ?string               $contentType = null,
         FileInfo|array        $fileInfo = [],
-        ?array                $fileRetention = null,
         ?bool                 $legalHold = null,
+        ?array                $fileRetention = null,
         ?ServerSideEncryption $serverSideEncryption = null,
         ?FileUploadMetadata   $metadata = null
     ): File
     {
-        $largeFileUpload = LargeFileUpload::create($this->client)->withStream($stream, $fileName);
+        $largeFileUpload = LargeFileUpload::create($this->client)->withStream($filePath, $fileName);
 
         if ($contentType) {
             $largeFileUpload->useContentType($contentType);

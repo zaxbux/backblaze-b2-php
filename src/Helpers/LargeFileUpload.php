@@ -17,6 +17,7 @@ class LargeFileUpload
      * @var resource $stream
      */
     private mixed $stream;
+    private string $filePath;
     private $fileName;
 
     private $contentLength;
@@ -51,11 +52,12 @@ class LargeFileUpload
     }
 
     public function withStream(
-        $stream,
+        string $filePath,
         string $fileName,
     ): LargeFileUpload
     {
-        $this->stream = $stream;
+        $this->filePath = $filePath;
+        $this->stream = fopen($filePath, 'rb');
         $this->fileName = $fileName;
 
         return $this;
@@ -140,7 +142,7 @@ class LargeFileUpload
         return $this;
     }
 
-    public function uploadParts()
+    public function uploadParts(): static
     {
         while ($this->remainingBytes() > 0) {
             $this->partCount++;
