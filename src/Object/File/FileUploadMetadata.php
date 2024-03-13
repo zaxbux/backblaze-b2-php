@@ -20,6 +20,9 @@ final class FileUploadMetadata {
 	/** @var string */
 	private $hash;
 
+	/** @var int|null */
+	private $mtime;
+
 	/**
 	 * @param int $length 
 	 * @param string $hash 
